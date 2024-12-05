@@ -10,7 +10,6 @@ namespace JiwaCustomerPortal
             var builder = WebApplication.CreateBuilder(args);
 
             ConfigurationManager configuration = builder.Configuration;
-            Config.ShowDiagnostics = configuration.GetValue<bool>("ShowDiagnostics");
             Config.JiwaAPIURL = configuration.GetSection("JiwaAPIURL").Value;
             Config.JiwaAPIKey = configuration.GetSection("JiwaAPIKey").Value;
 
