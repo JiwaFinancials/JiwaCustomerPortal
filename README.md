@@ -86,7 +86,7 @@ Grant the following REST API permissions to the Customer Web Portal User Group:
 5. GET /Sessions/Current
 6. GET /auth/logout
 7. GET /SalesOrders/{InvoiceHistoryID}/InvoiceSnapshotReport/{ReportID}
-8. GET /SalesQuotes/{QuoteID}/QuoteReport/{ReportID}
+8. GET /SalesQuotes/{QuoteHistoryID}/QuoteSnapshotReport/{ReportID}
 9. GET /Debtors/{DebtorID}/StatementReport/{ReportID}/At/{AsAtDate}
 10. GET /Debtors
 11. GET /Debtors/{DebtorID}/ContactNames
@@ -105,8 +105,9 @@ Grant the following REST API permissions to the Customer Web Portal User Group:
 24. GET /Queries/StartupLog
 25. GET /Queries/PluginExceptions
 26. GET /SalesOrders/{InvoiceID}
+27. GET /SalesQuotes/{QuoteID}
 
-![image](https://github.com/user-attachments/assets/8d8e417b-8486-4c8b-8331-8b3b0de78262)
+![image](https://github.com/user-attachments/assets/fc2ec691-f12f-429f-90c4-b9cf9395c956)
 
 ## Create user Customer Web Portal
 Create a new Staff Member in the Staff Maintenance form with the name Customer Web Portal.  Add this Staff member to the Customer Web Portal User Group.
