@@ -145,6 +145,7 @@ The Customer Web Portal will only allow login if the debtor contact has a valid 
 
 ### Debtor Contact Tags
 Create the tags _Customer Web Portal - Admin_ and _Customer Web Portal - User_ if they are not already present - ensure the _Customer Web Portal_ custom field is checked for these two tags.
+
 ![image](https://github.com/user-attachments/assets/504d84d7-bb80-4e62-ae80-7fde2d3334f3)
 
 Debtor contacts with the tag _Customer Portal - Admin_ will be able to add, edit and delete contacts themselves - this includes adding or removing contact name tags.
