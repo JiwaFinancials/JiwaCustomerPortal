@@ -395,3 +395,20 @@ Reboot the machine and ensure that https://portal.domain.com is accessible.
 
 #### Secure the machine
 Remove the Azure firewall rule to allow access via port 22 for SSH.  Add the rule as needed for subsequent maintenance operations where you need to SSH back in.
+
+## Windows VM
+
+TODO: Finish notes on deploying on Windows
+
+### Build
+
+Publish the project by opening a Visual Studio 2022 command prompt and running the following command from the same folder as the project:
+```console
+dotnet publish -c release -r win-x64 --self-contained
+```
+
+### Copy output to Windows machine to host the portal
+
+### use sc.exe to configre the JiwaCustomerPortal.exe as a service, with automatic start
+
+### configure appsettings.json
