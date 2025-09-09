@@ -53,18 +53,18 @@ namespace JiwaCustomerPortal
 
                     try
                     {
-                    Task readCurrenciesTask = Task.Run( async () =>
-                    {
-                        ServiceStack.QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency> currencyAutoQueryResponse = await JiwaAPI.GetAsync(currencyAutoQuery, jiwaAPIKey: JiwaAPIKey);
-
-                        _Currencies = new System.Collections.Generic.Dictionary<string, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency>();
-                        foreach (JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency currency in currencyAutoQueryResponse.Results)
+                        Task readCurrenciesTask = Task.Run( async () =>
                         {
-                            _Currencies.Add(currency.RecID, currency);
-                        }
-                    });
+                            ServiceStack.QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency> currencyAutoQueryResponse = await JiwaAPI.GetAsync(currencyAutoQuery, jiwaAPIKey: JiwaAPIKey);
 
-                    readCurrenciesTask.Wait();
+                            _Currencies = new System.Collections.Generic.Dictionary<string, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency>();
+                            foreach (JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency currency in currencyAutoQueryResponse.Results)
+                            {
+                                _Currencies.Add(currency.RecID, currency);
+                            }
+                        });
+
+                        readCurrenciesTask.Wait();
                     }
                     catch (Exception ex)
                     {
