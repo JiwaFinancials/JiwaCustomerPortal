@@ -10,7 +10,7 @@
 # About
 A simple web portal which uses the Jiwa 8 REST API to provide basic account functions.
 
-The portal is built using ASP.NET 9 Server Side Blazor, ServiceStack Client 8.4.4 and Bootstrap 5.3.3
+The portal is built using ASP.NET 10 Server Side Blazor, ServiceStack Client 8.10 and Bootstrap 5.3.3
 
 # Functions
 
@@ -272,11 +272,11 @@ sudo certbot certonly --standalone
 ```
 
 #### Publish JiwaCustomerPortal project
-Publish the project by opening a Visual Studio 2022 command prompt and running the following command from the same folder as the project:
+Publish the project by opening a Visual Studio command prompt and running the following command from the same folder as the project:
 ```console
 dotnet publish -c release -r linux-x64 --self-contained
 ```
-When finished, the published folder will be located in the \bin\Release\net9.0\linux-x64\publish relative to the project.
+When finished, the published folder will be located in the \bin\Release\net10.0\linux-x64\publish relative to the project.
 
 SFTP the publish folder to the linux machine. We use Filezilla, but any FTP client capable of SFTP will do.
 Your hostname will be sftp:// and the name of the machine - eg: sftp://portal.domain.com
