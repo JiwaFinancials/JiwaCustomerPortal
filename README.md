@@ -375,7 +375,7 @@ Check using a browser that your portal is accessible by visting the configured u
 ##### Configure Crontab
 Now edit the crontab with the command:
 ```console
-sudo crontab -e
+crontab -e
 ```
 
 If asked to choose an editor, do so - I use nano (aka pico):
