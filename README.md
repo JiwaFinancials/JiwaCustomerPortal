@@ -48,6 +48,9 @@ Only users with the debtor contact name tag "Customer Web Portal - Admin" are ab
 
 ![image](https://github.com/user-attachments/assets/aa1d6822-bea7-49cc-944e-a3081d158102)
 
+# Live Demo
+https://portal.demo.jiwa.com.au/ is a demo which consumes https://api.jiwa.com.au - which is connected to a demo database.
+
 # Deployment
 
 ## Jiwa REST API 
