@@ -57,12 +57,12 @@
             }
             else
             {                
-                <input type="date" class="form-control" id="Date" value="@salesQuote.InvoiceInitDate.Value.ToString("yyyy-MM-dd")" @onchange="async (e) =>
+                <input type="date" class="form-control" id="Date" value="@salesQuote.InvoiceInitDate.Value.ToString("yyyy-MM-dd")" @onchange="@(async (e) =>
                                                               {
                                                                                          await QuoteChanged(e, (q) =>
                                                                                          {
-                                                                                             q.InvoiceInitDate = DateTime.Parse(e.Value.ToString()); });
-                                                              }">
+                                                                                             q.InvoiceInitDate = DateTime.ParseExact(e.Value.ToString(), "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture); });
+                                                              })">
             }
         </div>
         <div class="col-3">
@@ -181,17 +181,38 @@
                                     }
                                     else
                                     {
-                                        <td>
-                                            <input type="number" class="form-control" id="QuantityOrdered" value="@salesQuoteLine.QuantityOrdered" @onchange="async (e) =>
-                                            {
-                                                await QuoteLineChanged(e, salesQuoteLine.QuoteLineID,(q) => { q.QuantityOrdered = decimal.Parse(e.Value.ToString()); });
-                                            }">
-                                        </td>
-                                        <td class="text-end">@Config.FormattedDecimals(@salesQuoteLine.QuantityOrdered, salesQuoteLine.QuantityDecimalPlaces)</td>
-                                    }
-                                    
+                                        <td width="160px">
+                                            <input type="number" class="form-control" id="QuantityOrdered" 
+                                                    style="text-align: right;"
+                                                    value="@Config.FormattedDecimals(@salesQuoteLine.QuantityOrdered, salesQuoteLine.QuantityDecimalPlaces)" 
+                                                    step="@(Math.Pow(10, (double)-salesQuoteLine.QuantityDecimalPlaces))" 
+                                                    min="0"
+                                                    @onchange="async (e) =>
+                                                    {
+                                                        await QuoteLineChanged(e, salesQuoteLine.QuoteLineID,(q) => { q.QuantityOrdered = decimal.Parse(e.Value.ToString()); });
+                                                    }">
+                                        </td>                                        
+                                    }                                    
 
-                                    <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXDiscountedPrice, salesQuote.CurrencyID)</td>
+                                    @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                    {
+                                        <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXDiscountedPrice, salesQuote.CurrencyID)</td>
+                                    }
+                                    else
+                                    {
+                                        <td width="160px">
+                                            <input type="number" class="form-control" id="FXDiscountedPrice" 
+                                                value="@Config.FormattedDecimals(@salesQuoteLine.FXDiscountedPrice, Config.CurrencyDecimals(salesQuote.CurrencyID), false)"
+                                                   style="text-align: right;"
+                                                step="@(Math.Pow(10, (double)-Config.CurrencyDecimals(salesQuote.CurrencyID)))"
+                                                min="0"
+                                                @onchange="async (e) =>
+                                                {
+                                                    await QuoteLineChanged(e, salesQuoteLine.QuoteLineID, (q) => { q.FXDiscountedPrice = decimal.Parse(e.Value.ToString()); });
+                                                }">
+                                        </td>
+                                    }
+
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal - salesQuoteLine.TaxToCharge, @salesQuote.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXTaxToCharge, salesQuote.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal, salesQuote.CurrencyID)</td>

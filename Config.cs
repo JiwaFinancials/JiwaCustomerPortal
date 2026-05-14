@@ -91,17 +91,24 @@ namespace JiwaCustomerPortal
             JiwaAPISystemInformation = await JiwaAPI.GetAsync(new SystemInformationGETRequest(), jiwaAPIKey: JiwaAPIKey);
         }
 
-        public static string FormattedDecimals(decimal value, short decimalPlaces)
+        public static string FormattedDecimals(decimal value, short decimalPlaces, bool useCommas = true)
         {
             string decimalsFormat = new string('0', decimalPlaces);
-            return value.ToString($"###,###,###,###,###.{decimalsFormat}");
+            if (useCommas)
+            {
+                return value.ToString($"###,###,###,###,###.{decimalsFormat}");
+            }
+            else
+            {
+                return value.ToString($"###############.{decimalsFormat}");
+            }
         }
 
-        public static string FormattedDecimals(decimal? value, short decimalPlaces)
+        public static string FormattedDecimals(decimal? value, short decimalPlaces, bool useCommas = true)
         {
             if (value != null)
             {
-                return FormattedDecimals(value.Value, decimalPlaces);
+                return FormattedDecimals(value.Value, decimalPlaces, useCommas);
             }
             else
             {
@@ -109,15 +116,29 @@ namespace JiwaCustomerPortal
             }
         }
 
-        public static string FormattedDecimals(decimal? value, short? decimalPlaces)
+        public static string FormattedDecimals(decimal? value, short? decimalPlaces, bool useCommas = true)
         {
             if (decimalPlaces == null)
             {
-                return FormattedDecimals(value, 0);
+                return FormattedDecimals(value, 0, useCommas);
             }
             else
             {
-                return FormattedDecimals(value, decimalPlaces.Value);
+                return FormattedDecimals(value, decimalPlaces.Value, useCommas);
+            }
+        }
+
+        public static short? CurrencyDecimals(string CurrencyID)
+        {
+            JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency currency = _Currencies[CurrencyID];
+
+            if (currency != null)
+            {
+                return currency.DecimalPlaces;
+            }
+            else
+            {
+                return 0;
             }
         }
 
