@@ -12,6 +12,23 @@ namespace JiwaCustomerPortal
         // if passed a jiwaAPISessionId, adds an ss-id cookie to the request for auth, otherwise it if an APIKey is provided, it uses that
         // Requests to authenticate will provide neither jiwaAPISessionId or jiwaAPIKey
         // caller should be try catching this and taking appropriate if there was an exception
+        public static async Task<TResponse> SendAsync<TResponse>(ServiceStack.IReturn<TResponse> requestDTO, string? jiwaAPISessionId = null, string? jiwaAPIKey = null)
+        {
+            using (ServiceStack.JsonApiClient client = new ServiceStack.JsonApiClient(Config.JiwaAPIURL))
+            {
+                if (!string.IsNullOrWhiteSpace(jiwaAPISessionId))
+                {
+                    client.SetCookie("ss-id", jiwaAPISessionId, null);
+                }
+                else
+                {
+                    client.BearerToken = jiwaAPIKey;
+                }
+
+                return await client.SendAsync(requestDTO);
+            }
+        }
+
         public static async Task<TResponse> GetAsync<TResponse>(ServiceStack.IReturn<TResponse> requestDTO, string? jiwaAPISessionId = null, string? jiwaAPIKey = null)
         {
             using (ServiceStack.JsonApiClient client = new ServiceStack.JsonApiClient(Config.JiwaAPIURL))

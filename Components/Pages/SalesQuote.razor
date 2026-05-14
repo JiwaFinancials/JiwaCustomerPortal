@@ -51,15 +51,47 @@
     <div class="row">
         <div class="col-3">
             <label for="Date" class="form-label">Date</label>
-            <input type="text" class="form-control" id="Date" readonly placeholder="@salesQuote.InvoiceInitDate.Value.ToString(@BrowserService.DateFormat)">
+            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+            {
+                <input type="text" class="form-control" id="Date" readonly placeholder="@salesQuote.InvoiceInitDate.Value.ToString(@BrowserService.DateFormat)">
+            }
+            else
+            {                
+                <input type="date" class="form-control" id="Date" value="@salesQuote.InvoiceInitDate.Value.ToString("yyyy-MM-dd")" @onchange="async (e) =>
+                                                              {
+                                                                                         await QuoteChanged(e, (q) =>
+                                                                                         {
+                                                                                             q.InvoiceInitDate = DateTime.Parse(e.Value.ToString()); });
+                                                              }">
+            }
         </div>
         <div class="col-3">
             <label for="OrderNo" class="form-label">Order No.</label>
-            <input type="text" class="form-control" id="OrderNo" readonly placeholder="@salesQuote.OrderNo">
+            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+            {
+                <input type="text" class="form-control" id="OrderNo" readonly placeholder="@salesQuote.OrderNo">
+            }
+            else
+            {
+                <input type="text" class="form-control" id="OrderNo" value="@salesQuote.OrderNo" @onchange="async (e) =>
+                                       {
+                                           await QuoteChanged(e, (q) => { q.OrderNo = e.Value.ToString(); });
+                                       }">
+            }
         </div>
         <div class="col-3">
-            <label for="Reference" class="form-label">Reference</label>
-            <input type="text" class="form-control" id="Reference" readonly placeholder="@salesQuote.SOReference">
+            <label for="Reference" class="form-label">Reference</label>            
+            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+            {
+                <input type="text" class="form-control" id="Reference" readonly placeholder="@salesQuote.SOReference">
+            }
+            else
+            {
+                <input type="text" class="form-control" id="Reference" value="@salesQuote.SOReference" @onchange="async (e) => 
+                { 
+                    await QuoteChanged(e, (q) => { q.SOReference = e.Value.ToString();  });
+                }">
+            }
         </div>
     </div>
 
@@ -143,7 +175,22 @@
                                         <td>@salesQuoteLine.SKUUnitName</td>
                                     }
 
-                                    <td class="text-end">@Config.FormattedDecimals(@salesQuoteLine.QuantityOrdered, salesQuoteLine.QuantityDecimalPlaces)</td>
+                                    @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                    {
+                                        <td class="text-end">@Config.FormattedDecimals(@salesQuoteLine.QuantityOrdered, salesQuoteLine.QuantityDecimalPlaces)</td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            <input type="number" class="form-control" id="QuantityOrdered" value="@salesQuoteLine.QuantityOrdered" @onchange="async (e) =>
+                                            {
+                                                await QuoteLineChanged(e, salesQuoteLine.QuoteLineID,(q) => { q.QuantityOrdered = decimal.Parse(e.Value.ToString()); });
+                                            }">
+                                        </td>
+                                        <td class="text-end">@Config.FormattedDecimals(@salesQuoteLine.QuantityOrdered, salesQuoteLine.QuantityDecimalPlaces)</td>
+                                    }
+                                    
+
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXDiscountedPrice, salesQuote.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal - salesQuoteLine.TaxToCharge, @salesQuote.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXTaxToCharge, salesQuote.CurrencyID)</td>
@@ -312,14 +359,10 @@
             return;
         }
 
-        bool oldAPIRequestInPogress = APIRequestInPogress;        
-        APIRequestInPogress = true;
-
-        // Request filter in the API will ensure that the below GET will 404 if the sales quote does not belong to us, and we are authenticated as a debtor contact
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteGETRequest salesQuoteGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteGETRequest() { QuoteID = QuoteId };
-        try
+        salesQuote = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuoteGETRequest);
+        if (salesQuote != null)
         {
-            salesQuote = await JiwaAPI.GetAsync(salesQuoteGETRequest, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
             SelectedHistory = salesQuote.Histories[0];
 
             if (QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query).TryGetValue("SnapshotNo", out var snapshotNoParam))
@@ -331,28 +374,7 @@
                     SelectedHistory = salesQuote.Histories[snapno - 1];
                 }
             }
-        }
-        catch (ServiceStack.WebServiceException webServiceException)
-        {
-            if (webServiceException.StatusCode == 401)
-            {
-                // We are either not authenticated, or our token we have expired, go log on - but first clear any session info as it's no good no more.
-                WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
-                NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
-            }
-            else
-            {
-                statusMessage = webServiceException.ErrorMessage;
-            }
-        }
-        catch (Exception ex)
-        {
-            statusMessage = ex.Message;
-        }
-        finally
-        {
-            APIRequestInPogress = oldAPIRequestInPogress;
-        }        
+        }   
     }       
 
     private async Task OnSelectTab(string tabId)
@@ -394,4 +416,74 @@
             statusMessage = ex.Message;
         }
     }    
+
+    private async Task QuoteChanged(ChangeEventArgs e, Action<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest> patchDTOAction)
+    {
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest salesQuotePATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest();
+        salesQuotePATCHRequest.QuoteID = salesQuote.QuoteID;
+        patchDTOAction.Invoke(salesQuotePATCHRequest);
+
+        int? currentSnap = SelectedHistory.HistoryNo;
+
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuotePATCHRequest);
+        if (response != null)
+        {
+            salesQuote = response;
+            SelectedHistory = salesQuote.Histories[currentSnap.Value - 1];
+        }        
+    }
+
+    private async Task QuoteLineChanged(ChangeEventArgs e, string quoteLineID, Action<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine> patchDTOAction)
+    {
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest salesQuotePATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest();
+        salesQuotePATCHRequest.QuoteID = salesQuote.QuoteID;
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine quoteLine = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine();
+        quoteLine.QuoteLineID = quoteLineID;
+        patchDTOAction.Invoke(quoteLine);
+        salesQuotePATCHRequest.Lines = new List<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine>();
+        salesQuotePATCHRequest.Lines.Add(quoteLine);
+
+        int? currentSnap = SelectedHistory.HistoryNo;
+
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuotePATCHRequest);
+        if (response != null)
+        {
+            salesQuote = response;
+            SelectedHistory = salesQuote.Histories[currentSnap.Value - 1];
+        }
+    }
+
+    private async Task<T> SendToAPI<T>(IReturn<T> requestDTO)
+    {
+        bool oldAPIRequestInPogress = APIRequestInPogress;
+        APIRequestInPogress = true;
+
+        try
+        {
+            return await JiwaAPI.SendAsync(requestDTO, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
+        }
+        catch (ServiceStack.WebServiceException webServiceException)
+        {
+            if (webServiceException.StatusCode == 401)
+            {
+                // We are either not authenticated, or our token we have expired, go log on - but first clear any session info as it's no good no more.
+                WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
+                NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
+            }
+            else
+            {
+                statusMessage = webServiceException.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            APIRequestInPogress = oldAPIRequestInPogress;
+        }
+
+        return default(T);
+    }
 }

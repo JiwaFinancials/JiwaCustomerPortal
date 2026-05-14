@@ -402,6 +402,47 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
     {
         public virtual string QuoteID { get; set; }
     }
+
+    [Route("/SalesQuotes/{QuoteID}", "PATCH")]
+    [ApiResponse(Description = "Updated OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No Sales Quote with the QuoteID provided was found", StatusCode = 404)]
+    public partial class SalesQuotePATCHRequest
+        : JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote, IReturn<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>
+    {
+        [IgnoreDataMember]
+        public virtual string Type { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorID { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorAccountNo { get; set; }
+
+        [IgnoreDataMember]
+        public virtual DateTimeOffset? LastSavedDateTime { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string StaffTitle { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorName { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorEmailAddress { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string LogicalID { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string LogicalWarehouseDescription { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string PhysicalWarehouseDescription { get; set; }
+
+        public virtual string QuoteID { get; set; }
+    }
 }
 #endregion
 
