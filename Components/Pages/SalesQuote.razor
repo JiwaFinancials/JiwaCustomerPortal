@@ -213,7 +213,7 @@
                                         </td>
                                     }
 
-                                    <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal - salesQuoteLine.TaxToCharge, @salesQuote.CurrencyID)</td>
+                                    <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal - salesQuoteLine.FXTaxToCharge, @salesQuote.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXTaxToCharge, salesQuote.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal, salesQuote.CurrencyID)</td>
                                 }

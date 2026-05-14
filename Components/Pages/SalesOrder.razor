@@ -151,7 +151,7 @@
                                     <td class="text-end">@Config.FormattedDecimals(@salesOrderLine.QuantityThisDel, salesOrderLine.QuantityDecimalPlaces)</td>
                                     <td class="text-end">@Config.FormattedDecimals(@salesOrderLine.QuantityBackOrd, salesOrderLine.QuantityDecimalPlaces)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesOrderLine.FXDiscountedPrice, salesOrder.CurrencyID)</td>
-                                    <td class="text-end">@Config.FormattedCurrency(@salesOrderLine.FXLineTotal - salesOrderLine.TaxToCharge, @salesOrder.CurrencyID)</td>
+                                    <td class="text-end">@Config.FormattedCurrency(@salesOrderLine.FXLineTotal - salesOrderLine.FXTaxToCharge, @salesOrder.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesOrderLine.FXTaxToCharge, salesOrder.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesOrderLine.FXLineTotal, salesOrder.CurrencyID)</td>
                                 }
