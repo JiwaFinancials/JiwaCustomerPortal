@@ -23,6 +23,10 @@ namespace JiwaCustomerPortal
         public static string DebtorStatementReport { get; set; }
         public static string CustomerWebPortalPluginVersion { get; set; }
         public static string DocketNumHeader { get; set; }
+        public static string IN_LogicalID { get; set; }
+        public static string LogicalWarehouseDescription { get; set; }
+        public static string IN_PhysicalID { get; set; }
+        public static string PhysicalWarehouseDescription { get; set; }
 
         public static string _ServiceStackJsonAPIClientVersion;
         public static string ServiceStackJsonAPIClientVersion
@@ -87,6 +91,10 @@ namespace JiwaCustomerPortal
             DebtorStatementReport = response.DebtorStatementReport;
             CustomerWebPortalPluginVersion = response.PluginVersion;
             DocketNumHeader = response.DocketNumHeader;
+            IN_LogicalID = response.IN_LogicalID;
+            LogicalWarehouseDescription = response.LogicalWarehouseDescription;
+            IN_PhysicalID = response.IN_PhysicalID;
+            PhysicalWarehouseDescription = response.PhysicalWarehouseDescription;
 
             JiwaAPISystemInformation = await JiwaAPI.GetAsync(new SystemInformationGETRequest(), jiwaAPIKey: JiwaAPIKey);
         }

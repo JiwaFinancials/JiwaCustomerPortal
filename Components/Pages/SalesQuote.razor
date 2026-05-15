@@ -25,6 +25,13 @@
 
 <StatusMessage Message="@statusMessage"/>
 
+@if (AddingItem)
+{
+    <div class="relative">
+        <JiwaInventoryAutoQueryModalSelectionDialog Title="Select Item" OnClose="@AddItemDialogClosed" />
+    </div>
+}
+
 @if (salesQuote != null)
 {
     <div class="row">
@@ -149,6 +156,8 @@
                             <th class="text-end">Total Ex</th>
                             <th class="text-end">Tax</th>
                             <th class="text-end">Total Inc.</th>
+                            <th class="text-center"></th>
+
                         </tr>
                     </thead>
 
@@ -216,6 +225,14 @@
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal - salesQuoteLine.FXTaxToCharge, @salesQuote.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXTaxToCharge, salesQuote.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal, salesQuote.CurrencyID)</td>
+                                    <td class="text-center">
+                                        <button @onclick="_ => DeleteQuoteLine(salesQuoteLine)" class="btn" style="background-color:transparent">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="red" class="bi bi-x-circle" viewBox="0 0 20 20">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                                            </svg>
+                                        </button>
+                                    </td>
                                 }
                             </tr>
                         }
@@ -224,6 +241,7 @@
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal - x.TaxToCharge), salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.TaxToCharge), salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal), salesQuote.CurrencyID)</td>
+                            <td class="text-end"></td>
                         </tr>
 
                         @if (salesQuote.Cartage1ExGst + salesQuote.Cartage1Gst != 0)
@@ -233,6 +251,7 @@
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.Cartage1ExGst, salesQuote.CurrencyID)</td>
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.Cartage1Gst, salesQuote.CurrencyID)</td>
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.Cartage1ExGst + salesQuote.Cartage1Gst, salesQuote.CurrencyID)</td>
+                                <td class="text-end"></td>
                             </tr>
                         }
                         else
@@ -240,6 +259,7 @@
                             // even if Cartage1 is 0, display as blank to give a better visual appeal - space out the sub total and total
                             <tr>
                                 <td colspan="6" class="text-end">Freight</td>
+                                <td class="text-end"></td>
                                 <td class="text-end"></td>
                                 <td class="text-end"></td>
                                 <td class="text-end"></td>
@@ -253,6 +273,7 @@
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.Cartage2ExGst, salesQuote.CurrencyID)</td>
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.Cartage2Gst, salesQuote.CurrencyID)</td>
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.Cartage2ExGst + salesQuote.Cartage2Gst, salesQuote.CurrencyID)</td>
+                                <td class="text-end"></td>
                             </tr>
                         }
 
@@ -263,6 +284,7 @@
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.Cartage3ExGst, salesQuote.CurrencyID)</td>
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.Cartage3Gst, salesQuote.CurrencyID)</td>
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.Cartage3ExGst + salesQuote.Cartage3Gst, salesQuote.CurrencyID)</td>
+                                <td class="text-end"></td>
                             </tr>
                         }
 
@@ -271,9 +293,17 @@
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal - x.TaxToCharge) + salesQuote.Cartage1ExGst + salesQuote.Cartage2ExGst + salesQuote.Cartage3ExGst, salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.TaxToCharge) + salesQuote.Cartage1Gst + salesQuote.Cartage2Gst + salesQuote.Cartage3Gst, salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal) + salesQuote.Cartage1ExGst + salesQuote.Cartage2ExGst + salesQuote.Cartage3ExGst + salesQuote.Cartage1Gst + salesQuote.Cartage2Gst + salesQuote.Cartage3Gst, salesQuote.CurrencyID)</td>
+                            <td class="text-end"></td>
                         </tr>
                     </tbody>
                 </table>
+                <button @onclick="(() => AddQuoteLine())" type="button" class="btn btn-success">
+                    Add Item
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-plus" viewBox="0 0 16 16">
+                        <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                        <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5" />
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -355,6 +385,7 @@
     private JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote salesQuote { get; set; }
     private string SelectedTabId { get; set; } = "Items-tab";
     private JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory SelectedHistory { get; set; }
+    private bool AddingItem { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -474,7 +505,88 @@
         }
     }
 
-    private async Task<T> SendToAPI<T>(IReturn<T> requestDTO)
+    private async Task DeleteQuoteLine(JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine salesQuoteLine)
+    {
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteLineDELETERequest salesQuoteLineDELETERequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteLineDELETERequest();
+        salesQuoteLineDELETERequest.QuoteID = salesQuote.QuoteID;
+        salesQuoteLineDELETERequest.QuoteHistoryID = SelectedHistory.QuoteHistoryID;
+        salesQuoteLineDELETERequest.QuoteLineID = salesQuoteLine.QuoteLineID;
+        await DeleteFromAPI(salesQuoteLineDELETERequest);
+
+        // re-read the quote
+        int? currentSnap = SelectedHistory.HistoryNo;
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteGETRequest salesQuoteGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteGETRequest() { QuoteID = QuoteId };
+        salesQuote = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuoteGETRequest);
+
+        if (salesQuote != null)
+        {
+            SelectedHistory = salesQuote.Histories[currentSnap.Value - 1];
+        }
+    }
+
+    private async Task AddQuoteLine()
+    {
+        AddingItem = true;
+    }
+
+    public async void AddItemDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse InventoryItem)
+    {
+        AddingItem = false;
+
+        if (InventoryItem != null)
+        {
+            JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest salesQuotePATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest();
+            salesQuotePATCHRequest.QuoteID = salesQuote.QuoteID;
+            JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine quoteLine = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine();
+            quoteLine.InventoryID = InventoryItem.InventoryID;
+            salesQuotePATCHRequest.Lines = new List<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine>();
+            salesQuotePATCHRequest.Lines.Add(quoteLine);
+
+            int? currentSnap = SelectedHistory.HistoryNo;
+
+            JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuotePATCHRequest);
+            if (response != null)
+            {
+                salesQuote = response;
+                SelectedHistory = salesQuote.Histories[currentSnap.Value - 1];
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task DeleteFromAPI(IReturnVoid requestDTO)
+    {
+        bool oldAPIRequestInPogress = APIRequestInPogress;
+        APIRequestInPogress = true;
+
+        try
+        {
+            await JiwaAPI.DeleteAsync<ServiceStack.IReturnVoid>(requestDTO, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
+        }
+        catch (ServiceStack.WebServiceException webServiceException)
+        {
+            if (webServiceException.StatusCode == 401)
+            {
+                // We are either not authenticated, or our token we have expired, go log on - but first clear any session info as it's no good no more.
+                WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
+                NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
+            }
+            else
+            {
+                statusMessage = webServiceException.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            APIRequestInPogress = oldAPIRequestInPogress;
+        }
+    }
+
+    private async Task<TResponse> SendToAPI<TResponse>(IReturn<TResponse> requestDTO)
     {
         bool oldAPIRequestInPogress = APIRequestInPogress;
         APIRequestInPogress = true;
@@ -505,6 +617,6 @@
             APIRequestInPogress = oldAPIRequestInPogress;
         }
 
-        return default(T);
+        return default(TResponse);
     }
 }

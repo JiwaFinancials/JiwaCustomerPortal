@@ -83,6 +83,10 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string DebtorStatementReport { get; set; }
         public virtual string PluginVersion { get; set; }
         public virtual string DocketNumHeader { get; set; }
+        public virtual string IN_LogicalID { get; set; }
+        public virtual string IN_PhysicalID { get; set; }
+        public virtual string LogicalWarehouseDescription { get; set; }
+        public virtual string PhysicalWarehouseDescription { get; set; }
     }
 
     [Route("/Debtors/ContactNames/{ContactNameID}/PasswordReset", "POST")]
@@ -442,6 +446,64 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string PhysicalWarehouseDescription { get; set; }
 
         public virtual string QuoteID { get; set; }
+    }
+
+    [Route("/SalesQuotes/{QuoteID}/Historys/{QuoteHistoryID}/Lines", "POST")]
+    [ApiResponse(Description = "Created OK", StatusCode = 201)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No Sales Quote Line with the QuoteID or QuoteLineID provided was found", StatusCode = 404)]
+    public partial class SalesQuoteLinePOSTRequest
+        : JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine, IReturn<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine>
+    {
+        [IgnoreDataMember]
+        public virtual string QuoteLineID { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? TaxToCharge { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? UnitCost { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? LineTotal { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? Weight { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? Cubic { get; set; }
+
+        [IgnoreDataMember]
+        public virtual short? QuantityDecimalPlaces { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? QuantityOriginalOrdered { get; set; }
+
+        [IgnoreDataMember]
+        public virtual SalesQuoteKitLineTypesEnum? KitLineType { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? KitUnits { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string KitHeaderLineID { get; set; }
+
+        public virtual string QuoteID { get; set; }
+        public virtual string QuoteHistoryID { get; set; }
+    }
+
+    [Route("/SalesQuotes/{QuoteID}/Historys/{QuoteHistoryID}/Lines/{QuoteLineID}", "DELETE")]
+    [ApiResponse(Description = "Deleted OK", StatusCode = 204)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No Sales Quote Line with the QuoteID or QuoteLineID provided was found", StatusCode = 404)]
+    public partial class SalesQuoteLineDELETERequest
+        : IReturnVoid
+    {
+        public virtual string QuoteID { get; set; }
+        public virtual string QuoteHistoryID { get; set; }
+        public virtual string QuoteLineID { get; set; }
     }
 }
 #endregion
@@ -1802,6 +1864,249 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tax
 #region "AutoQueries and Tables"
 namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
 {
+    #region "Inventory"
+    public partial class v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse
+    {
+        public v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse()
+        {
+            Picture = new byte[] { };
+        }
+
+        [Required]
+        public virtual string InventoryID { get; set; }
+
+        [Required]
+        public virtual string PartNo { get; set; }
+
+        public virtual string Description { get; set; }
+        public virtual byte[] Picture { get; set; }
+        [Required]
+        public virtual string InventoryClassificationID { get; set; }
+
+        public virtual string ClassificationDescription { get; set; }
+        [Required]
+        public virtual string Category1ID { get; set; }
+
+        public virtual string Category1Description { get; set; }
+        [Required]
+        public virtual string Category2ID { get; set; }
+
+        public virtual string Category2Description { get; set; }
+        [Required]
+        public virtual string Category3ID { get; set; }
+
+        public virtual string Category3Description { get; set; }
+        [Required]
+        public virtual string Category4ID { get; set; }
+
+        public virtual string Category4Description { get; set; }
+        [Required]
+        public virtual string Category5ID { get; set; }
+
+        public virtual string Category5Description { get; set; }
+        [Required]
+        public virtual string IN_LogicalID { get; set; }
+
+        public virtual string LogicalWarehouseDescription { get; set; }
+        [Required]
+        public virtual string IN_PhysicalID { get; set; }
+
+        [Required]
+        public virtual string PhysicalWarehouseDescription { get; set; }
+
+        public virtual decimal? AvailableStock { get; set; }
+        public virtual decimal? SellPrice { get; set; }
+        public virtual decimal? RRPPrice { get; set; }
+        [Required]
+        public virtual DateTimeOffset LastSavedDateTime { get; set; }
+
+        public virtual decimal? InStock { get; set; }
+    }
+
+    [Route("/Queries/OR/InventoryItemListImmutableWarehouse", "GET")]
+    [ApiResponse(Description = "Read OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public partial class v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery
+        : QueryDb<v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse>, IReturn<QueryResponse<v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse>>
+    {
+        public virtual string InventoryID { get; set; }
+        public virtual string InventoryIDStartsWith { get; set; }
+        public virtual string InventoryIDEndsWith { get; set; }
+        public virtual string InventoryIDContains { get; set; }
+        public virtual string InventoryIDLike { get; set; }
+        public virtual string[] InventoryIDBetween { get; set; }
+        public virtual string[] InventoryIDIn { get; set; }
+        public virtual string PartNo { get; set; }
+        public virtual string PartNoStartsWith { get; set; }
+        public virtual string PartNoEndsWith { get; set; }
+        public virtual string PartNoContains { get; set; }
+        public virtual string PartNoLike { get; set; }
+        public virtual string[] PartNoBetween { get; set; }
+        public virtual string[] PartNoIn { get; set; }
+        public virtual string Description { get; set; }
+        public virtual string DescriptionStartsWith { get; set; }
+        public virtual string DescriptionEndsWith { get; set; }
+        public virtual string DescriptionContains { get; set; }
+        public virtual string DescriptionLike { get; set; }
+        public virtual string[] DescriptionBetween { get; set; }
+        public virtual string[] DescriptionIn { get; set; }
+        public virtual byte[] Picture { get; set; }
+        public virtual string InventoryClassificationID { get; set; }
+        public virtual string InventoryClassificationIDStartsWith { get; set; }
+        public virtual string InventoryClassificationIDEndsWith { get; set; }
+        public virtual string InventoryClassificationIDContains { get; set; }
+        public virtual string InventoryClassificationIDLike { get; set; }
+        public virtual string[] InventoryClassificationIDBetween { get; set; }
+        public virtual string[] InventoryClassificationIDIn { get; set; }
+        public virtual string ClassificationDescription { get; set; }
+        public virtual string ClassificationDescriptionStartsWith { get; set; }
+        public virtual string ClassificationDescriptionEndsWith { get; set; }
+        public virtual string ClassificationDescriptionContains { get; set; }
+        public virtual string ClassificationDescriptionLike { get; set; }
+        public virtual string[] ClassificationDescriptionBetween { get; set; }
+        public virtual string[] ClassificationDescriptionIn { get; set; }
+        public virtual string Category1ID { get; set; }
+        public virtual string Category1IDStartsWith { get; set; }
+        public virtual string Category1IDEndsWith { get; set; }
+        public virtual string Category1IDContains { get; set; }
+        public virtual string Category1IDLike { get; set; }
+        public virtual string[] Category1IDBetween { get; set; }
+        public virtual string[] Category1IDIn { get; set; }
+        public virtual string Category1Description { get; set; }
+        public virtual string Category1DescriptionStartsWith { get; set; }
+        public virtual string Category1DescriptionEndsWith { get; set; }
+        public virtual string Category1DescriptionContains { get; set; }
+        public virtual string Category1DescriptionLike { get; set; }
+        public virtual string[] Category1DescriptionBetween { get; set; }
+        public virtual string[] Category1DescriptionIn { get; set; }
+        public virtual string Category2ID { get; set; }
+        public virtual string Category2IDStartsWith { get; set; }
+        public virtual string Category2IDEndsWith { get; set; }
+        public virtual string Category2IDContains { get; set; }
+        public virtual string Category2IDLike { get; set; }
+        public virtual string[] Category2IDBetween { get; set; }
+        public virtual string[] Category2IDIn { get; set; }
+        public virtual string Category2Description { get; set; }
+        public virtual string Category2DescriptionStartsWith { get; set; }
+        public virtual string Category2DescriptionEndsWith { get; set; }
+        public virtual string Category2DescriptionContains { get; set; }
+        public virtual string Category2DescriptionLike { get; set; }
+        public virtual string[] Category2DescriptionBetween { get; set; }
+        public virtual string[] Category2DescriptionIn { get; set; }
+        public virtual string Category3ID { get; set; }
+        public virtual string Category3IDStartsWith { get; set; }
+        public virtual string Category3IDEndsWith { get; set; }
+        public virtual string Category3IDContains { get; set; }
+        public virtual string Category3IDLike { get; set; }
+        public virtual string[] Category3IDBetween { get; set; }
+        public virtual string[] Category3IDIn { get; set; }
+        public virtual string Category3Description { get; set; }
+        public virtual string Category3DescriptionStartsWith { get; set; }
+        public virtual string Category3DescriptionEndsWith { get; set; }
+        public virtual string Category3DescriptionContains { get; set; }
+        public virtual string Category3DescriptionLike { get; set; }
+        public virtual string[] Category3DescriptionBetween { get; set; }
+        public virtual string[] Category3DescriptionIn { get; set; }
+        public virtual string Category4ID { get; set; }
+        public virtual string Category4IDStartsWith { get; set; }
+        public virtual string Category4IDEndsWith { get; set; }
+        public virtual string Category4IDContains { get; set; }
+        public virtual string Category4IDLike { get; set; }
+        public virtual string[] Category4IDBetween { get; set; }
+        public virtual string[] Category4IDIn { get; set; }
+        public virtual string Category4Description { get; set; }
+        public virtual string Category4DescriptionStartsWith { get; set; }
+        public virtual string Category4DescriptionEndsWith { get; set; }
+        public virtual string Category4DescriptionContains { get; set; }
+        public virtual string Category4DescriptionLike { get; set; }
+        public virtual string[] Category4DescriptionBetween { get; set; }
+        public virtual string[] Category4DescriptionIn { get; set; }
+        public virtual string Category5ID { get; set; }
+        public virtual string Category5IDStartsWith { get; set; }
+        public virtual string Category5IDEndsWith { get; set; }
+        public virtual string Category5IDContains { get; set; }
+        public virtual string Category5IDLike { get; set; }
+        public virtual string[] Category5IDBetween { get; set; }
+        public virtual string[] Category5IDIn { get; set; }
+        public virtual string Category5Description { get; set; }
+        public virtual string Category5DescriptionStartsWith { get; set; }
+        public virtual string Category5DescriptionEndsWith { get; set; }
+        public virtual string Category5DescriptionContains { get; set; }
+        public virtual string Category5DescriptionLike { get; set; }
+        public virtual string[] Category5DescriptionBetween { get; set; }
+        public virtual string[] Category5DescriptionIn { get; set; }
+        public virtual string IN_LogicalID { get; set; }
+        public virtual string IN_LogicalIDStartsWith { get; set; }
+        public virtual string IN_LogicalIDEndsWith { get; set; }
+        public virtual string IN_LogicalIDContains { get; set; }
+        public virtual string IN_LogicalIDLike { get; set; }
+        public virtual string[] IN_LogicalIDBetween { get; set; }
+        public virtual string[] IN_LogicalIDIn { get; set; }
+        public virtual string LogicalWarehouseDescription { get; set; }
+        public virtual string LogicalWarehouseDescriptionStartsWith { get; set; }
+        public virtual string LogicalWarehouseDescriptionEndsWith { get; set; }
+        public virtual string LogicalWarehouseDescriptionContains { get; set; }
+        public virtual string LogicalWarehouseDescriptionLike { get; set; }
+        public virtual string[] LogicalWarehouseDescriptionBetween { get; set; }
+        public virtual string[] LogicalWarehouseDescriptionIn { get; set; }
+        public virtual string IN_PhysicalID { get; set; }
+        public virtual string IN_PhysicalIDStartsWith { get; set; }
+        public virtual string IN_PhysicalIDEndsWith { get; set; }
+        public virtual string IN_PhysicalIDContains { get; set; }
+        public virtual string IN_PhysicalIDLike { get; set; }
+        public virtual string[] IN_PhysicalIDBetween { get; set; }
+        public virtual string[] IN_PhysicalIDIn { get; set; }
+        public virtual string PhysicalWarehouseDescription { get; set; }
+        public virtual string PhysicalWarehouseDescriptionStartsWith { get; set; }
+        public virtual string PhysicalWarehouseDescriptionEndsWith { get; set; }
+        public virtual string PhysicalWarehouseDescriptionContains { get; set; }
+        public virtual string PhysicalWarehouseDescriptionLike { get; set; }
+        public virtual string[] PhysicalWarehouseDescriptionBetween { get; set; }
+        public virtual string[] PhysicalWarehouseDescriptionIn { get; set; }
+        public virtual decimal? AvailableStock { get; set; }
+        public virtual decimal? AvailableStockGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? AvailableStockGreaterThan { get; set; }
+        public virtual decimal? AvailableStockLessThan { get; set; }
+        public virtual decimal? AvailableStockLessThanOrEqualTo { get; set; }
+        public virtual decimal? AvailableStockNotEqualTo { get; set; }
+        public virtual decimal?[] AvailableStockBetween { get; set; }
+        public virtual decimal?[] AvailableStockIn { get; set; }
+        public virtual decimal? SellPrice { get; set; }
+        public virtual decimal? SellPriceGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? SellPriceGreaterThan { get; set; }
+        public virtual decimal? SellPriceLessThan { get; set; }
+        public virtual decimal? SellPriceLessThanOrEqualTo { get; set; }
+        public virtual decimal? SellPriceNotEqualTo { get; set; }
+        public virtual decimal?[] SellPriceBetween { get; set; }
+        public virtual decimal?[] SellPriceIn { get; set; }
+        public virtual decimal? RRPPrice { get; set; }
+        public virtual decimal? RRPPriceGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? RRPPriceGreaterThan { get; set; }
+        public virtual decimal? RRPPriceLessThan { get; set; }
+        public virtual decimal? RRPPriceLessThanOrEqualTo { get; set; }
+        public virtual decimal? RRPPriceNotEqualTo { get; set; }
+        public virtual decimal?[] RRPPriceBetween { get; set; }
+        public virtual decimal?[] RRPPriceIn { get; set; }
+        public virtual DateTimeOffset? LastSavedDateTime { get; set; }
+        public virtual DateTimeOffset? LastSavedDateTimeGreaterThanOrEqualTo { get; set; }
+        public virtual DateTimeOffset? LastSavedDateTimeGreaterThan { get; set; }
+        public virtual DateTimeOffset? LastSavedDateTimeLessThan { get; set; }
+        public virtual DateTimeOffset? LastSavedDateTimeLessThanOrEqualTo { get; set; }
+        public virtual DateTimeOffset? LastSavedDateTimeNotEqualTo { get; set; }
+        public virtual DateTimeOffset[] LastSavedDateTimeBetween { get; set; }
+        public virtual DateTimeOffset[] LastSavedDateTimeIn { get; set; }
+        public virtual decimal? InStock { get; set; }
+        public virtual decimal? InStockGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? InStockGreaterThan { get; set; }
+        public virtual decimal? InStockLessThan { get; set; }
+        public virtual decimal? InStockLessThanOrEqualTo { get; set; }
+        public virtual decimal? InStockNotEqualTo { get; set; }
+        public virtual decimal?[] InStockBetween { get; set; }
+        public virtual decimal?[] InStockIn { get; set; }
+    }
+    #endregion
+
     #region "Sales Orders"
     public partial class v_Jiwa_SalesOrder_List
     {

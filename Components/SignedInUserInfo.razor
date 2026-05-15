@@ -13,6 +13,12 @@
                     <table class="table-borderless">
                         <tbody>
                             <tr>
+                                @if (@WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                                {
+                                    <td class="text-end px-2">
+                                        @Config.PhysicalWarehouseDescription / @Config.LogicalWarehouseDescription
+                                    </td>
+                                }
                                 <td class="text-end px-2">
                                     <a href="User/Profile">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
@@ -30,6 +36,12 @@
                                 </td>
                             </tr>
                             <tr>
+                                @if (@WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                                {
+                                    <td class="text-end px-2">
+                                        <!-- spacer -->
+                                    </td>
+                                }
                                 <td class="text-end px-2">
                                     <a href="/User/SignOut">Sign Out</a>
                                 </td>

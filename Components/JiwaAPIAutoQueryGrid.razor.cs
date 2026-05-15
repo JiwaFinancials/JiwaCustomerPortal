@@ -21,6 +21,8 @@ namespace JiwaCustomerPortal.Components
         [Parameter]
         public IQuery AutoQuery { get; set; }
         [Parameter]
+        public bool UseFilters { get; set; } = true;
+        [Parameter]
         public bool ShowPageNavigationHeader { get; set; } = true;
         [Parameter]
         public bool ShowPageNavigation { get; set; } = true;
@@ -241,71 +243,74 @@ namespace JiwaCustomerPortal.Components
             AutoQuery.OrderBy = string.Join(",", orderByAscending, orderByDescending);
 
             // Filters
-            foreach (JiwaAutoQueryColumn<Model> column in Columns)
+            if (UseFilters)
             {
-                // Set initial value to null for all properties which start with a column name
-                // So OrderNo, OrderNoContains, OrderNoStartsWith and so on are all nulled first
-                // We need to null them first or else once we apply a filter it will stay there set in the AutoQuery property until we set it to something else.
-                foreach (System.Reflection.PropertyInfo propertyInfo in QueryModelProperties.Where(x => x.Name.StartsWith(column.Id)))
-                {                    
-                    propertyInfo.SetValue(AutoQuery, null, null);
-                    object value = null;
-                    ImmutableFilters.TryGetValue(propertyInfo.Name, out value);
-                    if (value != null)
-                    {
-                        propertyInfo.SetValue(AutoQuery, value, null);
-                    }
-                }
-
-                // Now set values corresponding to the selected filters
-                foreach (JiwaAutoQueryColumnFilter filter in column.Filters)
+                foreach (JiwaAutoQueryColumn<Model> column in Columns)
                 {
-                    System.Reflection.PropertyInfo propertyInfo = AutoQuery.GetType().GetProperty(filter.FilterOperator.QueryModelProperty);
-                    if (propertyInfo != null)
+                    // Set initial value to null for all properties which start with a column name
+                    // So OrderNo, OrderNoContains, OrderNoStartsWith and so on are all nulled first
+                    // We need to null them first or else once we apply a filter it will stay there set in the AutoQuery property until we set it to something else.
+                    foreach (System.Reflection.PropertyInfo propertyInfo in QueryModelProperties.Where(x => x.Name.StartsWith(column.Id)))
                     {
-                        Type dataType = column.ColumnDataType;
-                        if (dataType.IsGenericType && dataType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                        propertyInfo.SetValue(AutoQuery, null, null);
+                        object value = null;
+                        ImmutableFilters.TryGetValue(propertyInfo.Name, out value);
+                        if (value != null)
                         {
-                            dataType = Nullable.GetUnderlyingType(dataType);
+                            propertyInfo.SetValue(AutoQuery, value, null);
                         }
+                    }
 
-                        if (dataType == typeof(string))
+                    // Now set values corresponding to the selected filters
+                    foreach (JiwaAutoQueryColumnFilter filter in column.Filters)
+                    {
+                        System.Reflection.PropertyInfo propertyInfo = AutoQuery.GetType().GetProperty(filter.FilterOperator.QueryModelProperty);
+                        if (propertyInfo != null)
                         {
-                            propertyInfo.SetValue(AutoQuery, filter.FilterValue, null);
-                        }
-                        else if (dataType == typeof(decimal))
-                        {
-                            decimal value = 0;
-                            if (decimal.TryParse(filter.FilterValue, out value))
+                            Type dataType = column.ColumnDataType;
+                            if (dataType.IsGenericType && dataType.GetGenericTypeDefinition() == typeof(Nullable<>))
                             {
-                                propertyInfo.SetValue(AutoQuery, value, null);
-                            }
-                            
-                        }
-                        else if (dataType == typeof(int))
-                        {
-                            int value = 0;
-                            if (int.TryParse(filter.FilterValue, out value))
-                            {
-                                propertyInfo.SetValue(AutoQuery, value, null);
+                                dataType = Nullable.GetUnderlyingType(dataType);
                             }
 
-                        }
-                        else if (dataType == typeof(bool))
-                        {
-                            bool value = false;
-                            if (bool.TryParse(filter.FilterValue, out value))
+                            if (dataType == typeof(string))
                             {
-                                propertyInfo.SetValue(AutoQuery, value, null);
+                                propertyInfo.SetValue(AutoQuery, filter.FilterValue, null);
                             }
-
-                        }
-                        else if (dataType == typeof(DateTime))
-                        {
-                            DateTime value = DateTime.Now;
-                            if (DateTime.TryParse(filter.FilterValue, out value))
+                            else if (dataType == typeof(decimal))
                             {
-                                propertyInfo.SetValue(AutoQuery, value, null);
+                                decimal value = 0;
+                                if (decimal.TryParse(filter.FilterValue, out value))
+                                {
+                                    propertyInfo.SetValue(AutoQuery, value, null);
+                                }
+
+                            }
+                            else if (dataType == typeof(int))
+                            {
+                                int value = 0;
+                                if (int.TryParse(filter.FilterValue, out value))
+                                {
+                                    propertyInfo.SetValue(AutoQuery, value, null);
+                                }
+
+                            }
+                            else if (dataType == typeof(bool))
+                            {
+                                bool value = false;
+                                if (bool.TryParse(filter.FilterValue, out value))
+                                {
+                                    propertyInfo.SetValue(AutoQuery, value, null);
+                                }
+
+                            }
+                            else if (dataType == typeof(DateTime))
+                            {
+                                DateTime value = DateTime.Now;
+                                if (DateTime.TryParse(filter.FilterValue, out value))
+                                {
+                                    propertyInfo.SetValue(AutoQuery, value, null);
+                                }
                             }
                         }
                     }
