@@ -376,7 +376,10 @@
 }
 @code {
     [Parameter]
-    public string QuoteId { get; set; }
+    public string QuoteId { get; set; }    
+
+    [SupplyParameterFromQuery(Name = "CreateForDebtorID")]
+    public string CreateForDebtorID { get; set; }
 
     public string SnapshotNo { get; set; }
 
@@ -409,10 +412,20 @@
             // not authenticated
             NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
             return;
-        }
+        }        
 
-        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteGETRequest salesQuoteGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteGETRequest() { QuoteID = QuoteId };
-        salesQuote = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuoteGETRequest);
+        if (CreateForDebtorID != null)
+        {
+            // create a new quote, and then proceed to show that quote
+            JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePOSTRequest salesQuotePOSTRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePOSTRequest() { DebtorID = CreateForDebtorID };
+            salesQuote = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuotePOSTRequest);
+        }
+        else if (QuoteId != null)
+        {
+            JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteGETRequest salesQuoteGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteGETRequest() { QuoteID = QuoteId };
+            salesQuote = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuoteGETRequest);            
+        }        
+
         if (salesQuote != null)
         {
             SelectedHistory = salesQuote.Histories[0];
@@ -426,7 +439,7 @@
                     SelectedHistory = salesQuote.Histories[snapno - 1];
                 }
             }
-        }   
+        }
     }       
 
     private async Task OnSelectTab(string tabId)
@@ -529,7 +542,7 @@
         AddingItem = true;
     }
 
-    public async void AddItemDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse InventoryItem)
+    public async void AddItemDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR InventoryItem)
     {
         AddingItem = false;
 

@@ -1,13 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using ServiceStack;
-using ServiceStack.DataAnnotations;
-
-using JiwaFinancials.Jiwa.JiwaServiceModel.Tables;
-using ServiceStack.Web;
-using System.Reflection.Metadata;
+using JiwaCustomerPortal.Components.Pages;
 using JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields;
 using JiwaFinancials.Jiwa.JiwaServiceModel.Debtors;
 using JiwaFinancials.Jiwa.JiwaServiceModel.Notes;
@@ -15,9 +6,18 @@ using JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders;
 using JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes;
 using JiwaFinancials.Jiwa.JiwaServiceModel.Staff;
 using JiwaFinancials.Jiwa.JiwaServiceModel.Startup.Diagnostics;
+using JiwaFinancials.Jiwa.JiwaServiceModel.Tables;
 using JiwaFinancials.Jiwa.JiwaServiceModel.Tags;
 using JiwaFinancials.Jiwa.JiwaServiceModel.Tax;
-using JiwaCustomerPortal.Components.Pages;
+using ServiceStack;
+using ServiceStack.DataAnnotations;
+using ServiceStack.Web;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection.Metadata;
+using System.Runtime.Serialization;
+using static JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote;
 
 
 #region "DTOs purpose made for this app"
@@ -405,6 +405,32 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         : IReturn<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>
     {
         public virtual string QuoteID { get; set; }
+    }
+
+    [Route("/SalesQuotes", "POST")]
+    [ApiResponse(Description = "Created OK", StatusCode = 201)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public class SalesQuotePOSTRequest
+        : JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote, IReturn<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>
+    {
+        [IgnoreDataMember]
+        public string QuoteID { get; set; }
+
+        [IgnoreDataMember]
+        public e_SalesQuoteStatuses? Status { get; set; }
+
+        [IgnoreDataMember]
+        public DateTimeOffset? LastSavedDateTime { get; set; }
+
+        [IgnoreDataMember]
+        public string StaffTitle { get; set; }
+
+        [IgnoreDataMember]
+        public string DebtorName { get; set; }
+
+        [IgnoreDataMember]
+        public string DebtorEmailAddress { get; set; }
     }
 
     [Route("/SalesQuotes/{QuoteID}", "PATCH")]
@@ -1862,12 +1888,22 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tax
 #endregion
 
 #region "AutoQueries and Tables"
-namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
+namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or
 {
     #region "Inventory"
-    public partial class v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse
+    [Route("/Queries/OR/InventoryItemListImmutableWarehouse", "GET")]
+    [ApiResponse(Description = "Read OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public partial class v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery
+        : v_Jiwa_Inventory_Item_ListORQuery, IReturn<QueryResponse<v_Jiwa_Inventory_Item_ListOR>>
     {
-        public v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse()
+        public virtual string Immutable_IN_LogicalID { get; set; }
+    }
+
+    public partial class v_Jiwa_Inventory_Item_ListOR
+    {
+        public v_Jiwa_Inventory_Item_ListOR()
         {
             Picture = new byte[] { };
         }
@@ -1923,12 +1959,12 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual decimal? InStock { get; set; }
     }
 
-    [Route("/Queries/OR/InventoryItemListImmutableWarehouse", "GET")]
+    //[Route("/Queries/OR/InventoryItemList", "GET")] // Need to comment this out otherwise our v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery requests go here instead of to /Queries/OR/InventoryItemListImmutableWarehouse
     [ApiResponse(Description = "Read OK", StatusCode = 200)]
     [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
     [ApiResponse(Description = "Not authorised", StatusCode = 403)]
-    public partial class v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery
-        : QueryDb<v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse>, IReturn<QueryResponse<v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouse>>
+    public partial class v_Jiwa_Inventory_Item_ListORQuery
+        : QueryDb<v_Jiwa_Inventory_Item_ListOR>, IReturn<QueryResponse<v_Jiwa_Inventory_Item_ListOR>>
     {
         public virtual string InventoryID { get; set; }
         public virtual string InventoryIDStartsWith { get; set; }
@@ -2106,7 +2142,10 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual decimal?[] InStockIn { get; set; }
     }
     #endregion
+}
 
+namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
+{
     #region "Sales Orders"
     public partial class v_Jiwa_SalesOrder_List
     {
