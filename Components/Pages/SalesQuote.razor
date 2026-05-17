@@ -317,55 +317,158 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressee" class="form-label">Addressee</label>
-                                <input type="text" class="form-control" id="DeliveryAddressee" readonly placeholder="@salesQuote.DeliveryAddressee">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressee" readonly placeholder="@salesQuote.DeliveryAddressee">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressee" value="@salesQuote.DeliveryAddressee" @onchange="async (e) =>
+                                        {
+                                           await QuoteChanged(e, (q) => { q.DeliveryAddressee = e.Value.ToString(); });
+                                        }">
+                                }
+
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressContactName" class="form-label">Contact Name</label>
-                                <input type="text" class="form-control" id="DeliveryAddressContactName" readonly placeholder="@salesQuote.DeliveryAddressContactName">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressContactName" readonly placeholder="@salesQuote.DeliveryAddressContactName">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressContactName" value="@salesQuote.DeliveryAddressContactName" @onchange="async (e) =>
+                                            {
+                                               await QuoteChanged(e, (q) => { q.DeliveryAddressContactName = e.Value.ToString(); });
+                                            }">
+                                }
+
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddress1" class="form-label">Address 1</label>
-                                <input type="text" class="form-control" id="DeliveryAddress1" readonly placeholder="@salesQuote.DeliveryAddress1">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddress1" readonly placeholder="@salesQuote.DeliveryAddress1">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddress1" value="@salesQuote.DeliveryAddress1" @onchange="async (e) =>
+                                        {
+                                            await QuoteChanged(e, (q) => { q.DeliveryAddress1 = e.Value.ToString(); });
+                                        }">
+                                }
+
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddress2" class="form-label">Address 2</label>
-                                <input type="text" class="form-control" id="DeliveryAddress2" readonly placeholder="@salesQuote.DeliveryAddress2">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddress2" readonly placeholder="@salesQuote.DeliveryAddress2">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddress2" value="@salesQuote.DeliveryAddress2" @onchange="async (e) =>
+                                        {
+                                            await QuoteChanged(e, (q) => { q.DeliveryAddress2 = e.Value.ToString(); });
+                                        }">
+                                }
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressState" class="form-label">State</label>
-                                <input type="text" class="form-control" id="DeliveryAddressState" readonly placeholder="@salesQuote.DeliveryAddressState">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressState" readonly placeholder="@salesQuote.DeliveryAddressState">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressState" value="@salesQuote.DeliveryAddressState" @onchange="async (e) =>
+                                        {
+                                            await QuoteChanged(e, (q) => { q.DeliveryAddressState = e.Value.ToString(); });
+                                        }">
+                                }
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressSuburb" class="form-label">Suburb</label>
-                                <input type="text" class="form-control" id="DeliveryAddressSuburb" readonly placeholder="@salesQuote.DeliveryAddressSuburb">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressSuburb" readonly placeholder="@salesQuote.DeliveryAddressSuburb">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressSuburb" value="@salesQuote.DeliveryAddressSuburb" @onchange="async (e) =>
+                                        {
+                                                                                        await QuoteChanged(e, (q) => { q.DeliveryAddressSuburb = e.Value.ToString(); });
+                                        }">
+                                }
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressPostcode" class="form-label">Postcode</label>
-                                <input type="text" class="form-control" id="DeliveryAddressPostcode" readonly placeholder="@salesQuote.DeliveryAddressPostcode">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressPostcode" readonly placeholder="@salesQuote.DeliveryAddressPostcode">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressPostcode" value="@salesQuote.DeliveryAddressPostcode" @onchange="async (e) =>
+                                        {
+                                            await QuoteChanged(e, (q) => { q.DeliveryAddressPostcode = e.Value.ToString(); });
+                                        }">
+                                }
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressCountry" class="form-label">Country</label>
-                                <input type="text" class="form-control" id="DeliveryAddressCountry" readonly placeholder="@salesQuote.DeliveryAddressCountry">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressCountry" readonly placeholder="@salesQuote.DeliveryAddressCountry">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressCountry" value="@salesQuote.DeliveryAddressCountry" @onchange="async (e) =>
+                                        {
+                                            await QuoteChanged(e, (q) => { q.DeliveryAddressCountry = e.Value.ToString(); });
+                                        }">
+                                }
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressCourierDetails" class="form-label">Delivery Instructions</label>
-                                <input type="text" class="form-control" id="DeliveryAddressCourierDetails" readonly placeholder="@salesQuote.DeliveryAddressCourierDetails">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressCourierDetails" readonly placeholder="@salesQuote.DeliveryAddressCourierDetails">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressCourierDetails" value="@salesQuote.DeliveryAddressCourierDetails" @onchange="async (e) =>
+                                        {
+                                            await QuoteChanged(e, (q) => { q.DeliveryAddressCourierDetails = e.Value.ToString(); });
+                                        }">
+                                }
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressNotes" class="form-label">Notes</label>
-                                <input type="text" class="form-control" id="DeliveryAddressNotes" readonly placeholder="@salesQuote.DeliveryAddressNotes">
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressNotes" readonly placeholder="@salesQuote.DeliveryAddressNotes">
+                                }
+                                else
+                                {
+                                    <input type="text" class="form-control" id="DeliveryAddressNotes" value="@salesQuote.DeliveryAddressNotes" @onchange="async (e) =>
+                                        {
+                                            await QuoteChanged(e, (q) => { q.DeliveryAddressNotes = e.Value.ToString(); });
+                                        }">
+                                }
                             </div>
                         </div>
                     </div>
