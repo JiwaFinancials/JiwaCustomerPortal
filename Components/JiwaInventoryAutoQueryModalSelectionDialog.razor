@@ -52,7 +52,8 @@
                                       HiddenColumns=@(new List<string>() { "InventoryID" })                                      
                                       NoAuthenticationTokenCallbackMethod="@NoAuthenticationToken"
                                       AuthType="AuthTypes.JiwaAPISessionId"
-                                      APIExceptionCallbackMethod="@APIException">
+                                      APIExceptionCallbackMethod="@APIException"
+                                      DataCellRenderFragmentCallbackMethod="@InventoryItemsListGridDataCellRenderFragment">
                                   </JiwaAPIAutoQueryGrid>
 
             </div>
@@ -174,5 +175,23 @@
         {
             statusMessage = ex.Message;
         }
+    }
+
+    public RenderFragment InventoryItemsListGridDataCellRenderFragment(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR item, string columnId)
+    {
+        // Returns a render cell fragment for the cell contents of data cells of the debtor transactions grid where we don't want the default styling to be used.
+
+        RenderFragment content = null;
+        switch (columnId)
+        {
+            case "AvailableStock":
+                content = @<td class="text-end">@Config.FormattedDecimals(item.AvailableStock, item.QuantityDecimalPlaces, true)</td>;
+                break;
+            case "SellPrice":
+                content = @<td class="text-end">@Config.FormattedCurrency(item.SellPrice, Config.LocalCurrency.RecID)</td>;
+                break;
+        }
+
+        return content;
     }
 }

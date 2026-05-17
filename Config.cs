@@ -67,6 +67,11 @@ namespace JiwaCustomerPortal
                             foreach (JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency currency in currencyAutoQueryResponse.Results)
                             {
                                 _Currencies.Add(currency.RecID, currency);
+
+                                if (currency.IsLocal)
+                                {
+                                    _LocalCurrency = currency;
+                                }   
                             }
                         });
 
@@ -81,6 +86,15 @@ namespace JiwaCustomerPortal
 
                 return _Currencies;
             }            
+        }
+
+        private static JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency _LocalCurrency;
+        public static JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency LocalCurrency
+        {
+            get
+            {
+                return _LocalCurrency;
+            }
         }
 
         public static async Task ReadSettingsFromAPI()

@@ -1957,6 +1957,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or
         public virtual DateTimeOffset LastSavedDateTime { get; set; }
 
         public virtual decimal? InStock { get; set; }
+        public virtual short? QuantityDecimalPlaces { get; set; }
     }
 
     //[Route("/Queries/OR/InventoryItemList", "GET")] // Need to comment this out otherwise our v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery requests go here instead of to /Queries/OR/InventoryItemListImmutableWarehouse
@@ -2140,6 +2141,14 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or
         public virtual decimal? InStockNotEqualTo { get; set; }
         public virtual decimal?[] InStockBetween { get; set; }
         public virtual decimal?[] InStockIn { get; set; }
+        public virtual short? QuantityDecimalPlaces { get; set; }
+        public virtual short? QuantityDecimalPlacesGreaterThanOrEqualTo { get; set; }
+        public virtual short? QuantityDecimalPlacesGreaterThan { get; set; }
+        public virtual short? QuantityDecimalPlacesLessThan { get; set; }
+        public virtual short? QuantityDecimalPlacesLessThanOrEqualTo { get; set; }
+        public virtual short? QuantityDecimalPlacesNotEqualTo { get; set; }
+        public virtual short?[] QuantityDecimalPlacesBetween { get; set; }
+        public virtual short?[] QuantityDecimalPlacesIn { get; set; }
     }
     #endregion
 }
