@@ -2177,7 +2177,8 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         [Required]
         public virtual DateTimeOffset LastSavedDateTime { get; set; }
 
-        public virtual decimal? InvoiceTotal { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTax { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTax { get; set; }
         [Required]
         public virtual string DebtorID { get; set; }
 
@@ -2213,17 +2214,13 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual string InvoiceHistoryID { get; set; }
 
         public virtual string DeliveryAddressContactName { get; set; }
-        [Required]
         public virtual string DeliveryAddressee { get; set; }
-
         public virtual string DeliveryAddress1 { get; set; }
         public virtual string DeliveryAddress2 { get; set; }
         public virtual string DeliveryAddress3 { get; set; }
         public virtual string DeliveryAddress4 { get; set; }
         public virtual string DeliveryAddressPostcode { get; set; }
-        [Required]
         public virtual string DeliveryAddressCountry { get; set; }
-
         [Required]
         public virtual bool Delivered { get; set; }
 
@@ -2235,6 +2232,12 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual decimal? Cartage2TaxAmount { get; set; }
         public virtual decimal? CartageCharge3 { get; set; }
         public virtual decimal? Cartage3TaxAmount { get; set; }
+        public virtual decimal? FXCartageCharge1 { get; set; }
+        public virtual decimal? FXCartage1TaxAmount { get; set; }
+        public virtual decimal? FXCartageCharge2 { get; set; }
+        public virtual decimal? FXCartage2TaxAmount { get; set; }
+        public virtual decimal? FXCartageCharge3 { get; set; }
+        public virtual decimal? FXCartage3TaxAmount { get; set; }
         public virtual string CourierDetails { get; set; }
         public virtual string Notes { get; set; }
         public virtual string EmailAddress { get; set; }
@@ -2326,14 +2329,22 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual DateTimeOffset? LastSavedDateTimeNotEqualTo { get; set; }
         public virtual DateTimeOffset[] LastSavedDateTimeBetween { get; set; }
         public virtual DateTimeOffset[] LastSavedDateTimeIn { get; set; }
-        public virtual decimal? InvoiceTotal { get; set; }
-        public virtual decimal? InvoiceTotalGreaterThanOrEqualTo { get; set; }
-        public virtual decimal? InvoiceTotalGreaterThan { get; set; }
-        public virtual decimal? InvoiceTotalLessThan { get; set; }
-        public virtual decimal? InvoiceTotalLessThanOrEqualTo { get; set; }
-        public virtual decimal? InvoiceTotalNotEqualTo { get; set; }
-        public virtual decimal?[] InvoiceTotalBetween { get; set; }
-        public virtual decimal?[] InvoiceTotalIn { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTax { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxGreaterThan { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxLessThan { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxLessThanOrEqualTo { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxNotEqualTo { get; set; }
+        public virtual decimal?[] LocalInvoiceTotalIncTaxBetween { get; set; }
+        public virtual decimal?[] LocalInvoiceTotalIncTaxIn { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTax { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxGreaterThan { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxLessThan { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxLessThanOrEqualTo { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxNotEqualTo { get; set; }
+        public virtual decimal?[] FXInvoiceTotalIncTaxBetween { get; set; }
+        public virtual decimal?[] FXInvoiceTotalIncTaxIn { get; set; }
         public virtual string DebtorID { get; set; }
         public virtual string DebtorIDStartsWith { get; set; }
         public virtual string DebtorIDEndsWith { get; set; }
@@ -2580,6 +2591,54 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual decimal? Cartage3TaxAmountNotEqualTo { get; set; }
         public virtual decimal?[] Cartage3TaxAmountBetween { get; set; }
         public virtual decimal?[] Cartage3TaxAmountIn { get; set; }
+        public virtual decimal? FXCartageCharge1 { get; set; }
+        public virtual decimal? FXCartageCharge1GreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge1GreaterThan { get; set; }
+        public virtual decimal? FXCartageCharge1LessThan { get; set; }
+        public virtual decimal? FXCartageCharge1LessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge1NotEqualTo { get; set; }
+        public virtual decimal?[] FXCartageCharge1Between { get; set; }
+        public virtual decimal?[] FXCartageCharge1In { get; set; }
+        public virtual decimal? FXCartage1TaxAmount { get; set; }
+        public virtual decimal? FXCartage1TaxAmountGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage1TaxAmountGreaterThan { get; set; }
+        public virtual decimal? FXCartage1TaxAmountLessThan { get; set; }
+        public virtual decimal? FXCartage1TaxAmountLessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage1TaxAmountNotEqualTo { get; set; }
+        public virtual decimal?[] FXCartage1TaxAmountBetween { get; set; }
+        public virtual decimal?[] FXCartage1TaxAmountIn { get; set; }
+        public virtual decimal? FXCartageCharge2 { get; set; }
+        public virtual decimal? FXCartageCharge2GreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge2GreaterThan { get; set; }
+        public virtual decimal? FXCartageCharge2LessThan { get; set; }
+        public virtual decimal? FXCartageCharge2LessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge2NotEqualTo { get; set; }
+        public virtual decimal?[] FXCartageCharge2Between { get; set; }
+        public virtual decimal?[] FXCartageCharge2In { get; set; }
+        public virtual decimal? FXCartage2TaxAmount { get; set; }
+        public virtual decimal? FXCartage2TaxAmountGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage2TaxAmountGreaterThan { get; set; }
+        public virtual decimal? FXCartage2TaxAmountLessThan { get; set; }
+        public virtual decimal? FXCartage2TaxAmountLessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage2TaxAmountNotEqualTo { get; set; }
+        public virtual decimal?[] FXCartage2TaxAmountBetween { get; set; }
+        public virtual decimal?[] FXCartage2TaxAmountIn { get; set; }
+        public virtual decimal? FXCartageCharge3 { get; set; }
+        public virtual decimal? FXCartageCharge3GreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge3GreaterThan { get; set; }
+        public virtual decimal? FXCartageCharge3LessThan { get; set; }
+        public virtual decimal? FXCartageCharge3LessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge3NotEqualTo { get; set; }
+        public virtual decimal?[] FXCartageCharge3Between { get; set; }
+        public virtual decimal?[] FXCartageCharge3In { get; set; }
+        public virtual decimal? FXCartage3TaxAmount { get; set; }
+        public virtual decimal? FXCartage3TaxAmountGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage3TaxAmountGreaterThan { get; set; }
+        public virtual decimal? FXCartage3TaxAmountLessThan { get; set; }
+        public virtual decimal? FXCartage3TaxAmountLessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage3TaxAmountNotEqualTo { get; set; }
+        public virtual decimal?[] FXCartage3TaxAmountBetween { get; set; }
+        public virtual decimal?[] FXCartage3TaxAmountIn { get; set; }
         public virtual string CourierDetails { get; set; }
         public virtual string CourierDetailsStartsWith { get; set; }
         public virtual string CourierDetailsEndsWith { get; set; }
@@ -2719,7 +2778,8 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         [Required]
         public virtual DateTimeOffset LastSavedDateTime { get; set; }
 
-        public virtual decimal? InvoiceTotal { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTax { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTax { get; set; }
         [Required]
         public virtual string DebtorID { get; set; }
 
@@ -2755,23 +2815,25 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual string InvoiceHistoryID { get; set; }
 
         public virtual string DeliveryAddressContactName { get; set; }
-        [Required]
         public virtual string DeliveryAddressee { get; set; }
-
         public virtual string DeliveryAddress1 { get; set; }
         public virtual string DeliveryAddress2 { get; set; }
         public virtual string DeliveryAddress3 { get; set; }
         public virtual string DeliveryAddress4 { get; set; }
         public virtual string DeliveryAddressPostcode { get; set; }
-        [Required]
         public virtual string DeliveryAddressCountry { get; set; }
-
         public virtual decimal? CartageCharge1 { get; set; }
         public virtual decimal? Cartage1TaxAmount { get; set; }
         public virtual decimal? CartageCharge2 { get; set; }
         public virtual decimal? Cartage2TaxAmount { get; set; }
         public virtual decimal? CartageCharge3 { get; set; }
         public virtual decimal? Cartage3TaxAmount { get; set; }
+        public virtual decimal? FXCartageCharge1 { get; set; }
+        public virtual decimal? FXCartage1TaxAmount { get; set; }
+        public virtual decimal? FXCartageCharge2 { get; set; }
+        public virtual decimal? FXCartage2TaxAmount { get; set; }
+        public virtual decimal? FXCartageCharge3 { get; set; }
+        public virtual decimal? FXCartage3TaxAmount { get; set; }
         public virtual string CourierDetails { get; set; }
         public virtual string Notes { get; set; }
         public virtual string EmailAddress { get; set; }
@@ -2859,14 +2921,22 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual DateTimeOffset? LastSavedDateTimeNotEqualTo { get; set; }
         public virtual DateTimeOffset[] LastSavedDateTimeBetween { get; set; }
         public virtual DateTimeOffset[] LastSavedDateTimeIn { get; set; }
-        public virtual decimal? InvoiceTotal { get; set; }
-        public virtual decimal? InvoiceTotalGreaterThanOrEqualTo { get; set; }
-        public virtual decimal? InvoiceTotalGreaterThan { get; set; }
-        public virtual decimal? InvoiceTotalLessThan { get; set; }
-        public virtual decimal? InvoiceTotalLessThanOrEqualTo { get; set; }
-        public virtual decimal? InvoiceTotalNotEqualTo { get; set; }
-        public virtual decimal?[] InvoiceTotalBetween { get; set; }
-        public virtual decimal?[] InvoiceTotalIn { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTax { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxGreaterThan { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxLessThan { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxLessThanOrEqualTo { get; set; }
+        public virtual decimal? LocalInvoiceTotalIncTaxNotEqualTo { get; set; }
+        public virtual decimal?[] LocalInvoiceTotalIncTaxBetween { get; set; }
+        public virtual decimal?[] LocalInvoiceTotalIncTaxIn { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTax { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxGreaterThan { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxLessThan { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxLessThanOrEqualTo { get; set; }
+        public virtual decimal? FXInvoiceTotalIncTaxNotEqualTo { get; set; }
+        public virtual decimal?[] FXInvoiceTotalIncTaxBetween { get; set; }
+        public virtual decimal?[] FXInvoiceTotalIncTaxIn { get; set; }
         public virtual string DebtorID { get; set; }
         public virtual string DebtorIDStartsWith { get; set; }
         public virtual string DebtorIDEndsWith { get; set; }
@@ -3097,6 +3167,54 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual decimal? Cartage3TaxAmountNotEqualTo { get; set; }
         public virtual decimal?[] Cartage3TaxAmountBetween { get; set; }
         public virtual decimal?[] Cartage3TaxAmountIn { get; set; }
+        public virtual decimal? FXCartageCharge1 { get; set; }
+        public virtual decimal? FXCartageCharge1GreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge1GreaterThan { get; set; }
+        public virtual decimal? FXCartageCharge1LessThan { get; set; }
+        public virtual decimal? FXCartageCharge1LessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge1NotEqualTo { get; set; }
+        public virtual decimal?[] FXCartageCharge1Between { get; set; }
+        public virtual decimal?[] FXCartageCharge1In { get; set; }
+        public virtual decimal? FXCartage1TaxAmount { get; set; }
+        public virtual decimal? FXCartage1TaxAmountGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage1TaxAmountGreaterThan { get; set; }
+        public virtual decimal? FXCartage1TaxAmountLessThan { get; set; }
+        public virtual decimal? FXCartage1TaxAmountLessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage1TaxAmountNotEqualTo { get; set; }
+        public virtual decimal?[] FXCartage1TaxAmountBetween { get; set; }
+        public virtual decimal?[] FXCartage1TaxAmountIn { get; set; }
+        public virtual decimal? FXCartageCharge2 { get; set; }
+        public virtual decimal? FXCartageCharge2GreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge2GreaterThan { get; set; }
+        public virtual decimal? FXCartageCharge2LessThan { get; set; }
+        public virtual decimal? FXCartageCharge2LessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge2NotEqualTo { get; set; }
+        public virtual decimal?[] FXCartageCharge2Between { get; set; }
+        public virtual decimal?[] FXCartageCharge2In { get; set; }
+        public virtual decimal? FXCartage2TaxAmount { get; set; }
+        public virtual decimal? FXCartage2TaxAmountGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage2TaxAmountGreaterThan { get; set; }
+        public virtual decimal? FXCartage2TaxAmountLessThan { get; set; }
+        public virtual decimal? FXCartage2TaxAmountLessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage2TaxAmountNotEqualTo { get; set; }
+        public virtual decimal?[] FXCartage2TaxAmountBetween { get; set; }
+        public virtual decimal?[] FXCartage2TaxAmountIn { get; set; }
+        public virtual decimal? FXCartageCharge3 { get; set; }
+        public virtual decimal? FXCartageCharge3GreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge3GreaterThan { get; set; }
+        public virtual decimal? FXCartageCharge3LessThan { get; set; }
+        public virtual decimal? FXCartageCharge3LessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartageCharge3NotEqualTo { get; set; }
+        public virtual decimal?[] FXCartageCharge3Between { get; set; }
+        public virtual decimal?[] FXCartageCharge3In { get; set; }
+        public virtual decimal? FXCartage3TaxAmount { get; set; }
+        public virtual decimal? FXCartage3TaxAmountGreaterThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage3TaxAmountGreaterThan { get; set; }
+        public virtual decimal? FXCartage3TaxAmountLessThan { get; set; }
+        public virtual decimal? FXCartage3TaxAmountLessThanOrEqualTo { get; set; }
+        public virtual decimal? FXCartage3TaxAmountNotEqualTo { get; set; }
+        public virtual decimal?[] FXCartage3TaxAmountBetween { get; set; }
+        public virtual decimal?[] FXCartage3TaxAmountIn { get; set; }
         public virtual string CourierDetails { get; set; }
         public virtual string CourierDetailsStartsWith { get; set; }
         public virtual string CourierDetailsEndsWith { get; set; }

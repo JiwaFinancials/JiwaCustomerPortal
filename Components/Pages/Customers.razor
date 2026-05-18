@@ -345,7 +345,7 @@
                                                                             ["InvoiceInitDate"] = "Date",
                                                                             ["OrderNo"] = "Order No.",
                                                                             ["SOReference"] = "Reference",
-                                                                            ["InvoiceTotal"] = "Order Total",
+                                                                            ["FXInvoiceTotalIncTax"] = "Order Total",
                                                                             ["TotalAllocated"] = "Amount Paid",
                                                                             ["CreditNote"] = "Credit",
                                                                             ["CurrencyShortName"] = "Currency",
@@ -370,7 +370,7 @@
                                                                             ["InvoiceInitDate"] = "Date",
                                                                             ["OrderNo"] = "Order No.",
                                                                             ["QOReference"] = "Reference",
-                                                                            ["InvoiceTotal"] = "Quote Total",
+                                                                            ["FXInvoiceTotalIncTax"] = "Quote Total",
                                                                             ["CurrencyShortName"] = "Currency"
                                                                         } )
                                                 HiddenColumns=@(new List<string>() { "InvoiceID", "CurrencyID" })
@@ -520,16 +520,16 @@
         SalesOrdersAutoQuery = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_SalesOrder_ListQuery()
         {            
             OrderByDesc = "InvoiceNoDashHistoryNo",
-            InvoiceTotalNotEqualTo = 0,
-            Fields = "InvoiceID,InvoiceNoDashHistoryNo,HistoryNo,InvoiceInitDate,OrderNo,SOReference,CurrencyShortName,InvoiceTotal,TotalAllocated,DueDate,CreditNote,CurrencyID",
+            FXInvoiceTotalIncTaxNotEqualTo = 0,
+            Fields = "InvoiceID,InvoiceNoDashHistoryNo,HistoryNo,InvoiceInitDate,OrderNo,SOReference,CurrencyShortName,FXInvoiceTotalIncTax,TotalAllocated,DueDate,CreditNote,CurrencyID",
             Take = 10
         };
 
         SalesQuotesAutoQuery = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_SalesQuote_ListQuery()
         {            
             OrderByDesc = "InvoiceNoDashHistoryNo",
-            InvoiceTotalNotEqualTo = 0,
-            Fields = "InvoiceID,InvoiceNoDashHistoryNo,HistoryNo,InvoiceInitDate,Status,OrderNo,QOReference,CurrencyShortName,InvoiceTotal,CurrencyID",
+            FXInvoiceTotalIncTaxNotEqualTo = 0,
+            Fields = "InvoiceID,InvoiceNoDashHistoryNo,HistoryNo,InvoiceInitDate,Status,OrderNo,QOReference,CurrencyShortName,FXInvoiceTotalIncTax,CurrencyID",
             Take = 10
         };
     }   
@@ -878,30 +878,30 @@
             case "InvoiceNoDashHistoryNo":
                 content = @<td><a href="SalesOrder/@item.InvoiceID.Trim()?SnapshotNo=@item.HistoryNo">@item.InvoiceNoDashHistoryNo</a></td>;
                 break;
-            case "InvoiceTotal":
-                if (item.CreditNote && item.InvoiceTotal != null)
+            case "FXInvoiceTotalIncTax":
+                if (item.CreditNote && item.FXInvoiceTotalIncTax != null)
                 {
-                    decimal orderTotal = item.InvoiceTotal.Value * -1;
+                    decimal orderTotal = item.FXInvoiceTotalIncTax.Value * -1;
                     content = @<td class="text-end">@Config.FormattedCurrency(@orderTotal, item.CurrencyID)</td>;
                 }
                 else
                 {
-                    if (item.InvoiceTotal > item.TotalAllocated && item.DueDate < DateTime.Now)
+                    if (item.FXInvoiceTotalIncTax > item.TotalAllocated && item.DueDate < DateTime.Now)
                     {
                         // overdue
-                        content = @<td class="text-end"><div class="text-danger">@Config.FormattedCurrency(@item.InvoiceTotal, item.CurrencyID)</div></td>;
+                        content = @<td class="text-end"><div class="text-danger">@Config.FormattedCurrency(@item.FXInvoiceTotalIncTax, item.CurrencyID)</div></td>;
                     }
                     else
                     {
-                        if (item.TotalAllocated >= item.InvoiceTotal)
+                        if (item.TotalAllocated >= item.FXInvoiceTotalIncTax)
                         {
                             // fully paid
-                            content = @<td class="text-end"><div class="text-success">@Config.FormattedCurrency(@item.InvoiceTotal, item.CurrencyID)</div></td>;
+                            content = @<td class="text-end"><div class="text-success">@Config.FormattedCurrency(@item.FXInvoiceTotalIncTax, item.CurrencyID)</div></td>;
                         }
                         else
                         {
                             // Not fully paid, and not overdue
-                            content = @<td class="text-end">@Config.FormattedCurrency(@item.InvoiceTotal, item.CurrencyID)</td>;
+                            content = @<td class="text-end">@Config.FormattedCurrency(@item.FXInvoiceTotalIncTax, item.CurrencyID)</td>;
                         }
                     }
                 }
@@ -914,7 +914,7 @@
                 }
                 else
                 {
-                    if (item.InvoiceTotal > item.TotalAllocated && item.DueDate < DateTime.Now)
+                    if (item.FXInvoiceTotalIncTax > item.TotalAllocated && item.DueDate < DateTime.Now)
                     {
                         // overdue
                         content = @<td class="text-end"><div class="text-danger">@Config.FormattedCurrency(@item.TotalAllocated, item.CurrencyID)</div></td>;
@@ -928,14 +928,14 @@
             case "DueDate":
                 if (!item.CreditNote && item.DueDate != null)
                 {
-                    if (item.InvoiceTotal > item.TotalAllocated && item.DueDate < DateTime.Now)
+                    if (item.FXInvoiceTotalIncTax > item.TotalAllocated && item.DueDate < DateTime.Now)
                     {
                         // overdue
                         content = @<td class="text-end"><span class="badge rounded-pill bg-danger">@item.DueDate.Value.ToString(@BrowserService.DateFormat)</span></td>;
                     }
                     else
                     {
-                        if (item.TotalAllocated >= item.InvoiceTotal)
+                        if (item.TotalAllocated >= item.FXInvoiceTotalIncTax)
                         {
                             // fully paid
                             content = @<td class="text-end"><div class="badge rounded-pill bg-success">Fully Paid</div></td>;
@@ -984,8 +984,8 @@
             case "InvoiceNoDashHistoryNo":
                 content = @<td><a href="SalesQuote/@item.InvoiceID.Trim()?SnapshotNo=@item.HistoryNo">@item.InvoiceNoDashHistoryNo</a></td>;
                 break;
-            case "InvoiceTotal":
-                content = @<td class="text-end">@Config.FormattedCurrency(@item.InvoiceTotal, item.CurrencyID)</td>;
+            case "FXInvoiceTotalIncTax":
+                content = @<td class="text-end">@Config.FormattedCurrency(@item.FXInvoiceTotalIncTax, item.CurrencyID)</td>;
                 break;
             case "CurrencyShortName":
                 content = @<td><img src="data:image/png;base64,@Convert.ToBase64String(Config.Currencies[@item.CurrencyID].Picture)" width="30" height="20"> @item.CurrencyShortName</td>;

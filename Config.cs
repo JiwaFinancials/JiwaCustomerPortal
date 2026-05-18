@@ -118,11 +118,11 @@ namespace JiwaCustomerPortal
             string decimalsFormat = new string('0', decimalPlaces);
             if (useCommas)
             {
-                return value.ToString($"###,###,###,###,###.{decimalsFormat}");
+                return value.ToString($"###,###,###,###,##0.{decimalsFormat}");
             }
             else
             {
-                return value.ToString($"###############.{decimalsFormat}");
+                return value.ToString($"##############0.{decimalsFormat}");
             }
         }
 
@@ -171,7 +171,7 @@ namespace JiwaCustomerPortal
             if (currency != null)
             {                
                 string decimalsFormat = new string('0', (int)currency.DecimalPlaces);
-                string currencyFormat = $"###,###,###,###,###.{decimalsFormat}";
+                string currencyFormat = $"###,###,###,###,##0.{decimalsFormat}";
                 if (value < 0)
                 {
                     return $"-{currency.Symbol}{Math.Abs(value).ToString(currencyFormat)}";
