@@ -17,6 +17,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
 using System.Runtime.Serialization;
+using static JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder;
 using static JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote;
 
 
@@ -167,6 +168,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
 #region "Request DTOs"
 namespace JiwaFinancials.Jiwa.JiwaServiceModel
 {
+    #region "System"
     [Route("/SystemInfo/", "GET")]
     [ApiResponse(Description = "Read OK", StatusCode = 200)]
     [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
@@ -193,7 +195,9 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string CurrencyShortName { get; set; }
         public virtual short MoneyDecimalPlaces { get; set; }
     }
+    #endregion region
 
+    #region "Authentication"
     [Route("/Sessions/Current", "GET")]
     [ApiResponse(Description = "Read OK", StatusCode = 200)]
     [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
@@ -243,7 +247,9 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual DateTime LoginDateTime { get; set; }
         public virtual DateTime LogoutDateTime { get; set; }
     }
+    #endregion
 
+    #region "Reports"
     [Route("/SalesOrders/{InvoiceHistoryID}/InvoiceSnapshotReport/{ReportID}", "GET")]
     [ApiResponse(Description = "Read OK", StatusCode = 200)]
     [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
@@ -269,7 +275,9 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string ReportID { get; set; }
         public virtual bool AsAttachment { get; set; }
     }
+    #endregion
 
+    #region "Debtors"
     [Route("/Debtors/{DebtorID}/StatementReport/{ReportID}/At/{AsAtDate}", "GET")]
     [ApiResponse(Description = "Read OK", StatusCode = 200)]
     [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
@@ -384,7 +392,9 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string ContactNameID { get; set; }
         public virtual List<Tag> Tags { get; set; }
     }
+    #endregion
 
+    #region "Sales Orders"
     [Route("/SalesOrders/{InvoiceID}", "GET")]
     [ApiResponse(Description = "Read OK", StatusCode = 200)]
     [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
@@ -396,6 +406,172 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string InvoiceID { get; set; }
     }
 
+    [Route("/SalesOrders", "POST")]
+    [ApiResponse(Description = "Created OK", StatusCode = 201)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public partial class SalesOrderPOSTRequest
+        : JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder, IReturn<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>
+    {
+        [IgnoreDataMember]
+        public virtual string InvoiceID { get; set; }
+
+        [IgnoreDataMember]
+        public virtual SalesOrderStatuses? Status { get; set; }
+
+        [IgnoreDataMember]
+        public virtual DateTimeOffset? LastSavedDateTime { get; set; }
+
+        [IgnoreDataMember]
+        public virtual DateTime? DeliveredDate { get; set; }
+
+        [IgnoreDataMember]
+        public virtual bool? Delivered { get; set; }
+
+        [IgnoreDataMember]
+        public virtual DateTime? RCTIDate { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string StaffTitle { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorName { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorEmailAddress { get; set; }
+    }
+
+    [Route("/SalesOrders/{InvoiceID}", "PATCH")]
+    [ApiResponse(Description = "Updated OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No Sales Order with the InvoiceID provided was found", StatusCode = 404)]
+    public partial class SalesOrderPATCHRequest
+        : JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder, IReturn<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>
+    {
+        [IgnoreDataMember]
+        public virtual string Type { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorID { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorAccountNo { get; set; }
+
+        [IgnoreDataMember]
+        public virtual DateTimeOffset? LastSavedDateTime { get; set; }
+
+        [IgnoreDataMember]
+        public virtual DateTime? DeliveredDate { get; set; }
+
+        [IgnoreDataMember]
+        public virtual bool? Delivered { get; set; }
+
+        [IgnoreDataMember]
+        public virtual DateTime? RCTIDate { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string StaffTitle { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorName { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string DebtorEmailAddress { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string LogicalID { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string LogicalWarehouseDescription { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string PhysicalWarehouseDescription { get; set; }
+
+        public virtual string InvoiceID { get; set; }
+    }
+
+    [Route("/SalesOrders/{InvoiceID}/Historys/{InvoiceHistoryID}/Lines", "POST")]
+    [ApiResponse(Description = "Created OK", StatusCode = 201)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No Sales Order Line with the InvoiceID or InvoiceLineID provided was found", StatusCode = 404)]
+    public partial class SalesOrderLinePOSTRequest
+        : JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine, IReturn<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine>
+    {
+        [IgnoreDataMember]
+        public virtual string InvoiceLineID { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? PriceExGst { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? TaxToCharge { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? UnitCost { get; set; }
+
+        [IgnoreDataMember]
+        public virtual bool? FixPrice { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? LineTotal { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? Weight { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? Cubic { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? QuotedDiscountedPrice { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? QuotedDiscountPercentage { get; set; }
+
+        [IgnoreDataMember]
+        public virtual short? QuantityDecimalPlaces { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? QuantityOriginalOrdered { get; set; }
+
+        [IgnoreDataMember]
+        public virtual bool? NonInventory { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string CostCenter { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string Stage { get; set; }
+
+        [IgnoreDataMember]
+        public virtual SalesOrderKitLineTypesEnum? KitLineType { get; set; }
+
+        [IgnoreDataMember]
+        public virtual decimal? KitUnits { get; set; }
+
+        [IgnoreDataMember]
+        public virtual string KitHeaderLineID { get; set; }
+
+        public virtual string InvoiceID { get; set; }
+        public virtual string InvoiceHistoryID { get; set; }
+    }
+
+    [Route("/SalesOrders/{InvoiceID}/Historys/{InvoiceHistoryID}/Lines/{InvoiceLineID}", "DELETE")]
+    [ApiResponse(Description = "Deleted OK", StatusCode = 204)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No Sales Order Line with the InvoiceID or InvoiceLineID provided was found", StatusCode = 404)]
+    public partial class SalesOrderLineDELETERequest
+        : IReturnVoid
+    {
+        public virtual string InvoiceID { get; set; }
+        public virtual string InvoiceHistoryID { get; set; }
+        public virtual string InvoiceLineID { get; set; }
+    }
+    #endregion
+
+    #region "Sales Quotes"
     [Route("/SalesQuotes/{QuoteID}", "GET")]
     [ApiResponse(Description = "Read OK", StatusCode = 200)]
     [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
@@ -531,6 +707,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string QuoteHistoryID { get; set; }
         public virtual string QuoteLineID { get; set; }
     }
+    #endregion
 }
 #endregion
 

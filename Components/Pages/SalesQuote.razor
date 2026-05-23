@@ -262,35 +262,32 @@
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal), salesQuote.CurrencyID)</td>
                             <td class="text-end"></td>
                         </tr>
-                        
+
+                        <tr class="align-middle">
                         @if (salesQuote.FXCartage1ExGst != 0 || salesQuote.FXCartage1Gst != 0 || salesQuote.FXCartage2ExGst != 0 || salesQuote.FXCartage2Gst != 0 || salesQuote.FXCartage3ExGst != 0 || salesQuote.FXCartage3Gst != 0)
-                        {
-                            <tr class="align-middle">
+                        {                            
                                 <td colspan="6" class="text-end">Freight</td>
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage1ExGst + salesQuote.FXCartage2ExGst + salesQuote.FXCartage3ExGst, salesQuote.CurrencyID)</td>
                                 <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage1Gst + salesQuote.FXCartage2Gst + salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
-                                <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage1ExGst + salesQuote.FXCartage1Gst + salesQuote.FXCartage2ExGst + salesQuote.FXCartage2Gst + salesQuote.FXCartage3ExGst + salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
-                                <td class="text-center">
-                                    <button @onclick="_ => EditFreight()" class="btn" style="background-color:transparent">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 20 20">
-                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
+                                <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage1ExGst + salesQuote.FXCartage1Gst + salesQuote.FXCartage2ExGst + salesQuote.FXCartage2Gst + salesQuote.FXCartage3ExGst + salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>                                
                         }
                         else
                         {
-                            // even if there is no cartage, display as blank to give a better visual appeal - space out the sub total and total
-                            <tr class="align-middle">
-                                <td colspan="6" class="text-end">Freight</td>
-                                <td class="text-end"></td>
-                                <td class="text-end"></td>
-                                <td class="text-end"></td>
-                                <td class="text-end"></td>
-                            </tr>
+                            // even if there is no cartage, display as blank to give a better visual appeal - space out the sub total and total                            
+                            <td colspan="6" class="text-end">Freight</td>
+                            <td class="text-end"></td>
+                            <td class="text-end"></td>
+                            <td class="text-end"></td>                           
                         }
+                            <td class="text-center">
+                                <button @onclick="_ => EditFreight()" class="btn" style="background-color:transparent">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 20 20">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z" />
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
 
                         <tr class="align-middle">
                             <td colspan="6" class="text-end">Total</td>
