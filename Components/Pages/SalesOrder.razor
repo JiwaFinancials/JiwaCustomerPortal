@@ -166,8 +166,20 @@
                             <th class="text-end" width="160px">Quantity Previously Shipped</th>
                             <th class="text-end" width="160px">Quantity This Shipment</th>
                             <th class="text-end" width="160px">Quantity Backordered</th>
-                            <th class="text-end" width="160px">Price Ex</th>
-                            <th class="text-center" colspan="3">This Del.</th>
+                            <th class="text-end" width="160px">Price Ex</th>                            
+                            <th class="text-center" colspan="3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="TotalsTypeToggle" @bind="TotalsTypeIsOrdered">
+                                    @if (TotalsTypeIsOrdered)
+                                    {
+                                        <label>Ordered</label>
+                                    }
+                                    else
+                                    {
+                                        <label>This Delivery</label>
+                                    }
+                                </div>
+                            </th>
                             <th class="text-center" width="50px"></th>
                         </tr>
                         <tr>
@@ -255,9 +267,9 @@
                                         </td>
                                     }
 
-                                    <td class="text-end">@Config.FormattedCurrency(@salesOrderLine.FXLineTotal - salesOrderLine.FXTaxToCharge, @salesOrder.CurrencyID)</td>
-                                    <td class="text-end">@Config.FormattedCurrency(@salesOrderLine.FXTaxToCharge, salesOrder.CurrencyID)</td>
-                                    <td class="text-end">@Config.FormattedCurrency(@salesOrderLine.FXLineTotal, salesOrder.CurrencyID)</td>
+                                    <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrderLine.FXOrderedExGSTTotal : salesOrderLine.FXLineTotal - salesOrderLine.FXTaxToCharge, @salesOrder.CurrencyID)</td>
+                                    <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrderLine.FXOrderedGSTTotal : salesOrderLine.FXTaxToCharge, salesOrder.CurrencyID)</td>
+                                    <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrderLine.FXOrderedIncGSTTotal : salesOrderLine.FXLineTotal, salesOrder.CurrencyID)</td>
                                     <td class="text-center">
                                         <button @onclick="_ => DeleteSalesOrderLine(salesOrderLine)" class="btn" style="background-color:transparent">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="red" class="bi bi-x-circle" viewBox="0 0 20 20">
@@ -271,9 +283,9 @@
                         }
                         <tr class="align-middle">
                             <td colspan="9" class="text-end">Sub Total</td>
-                            <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal - x.FXTaxToCharge), salesOrder.CurrencyID)</td>
-                            <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.TaxToCharge), salesOrder.CurrencyID)</td>
-                            <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal), salesOrder.CurrencyID)</td>                            
+                            <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.LinesFXOrderedExGSTTotal : SelectedHistory.LinesFXExGSTTotal, salesOrder.CurrencyID)</td>
+                            <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.LinesFXOrderedGSTTotal : SelectedHistory.LinesFXGSTTotal, salesOrder.CurrencyID)</td>
+                            <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.LinesFXOrderedIncGSTTotal : SelectedHistory.LinesFXIncGSTTotal, salesOrder.CurrencyID)</td>
                             <td class="text-end"></td>
                         </tr>
 
@@ -312,9 +324,9 @@
                                 </label>
                                 Total
                             </td>
-                            <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal - x.FXTaxToCharge) + salesOrder.FXCartage1ExGst + salesOrder.FXCartage2ExGst + salesOrder.FXCartage3ExGst, salesOrder.CurrencyID)</td>
-                            <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXTaxToCharge) + salesOrder.FXCartage1Gst + salesOrder.FXCartage2Gst + salesOrder.FXCartage3Gst, salesOrder.CurrencyID)</td>
-                            <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal) + salesOrder.FXCartage1ExGst + salesOrder.FXCartage2ExGst + salesOrder.FXCartage3ExGst + salesOrder.FXCartage1Gst + salesOrder.FXCartage2Gst + salesOrder.FXCartage3Gst, salesOrder.CurrencyID)</td>
+                            <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.FXOrderedExGSTTotal : SelectedHistory.FXExGSTTotal, salesOrder.CurrencyID)</td>
+                            <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.FXOrderedGSTTotal : SelectedHistory.FXGSTTotal, salesOrder.CurrencyID)</td>
+                            <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.FXOrderedIncGSTTotal : SelectedHistory.FXIncGSTTotal, salesOrder.CurrencyID)</td>
                             <td class="text-end"></td>
                         </tr>
                     </tbody>
@@ -513,6 +525,7 @@
     private JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderHistory SelectedHistory { get; set; }
     private bool AddingItem { get; set; }
     private bool EditingFreight { get; set; }
+    private bool _TotalsTypeIsOrdered = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -564,7 +577,19 @@
                 }
             }
         }
-    }       
+    }      
+    
+    public bool TotalsTypeIsOrdered
+    {
+        get
+        {
+            return _TotalsTypeIsOrdered;
+        }
+        set
+        {
+            _TotalsTypeIsOrdered = value;            
+        }
+    }
 
     private async Task OnSelectTab(string tabId)
     {

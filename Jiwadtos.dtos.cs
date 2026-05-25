@@ -1228,6 +1228,18 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders
         public virtual string CurrencyID { get; set; }
         public virtual string CurrencyShortName { get; set; }
         public virtual decimal? CurrencyRate { get; set; }
+        virtual public decimal? LinesOrderedExGSTTotal { get; set; }
+        virtual public decimal? LinesOrderedGSTTotal { get; set; }
+        virtual public decimal? LinesOrderedIncGSTTotal { get; set; }
+        virtual public decimal? LinesFXOrderedExGSTTotal { get; set; }
+        virtual public decimal? LinesFXOrderedGSTTotal { get; set; }
+        virtual public decimal? LinesFXOrderedIncGSTTotal { get; set; }
+        virtual public decimal? OrderedExGSTTotal { get; set; }
+        virtual public decimal? OrderedGSTTotal { get; set; }
+        virtual public decimal? OrderedIncGSTTotal { get; set; }
+        virtual public decimal? FXOrderedExGSTTotal { get; set; }
+        virtual public decimal? FXOrderedGSTTotal { get; set; }
+        virtual public decimal? FXOrderedIncGSTTotal { get; set; }
         public enum SalesOrderTypes
         {
             e_SalesOrderNormalSalesOrder,
@@ -1440,6 +1452,18 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders
         public virtual List<CustomFieldValue> CustomFieldValues { get; set; }
         public virtual StaffMember ProcessedBy { get; set; }
         public virtual List<SalesOrderLine> Lines { get; set; }
+        virtual public decimal? LinesExGSTTotal { get; set; }
+        virtual public decimal? LinesGSTTotal { get; set; }
+        virtual public decimal? LinesIncGSTTotal { get; set; }
+        virtual public decimal? LinesFXExGSTTotal { get; set; }
+        virtual public decimal? LinesFXGSTTotal { get; set; }
+        virtual public decimal? LinesFXIncGSTTotal { get; set; }
+        virtual public decimal? ExGSTTotal { get; set; }
+        virtual public decimal? GSTTotal { get; set; }
+        virtual public decimal? IncGSTTotal { get; set; }
+        virtual public decimal? FXExGSTTotal { get; set; }
+        virtual public decimal? FXGSTTotal { get; set; }
+        virtual public decimal? FXIncGSTTotal { get; set; }
         public enum SalesOrderHistoryStatuses
         {
             e_SalesOrderHistoryStatusEntering,
@@ -1542,6 +1566,12 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders
         public virtual decimal? KitUnits { get; set; }
         public virtual string KitHeaderLineID { get; set; }
         public virtual string SKUUnitName { get; set; }
+        virtual public decimal? OrderedExGSTTotal { get; set; }
+        virtual public decimal? OrderedGSTTotal { get; set; }
+        virtual public decimal? OrderedIncGSTTotal { get; set; }
+        virtual public decimal? FXOrderedExGSTTotal { get; set; }
+        virtual public decimal? FXOrderedGSTTotal { get; set; }
+        virtual public decimal? FXOrderedIncGSTTotal { get; set; }
 
         public enum SalesOrderSerialStockSelectionTypesEnum
         {
