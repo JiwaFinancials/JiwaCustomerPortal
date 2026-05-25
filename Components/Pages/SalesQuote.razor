@@ -447,28 +447,28 @@
                                 <label for="DeliveryAddressCourierDetails" class="form-label">Delivery Instructions</label>
                                 @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
                                 {
-                                    <input type="text" class="form-control" id="DeliveryAddressCourierDetails" readonly placeholder="@salesQuote.DeliveryAddressCourierDetails">
+                                    <textarea rows="3" class="form-control" id="DeliveryAddressCourierDetails" readonly placeholder="@salesQuote.DeliveryAddressCourierDetails"></textarea>
                                 }
                                 else
                                 {
-                                    <input type="text" class="form-control" id="DeliveryAddressCourierDetails" value="@salesQuote.DeliveryAddressCourierDetails" @onchange="async (e) =>
+                                    <textarea rows="3" class="form-control" id="DeliveryAddressCourierDetails" value="@salesQuote.DeliveryAddressCourierDetails" @onchange="async (e) =>
                                         {
                                             await QuoteChanged(e, (q) => { q.DeliveryAddressCourierDetails = e.Value.ToString(); });
-                                        }">
+                                                                                      }"></textarea>
                                 }
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressNotes" class="form-label">Notes</label>
                                 @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
                                 {
-                                    <input type="text" class="form-control" id="DeliveryAddressNotes" readonly placeholder="@salesQuote.DeliveryAddressNotes">
+                                    <textarea rows="3" class="form-control" id="DeliveryAddressNotes" readonly placeholder="@salesQuote.DeliveryAddressNotes"></textarea>
                                 }
                                 else
                                 {
-                                    <input type="text" class="form-control" id="DeliveryAddressNotes" value="@salesQuote.DeliveryAddressNotes" @onchange="async (e) =>
+                                    <textarea rows="3" class="form-control" id="DeliveryAddressNotes" value="@salesQuote.DeliveryAddressNotes" @onchange="async (e) =>
                                         {
                                             await QuoteChanged(e, (q) => { q.DeliveryAddressNotes = e.Value.ToString(); });
-                                        }">
+                                                                                      }"></textarea>
                                 }
                             </div>
                         </div>

@@ -159,11 +159,16 @@
                             <th>Part No.</th>                                        
                             <th>Description</th>
                             <th>Unit</th>
-                            <th class="text-end">Quantity Ordered</th>
-                            <th class="text-end">Quantity Previously Shipped</th>
-                            <th class="text-end">Quantity This Shipment</th>
-                            <th class="text-end">Quantity Backordered</th>
-                            <th class="text-end">Price Ex</th>
+                            <th class="text-end" width="160px">Quantity Ordered</th>
+                            <th class="text-end" width="160px">Quantity Previously Shipped</th>
+                            <th class="text-end" width="160px">Quantity This Shipment</th>
+                            <th class="text-end" width="160px">Quantity Backordered</th>
+                            <th class="text-end" width="160px">Price Ex</th>
+                            <th class="text-center" colspan="3">This Del.</th>
+                            <th class="text-center" width="50px"></th>
+                        </tr>
+                        <tr>
+                            <th class="text-center" colspan="9"></th>                            
                             <th class="text-end">Total Ex</th>
                             <th class="text-end">Tax</th>
                             <th class="text-end">Total Inc.</th>
@@ -174,7 +179,7 @@
                     <tbody>
                         @foreach (JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine salesOrderLine in SelectedHistory.Lines)
                         {
-                            <tr>
+                            <tr class="align-middle">
                                 @if (salesOrderLine.CommentLine.Value)
                                 {
                                     <td>@salesOrderLine.ItemNo</td>
@@ -218,9 +223,9 @@
                                                     }">
                                         </td>
                                     }
-                                    <td class="text-end">@Config.FormattedDecimals(@salesOrderLine.QuantityPreviousDelivery, salesOrderLine.QuantityDecimalPlaces)</td>
-                                    <td class="text-end">@Config.FormattedDecimals(@salesOrderLine.QuantityThisDel, salesOrderLine.QuantityDecimalPlaces)</td>
-                                    <td class="text-end">@Config.FormattedDecimals(@salesOrderLine.QuantityBackOrd, salesOrderLine.QuantityDecimalPlaces)</td>
+                                    <td class="text-end" width="160px">@Config.FormattedDecimals(@salesOrderLine.QuantityPreviousDelivery, salesOrderLine.QuantityDecimalPlaces)</td>
+                                    <td class="text-end" width="160px">@Config.FormattedDecimals(@salesOrderLine.QuantityThisDel, salesOrderLine.QuantityDecimalPlaces)</td>
+                                    <td class="text-end" width="160px">@Config.FormattedDecimals(@salesOrderLine.QuantityBackOrd, salesOrderLine.QuantityDecimalPlaces)</td>
 
                                     @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
                                     {
@@ -451,28 +456,28 @@
                                 <label for="DeliveryAddressCourierDetails" class="form-label">Delivery Instructions</label>
                                 @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
                                 {
-                                    <input type="text" class="form-control" id="DeliveryAddressCourierDetails" readonly placeholder="@salesOrder.DeliveryAddressCourierDetails">
+                                    <textarea rows="3" class="form-control" id="DeliveryAddressCourierDetails" readonly placeholder="@salesOrder.DeliveryAddressCourierDetails"></textarea>
                                 }
                                 else
                                 {
-                                    <input type="text" class="form-control" id="DeliveryAddressCourierDetails" value="@salesOrder.DeliveryAddressCourierDetails" @onchange="async (e) =>
+                                    <textarea rows="3" class="form-control" id="DeliveryAddressCourierDetails" value="@salesOrder.DeliveryAddressCourierDetails" @onchange="async (e) =>
                                         {
                                             await SalesOrderChanged(e, (q) => { q.DeliveryAddressCourierDetails = e.Value.ToString(); });
-                                        }">
+                                                                                      }"></textarea>
                                 }
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressNotes" class="form-label">Notes</label>
                                 @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
                                 {
-                                    <input type="text" class="form-control" id="DeliveryAddressNotes" readonly placeholder="@salesOrder.DeliveryAddressNotes">
+                                    <textarea rows="3" class="form-control" id="DeliveryAddressNotes" readonly placeholder="@salesOrder.DeliveryAddressNotes"></textarea>
                                 }
                                 else
                                 {
-                                    <input type="text" class="form-control" id="DeliveryAddressNotes" value="@salesOrder.DeliveryAddressNotes" @onchange="async (e) =>
+                                    <textarea rows="3" class="form-control" id="DeliveryAddressNotes" value="@salesOrder.DeliveryAddressNotes" @onchange="async (e) =>
                                         {
                                             await SalesOrderChanged(e, (q) => { q.DeliveryAddressNotes = e.Value.ToString(); });
-                                        }">
+                                                                                      }"></textarea>
                                 }
                             </div>
                         </div>
