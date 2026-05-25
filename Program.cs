@@ -10,6 +10,8 @@ namespace JiwaCustomerPortal
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Host.UseWindowsService();
+
             ConfigurationManager configuration = builder.Configuration;
             Config.JiwaAPIURL = configuration.GetValue<string>("JiwaAPIURL");
             Config.JiwaAPIKey = configuration.GetValue<string>("JiwaAPIKey");

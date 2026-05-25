@@ -279,6 +279,8 @@ sudo certbot certonly --standalone
 ```
 
 #### Publish JiwaCustomerPortal project
+If building from source, the following applies - or you can use the linux-x64 release binaries instead
+
 Publish the project by opening a Visual Studio command prompt and running the following command from the same folder as the project:
 ```console
 dotnet publish -c release -r linux-x64 --self-contained
@@ -403,19 +405,52 @@ Reboot the machine and ensure that https://portal.domain.com is accessible.
 #### Secure the machine
 Remove the Azure firewall rule to allow access via port 22 for SSH.  Add the rule as needed for subsequent maintenance operations where you need to SSH back in.
 
-## Windows VM
+## Windows
 
-TODO: Finish notes on deploying on Windows
-
-### Build
-
-Publish the project by opening a Visual Studio 2022 command prompt and running the following command from the same folder as the project:
+### Publish JiwaCustomerPortal project (if required)
+If building from source, the following applies - or you can use the win-x64 release binaries instead
+Publish the project by opening a Visual Studio command prompt and the following command from the same folder as the project:
 ```console
 dotnet publish -c release -r win-x64 --self-contained
 ```
-
-### Copy output to Windows machine to host the portal
+When finished, the published folder will be located in the \bin\Release\net10.0\win-x64\publish relative to the project.
 
 ### use sc.exe to configre the JiwaCustomerPortal.exe as a service, with automatic start
+   ```powershell
+   sc.exe create JiwaCustomerPortal binPath="C:\Jiwa\JiwaCustomerPortal\JiwaCustomerPortal.exe" start=auto   
+   ```
 
 ### configure appsettings.json
+Use your editor of choice and edit the appsettings.json
+
+You must set the JiwaAPIURL, JiwaAPIKey, AllowedHosts, Kestrel.Endpoints.MyHttpEndpoint.Url , Kestrel.Certificates.Default.Path and Kestrel.Certificates.Default.KeyPath.
+AllowedHosts and Kestrel.Endpoints.MyHttpEndpoint.Url must match the CNAME DNS record for the SSL Certificate, if using HTTPS.
+
+```json
+{
+  "JiwaAPIURL": "https://yourjiwaapi.domain.com:5492",
+  "JiwaAPIKey": "Your Jiwa API Key",
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "portal.domain.com",
+  "Kestrel": {
+      "Endpoints": {
+        "MyHttpEndpoint": {
+          "Url": "https://portal.domain.com:443"
+        }
+      },
+    "Certificates": {
+      "Default": {
+          "Path": "/etc/letsencrypt/live/portal.domain.com/fullchain.pem",
+          "KeyPath": "/etc/letsencrypt/live/portal.domain.com/privkey.pem"
+        }
+    }
+  }
+}
+```
+### Start the Windows service
+Using services.msc, find the JiwaCustomerPortal service, right click and select Start.
