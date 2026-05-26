@@ -133,13 +133,16 @@
     [Parameter]
     public EventCallback<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder> OnClose { get; set; }
 
-    private bool APIRequestInProgress;
+    // APIRequestInProgress cannot be simply set to true and restored to original state, due to race conditions arising from asynchronous
+    // calls - so we use a counter instead, and increment or decrement that - and we look at the APIRequestInProgressCount to determine if a request is currently in progress or not.
+    private int APIRequestInProgressCount = 0;
+    public bool APIRequestInProgress => APIRequestInProgressCount > 0;
     private string? statusMessage;    
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        
+
         if (WebPortalUserSessionStateContainer.WebPortalUserSession == null)
         {
             // not authenticated ?
@@ -171,8 +174,7 @@
 
     private async Task<TResponse> SendToAPI<TResponse>(IReturn<TResponse> requestDTO)
     {
-        bool oldAPIRequestInProgress = APIRequestInProgress;
-        APIRequestInProgress = true;
+        APIRequestInProgressCount++;
 
         try
         {
@@ -197,7 +199,7 @@
         }
         finally
         {
-            APIRequestInProgress = oldAPIRequestInProgress;
+            APIRequestInProgressCount--;
         }
 
         return default(TResponse);

@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using static System.Net.WebRequestMethods;
 using ServiceStack.DataAnnotations;
 using System.Reflection;
+using System.Threading;
 
 namespace JiwaCustomerPortal.Components
 {
@@ -26,6 +27,8 @@ namespace JiwaCustomerPortal.Components
         public bool ShowPageNavigationHeader { get; set; } = true;
         [Parameter]
         public bool ShowPageNavigation { get; set; } = true;
+        [Parameter]
+        public int MaxPageNavigationButtons { get; set; } = 7;
         [Parameter]
         public List<string> HiddenColumns { get; set; } = new List<string>();
         [Parameter]
@@ -48,7 +51,11 @@ namespace JiwaCustomerPortal.Components
         public List<JiwaAutoQueryColumn<Model>> Columns { get; set; } = new List<JiwaAutoQueryColumn<Model>>();
         private ServiceStack.QueryResponse<Model> Response { get; set; }        
         public Model? SelectedItem { get; set; }
-        private bool APIRequestInProgress;
+        private int APIRequestInProgressCount = 0;
+
+        // APIRequestInProgress cannot be simply set to true and restored to original state, due to race conditions arising from asynchronous
+        // calls - so we use a counter instead, and increment or decrement that - and we look at the APIRequestInProgressCount to determine if a request is currently in progress or not.
+        public bool APIRequestInProgress => APIRequestInProgressCount > 0;
         
         [Inject] public IJSRuntime JS { get; set; }
         ElementReference? refResults;
@@ -58,6 +65,7 @@ namespace JiwaCustomerPortal.Components
         private System.Reflection.PropertyInfo[] ModelProperties;
         private System.Reflection.PropertyInfo[] QueryModelProperties;
 
+        private CancellationTokenSource? CancellationTokenSource { get; set; } = new CancellationTokenSource();
         private Dictionary<string, object> ImmutableFilters { get; set; } = new Dictionary<string, object>();
 
         protected override async Task OnInitializedAsync()
@@ -192,19 +200,42 @@ namespace JiwaCustomerPortal.Components
 
             await ExecuteAutoQuery();
 
-            if (InitialSelectedItemMethod is not null)
+            if (InitialSelectedItemMethod is not null && Response is not null)
             {
                 SelectedItem = InitialSelectedItemMethod.Invoke(Response.Results);
                 await ItemSelectedCallbackMethod.InvokeAsync(SelectedItem);
             }
         }
 
-        public async Task ExecuteAutoQuery()
+        public void Dispose()
+        {
+            CancellationTokenSource?.Cancel();
+            CancellationTokenSource?.Dispose();
+        }
+
+        public async Task ExecuteAutoQuery(CancellationToken cancellationToken = default)
         {            
+            if (cancellationToken == default)
+            {
+                // create our own cancellation token
+                try
+                {
+                    CancellationTokenSource?.Cancel();
+                    CancellationTokenSource?.Dispose();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // swallow if already disposed - we don't care
+                }
+
+                CancellationTokenSource = new CancellationTokenSource();
+                cancellationToken = CancellationTokenSource.Token;
+            }
+
             string? jiwaAPIKey = null;
 
             if (AuthType == AuthTypes.JiwaAPISessionId)
-            {                
+            {
                 if (WebPortalUserSessionStateContainer.WebPortalUserSession == null)
                 {
                     // not authenticated - no token found in session storage
@@ -217,7 +248,7 @@ namespace JiwaCustomerPortal.Components
                         NavigationManager.NavigateTo("User/SignIn");
                     }
                     return;
-                }                
+                }
             }
             else
             {
@@ -317,22 +348,25 @@ namespace JiwaCustomerPortal.Components
                 }
             }
 
-            bool oldAPIRequestInProgress = APIRequestInProgress;
-            APIRequestInProgress = true;
+            APIRequestInProgressCount++;
             // Signal the page has changed so the spinner starts animating
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
 
             try
             {
                 if (AuthType == AuthTypes.JiwaAPIKey)
                 {
-                    Response = await JiwaAPI.GetAsync<QueryResponse<Model>>(AutoQuery, jiwaAPIKey: jiwaAPIKey);
+                    Response = await JiwaAPI.GetAsync<QueryResponse<Model>>(AutoQuery, jiwaAPIKey: jiwaAPIKey, cancellationToken: cancellationToken);
                 }
                 else
                 {
-                    Response = await JiwaAPI.GetAsync<QueryResponse<Model>>(AutoQuery, jiwaAPISessionId: WebPortalUserSessionStateContainer?.WebPortalUserSession?.Id);
-                }                
+                    Response = await JiwaAPI.GetAsync<QueryResponse<Model>>(AutoQuery, jiwaAPISessionId: WebPortalUserSessionStateContainer?.WebPortalUserSession?.Id, cancellationToken: cancellationToken);
+                }
             }            
+            catch(OperationCanceledException)
+            {
+                //swallow
+            }
             catch (Exception ex)
             {
                 if (APIExceptionCallbackMethod.HasDelegate)
@@ -346,11 +380,11 @@ namespace JiwaCustomerPortal.Components
             }
             finally
             {
-                APIRequestInProgress = oldAPIRequestInProgress;
+                APIRequestInProgressCount--;
             }
 
             // Signal the page has changed again, as many properties of the AutoQuery response are used to render the page
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         }
 
         public T PropertyValue<T>(Model item, string propertyName)
@@ -513,7 +547,7 @@ namespace JiwaCustomerPortal.Components
             }
 
             ShowFilterDialogColumn = null;
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         }
 
         public string RowClass(Model item)
@@ -552,17 +586,5 @@ namespace JiwaCustomerPortal.Components
                 OnSelectItem(item);
             }
         }
-    }
-
-    public struct DOMRect
-    {
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
-        public double Top { get; set; }
-        public double Right { get; set; }
-        public double Bottom { get; set; }
-        public double Left { get; set; }
     }
 }

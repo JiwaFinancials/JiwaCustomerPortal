@@ -159,7 +159,10 @@
 
 @code {
     private string? errorMessage;
-    private bool APIRequestInProgress;
+    // APIRequestInProgress cannot be simply set to true and restored to original state, due to race conditions arising from asynchronous
+    // calls - so we use a counter instead, and increment or decrement that - and we look at the APIRequestInProgressCount to determine if a request is currently in progress or not.
+    private int APIRequestInProgressCount = 0;
+    public bool APIRequestInProgress => APIRequestInProgressCount > 0;
     private bool hasMultipleUserIdentitiesWithEmailAddress;
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_DB_ContactNameMultipleQuery DebtorContactNameMultipleAutoQuery;
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_DB_ContactNameMultiple selectedContact { get; set; }
@@ -235,8 +238,7 @@
 
         ServiceStack.AuthenticateResponse? authResponse = null;
 
-        bool oldAPIRequestInProgress = APIRequestInProgress;
-        APIRequestInProgress = true;
+        APIRequestInProgressCount++;
 
         try
         {
@@ -291,7 +293,7 @@
         }
         finally
         {
-            APIRequestInProgress = oldAPIRequestInProgress;
+            APIRequestInProgressCount--;
         }
 
         if (authResponse?.SessionId == null)
@@ -300,8 +302,7 @@
             return;
         }
 
-        oldAPIRequestInProgress = APIRequestInProgress;
-        APIRequestInProgress = true;
+        APIRequestInProgressCount++;
         try
         {
             JiwaFinancials.Jiwa.JiwaServiceModel.JiwaAuthUserSessionResponse jiwaAuthUserSession = await JiwaAPI.GetAsync(new JiwaFinancials.Jiwa.JiwaServiceModel.AuthCurrentSessionGETRequest(), jiwaAPISessionId: authResponse.SessionId);
@@ -332,7 +333,7 @@
         }
         finally
         {
-            APIRequestInProgress = oldAPIRequestInProgress;
+            APIRequestInProgressCount--;
         }
 
         // We want to redirect to where this came from, if we were redirected to here from somewhere else

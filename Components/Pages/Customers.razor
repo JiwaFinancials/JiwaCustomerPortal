@@ -46,20 +46,12 @@
 }
 
 <div class="row">
-    <div class="col-3">
-        <JiwaAPIAutoQueryGrid @ref="CustomerListGrid" Model="JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_List"
-                                QueryType="JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_ListQuery"
-                                AutoQuery="@v_Jiwa_Debtor_ListQuery"
-                                ShowPageNavigationHeader="true"
-                                HiddenColumns=@(new List<String> {"DebtorID"})
-                                CaptionMaps=@(new Dictionary<string, string> { ["AccountNo"] = "Account No." } )
-                                AddSelectButtonColumn="false"
-                                ItemSelectedCallbackMethod="@ItemSelected"
-                                InitialSelectedItemMethod="@InitialSelectedItemMethod"
-                                NoAuthenticationTokenCallbackMethod="@NoAuthenticationToken"
-                                AuthType="AuthTypes.JiwaAPISessionId"
-                                APIExceptionCallbackMethod="@APIException">
-        </JiwaAPIAutoQueryGrid>            
+    <div class="col-3">        
+        <JiwaDebtorsAutoQuerySelection             
+            ItemSelectedCallbackMethod="@ItemSelected"       
+            NoAuthenticationTokenCallbackMethod="@NoAuthenticationToken"
+            APIExceptionCallbackMethod="@APIException">
+        </JiwaDebtorsAutoQuerySelection>        
     </div>
 
     <div class="col-9">
@@ -361,9 +353,10 @@
                         <br />
                         <button @onclick="(() => CreateSalesOrder())" type="button" class="btn btn-success">
                             Create Sales Order
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-plus" viewBox="0 0 16 16">
-                                <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
-                                <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="-6 -6 48 48">
+                                <circle cx="16" cy="16" r="14" style="stroke: white;stroke-width:2" fill="transparent" />
+                                <line x1="16" y1="6" x2="16" y2="26" style="stroke: white;stroke-width:2" />
+                                <line x1="6" y1="16" x2="26" y2="16" style="stroke: white;stroke-width:2" />
                             </svg>
                         </button>
                     }
@@ -394,9 +387,10 @@
                         <br />
                         <button @onclick="(() => CreateQuote())" type="button" class="btn btn-success">
                             Create Quote
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-plus" viewBox="0 0 16 16">
-                                <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
-                                <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="-6 -6 48 48">
+                                <circle cx="16" cy="16" r="14" style="stroke: white;stroke-width:2" fill="transparent" />
+                                <line x1="16" y1="6" x2="16" y2="26" style="stroke: white;stroke-width:2" />
+                                <line x1="6" y1="16" x2="26" y2="16" style="stroke: white;stroke-width:2" />
                             </svg>
                         </button>                        
                     }
@@ -442,7 +436,12 @@
 </div>
 
 @code {
-    private bool APIRequestInProgress;
+    private int APIRequestInProgressCount = 0;
+
+    // APIRequestInProgress cannot be simply set to true and restored to original state, due to race conditions arising from asynchronous
+    // calls - so we use a counter instead, and increment or decrement that - and we look at the APIRequestInProgressCount to determine if a request is currently in progress or not.
+    public bool APIRequestInProgress => APIRequestInProgressCount > 0;
+
     private string? statusMessage;    
     private JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.Debtor Debtor { get; set; }
     private string SelectedTabId { get; set; } = "Contacts-tab";
@@ -450,9 +449,6 @@
     // For tabs which we lazy load, we keep track of if they've been clicked on with this list. The tab ID is added to the list when they click on it,
     // and we only bother rendering the AutoQuery or calling the API route backing that data when it is clicked the first time.
     private List<String> LazyLoadTabIds = new List<string>();
-
-    private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_ListQuery v_Jiwa_Debtor_ListQuery { get; set; }    
-    private JiwaAPIAutoQueryGrid<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_List, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_ListQuery> CustomerListGrid { get; set; }
 
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_Transactions_ListQuery DebtorsTransactionsAutoQuery { get; set; }
     private JiwaAPIAutoQueryGrid<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_Transactions_List, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_Transactions_ListQuery> DebtorsTransactionsAutoQueryGrid { get; set; }
@@ -513,12 +509,6 @@
         // Where the debtor transactions autoquery component returns multiple pages, selecting page 3 and then clicking on a 
         // different tab and then back to the debtor transactions tab it will still show the transactions last displayed, but the page number will be back to page 1
         // So we instantiate the auto queries here, and in the component razor instantiation we set the AutoQuery parameter of the component to be our local declared instance here.
-        v_Jiwa_Debtor_ListQuery = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_ListQuery()
-            {
-                OrderBy = "AccountNo",
-                Fields = "DebtorID,AccountNo,Name",
-                Take = 12
-            };         
 
         DebtorsTransactionsAutoQuery = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_Transactions_ListQuery()
         {            
@@ -574,40 +564,18 @@
         }
     }    
 
-    public async void ItemSelected(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_List item)
+    public async void ItemSelected(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListOR item)
     {
         // when a debtor is selected from the customer list, we need to read the debtor
 
-        bool oldAPIRequestInProgress = APIRequestInProgress;
-        APIRequestInProgress = true;
+        if (item == null)
+        {
+            return;
+        }
 
         JiwaFinancials.Jiwa.JiwaServiceModel.DebtorGETRequest debtorGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.DebtorGETRequest();
         debtorGETRequest.DebtorID = item.DebtorID;
-        try
-        {
-            Debtor = await JiwaAPI.GetAsync(debtorGETRequest, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
-        }
-        catch (ServiceStack.WebServiceException webServiceException)
-        {
-            if (webServiceException.StatusCode == 401)
-            {
-                // We are either not authenticated, or our token we have expired, go log on - but first clear any session info as it's no good no more.
-                WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
-                NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
-            }
-            else
-            {
-                statusMessage = webServiceException.ErrorMessage;
-            }
-        }
-        catch (Exception ex)
-        {
-            statusMessage = ex.Message;
-        }
-        finally
-        {
-            APIRequestInProgress = oldAPIRequestInProgress;
-        }        
+        Debtor = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.Debtor>(debtorGETRequest);      
 
         if (Debtor is not null)
         {
@@ -667,7 +635,7 @@
             }
         }
 
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     public JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_List InitialSelectedItemMethod(List<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_List> Results)
@@ -686,36 +654,9 @@
     {
         if (Debtor != null)
         {
-            bool oldAPIRequestInProgress = APIRequestInProgress;
-            APIRequestInProgress = true;
-
             JiwaFinancials.Jiwa.JiwaServiceModel.Tables.DebtorBackordersGETRequest DebtorBackordersGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.DebtorBackordersGETRequest();
             DebtorBackordersGETRequest.DebtorID = Debtor.DebtorID;
-            try
-            {
-                BackOrders = await JiwaAPI.GetAsync(DebtorBackordersGETRequest, WebPortalUserSessionStateContainer?.WebPortalUserSession?.Id, null);
-            }
-            catch (ServiceStack.WebServiceException webServiceException)
-            {
-                if (webServiceException.StatusCode == 401)
-                {
-                    // We are either not authenticated, or our token we have expired, go log on - but first clear any session info as it's no good no more.
-                    WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
-                    NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
-                }
-                else
-                {
-                    statusMessage = webServiceException.ErrorMessage;
-                }
-            }
-            catch (Exception ex)
-            {
-                statusMessage = ex.Message;
-            }
-            finally
-            {
-                APIRequestInProgress = oldAPIRequestInProgress;
-            }
+            BackOrders = await SendToAPI<List<JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorBackOrder>>(DebtorBackordersGETRequest);
         }
     }
 
@@ -1044,8 +985,10 @@
 
     public async void CreateContactDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName ContactName)
     {
+        ContactNameToCreate = null;
+
         if (ContactName != null)
-        {
+        {            
             // edit the contact
             JiwaFinancials.Jiwa.JiwaServiceModel.DebtorContactNamePOSTRequest debtorContactNamePOSTRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.DebtorContactNamePOSTRequest();
             debtorContactNamePOSTRequest.DebtorID = Debtor.DebtorID;
@@ -1056,8 +999,7 @@
             debtorContactNamePOSTRequest.EmailAddress = ContactName.EmailAddress;
             debtorContactNamePOSTRequest.TagMemberships = ContactName.TagMemberships;
 
-            bool oldAPIRequestInProgress = APIRequestInProgress;
-            APIRequestInProgress = true;
+            APIRequestInProgressCount++;
 
             try
             {
@@ -1089,7 +1031,7 @@
             }
             finally
             {
-                APIRequestInProgress = oldAPIRequestInProgress;
+                APIRequestInProgressCount--;
             }
         }
         else
@@ -1097,13 +1039,14 @@
             // clear any previously set status message when the user cancels the create
             statusMessage = null;
         }
-
-        ContactNameToCreate = null;
-        StateHasChanged();
+        
+        await InvokeAsync(StateHasChanged);
     }
 
     public async void EditContactDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName ContactName)
     {
+        ContactNameToEdit = null;
+
         if (ContactName != null)
         {
             // edit the contact
@@ -1117,8 +1060,7 @@
             debtorContactNamePATCHRequest.EmailAddress = ContactName.EmailAddress;
             debtorContactNamePATCHRequest.TagMemberships = null; // Tag memberships we ignore in the contact name patch, as we do a subsequent PUT to replace all the tags instead.
 
-            bool oldAPIRequestInProgress = APIRequestInProgress;
-            APIRequestInProgress = true;
+            APIRequestInProgressCount++;
 
             try
             {
@@ -1157,7 +1099,7 @@
             }
             finally
             {
-                APIRequestInProgress = oldAPIRequestInProgress;
+                APIRequestInProgressCount--;
             }
         }
         else
@@ -1165,13 +1107,12 @@
             // clear any previously set status message when the user cancels the edit
             statusMessage = null;
         }
-
-        ContactNameToEdit = null;
-        StateHasChanged();
+        
+        await InvokeAsync(StateHasChanged);
     }
 
     public async void DeleteContactConfirmationDialogClosed(bool resultOK)
-    {
+    {        
         if (resultOK)
         {
             if (ContactNameToDelete.ContactNameID == WebPortalUserSessionStateContainer.WebPortalUserSession.DebtorContactNameID)
@@ -1185,8 +1126,10 @@
             debtorContactNameDELETERequest.DebtorID = Debtor.DebtorID;
             debtorContactNameDELETERequest.ContactNameID = ContactNameToDelete.ContactNameID;
 
-            bool oldAPIRequestInProgress = APIRequestInProgress;
-            APIRequestInProgress = true;
+            string deletedMessage = $"Contact {ContactNameToDelete.DisplayName()}, {ContactNameToDelete.EmailAddress} has been deleted.";
+            ContactNameToDelete = null; // We set this to null so the dialog removes itself
+
+            APIRequestInProgressCount++;
 
             try
             {
@@ -1197,7 +1140,7 @@
                 debtorContactNamesGETManyRequest.DebtorID = Debtor.DebtorID;
                 Debtor.ContactNames = await JiwaAPI.GetAsync(debtorContactNamesGETManyRequest, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
 
-                statusMessage = $"Contact {ContactNameToDelete.DisplayName()}, {ContactNameToDelete.EmailAddress} has been deleted.";
+                statusMessage = deletedMessage;
             }
             catch (ServiceStack.WebServiceException webServiceException)
             {
@@ -1218,17 +1161,17 @@
             }
             finally
             {
-                APIRequestInProgress = oldAPIRequestInProgress;
+                APIRequestInProgressCount--;
             }
         }
         else
         {
             // clear any previously set status message when the user cancels the delete
             statusMessage = null;
+            ContactNameToDelete = null;
         }
-
-        ContactNameToDelete = null;
-        StateHasChanged();
+        
+        await InvokeAsync(StateHasChanged);
     }
 
     public short GetSnapshotNoFromInvoiceNoDashDocketNumHeaderHistoryNo(string InvoiceNoDashDocketNumHeaderHistoryNo)
@@ -1269,5 +1212,38 @@
     private async Task CreateSalesOrder()
     {
         NavigationManager.NavigateTo($"/SalesOrder/NULL/?CreateForDebtorID={Debtor.DebtorID}&returnUrl={NavigationManager.Uri}");
+    }
+
+    private async Task<TResponse> SendToAPI<TResponse>(IReturn<TResponse> requestDTO)
+    {
+        APIRequestInProgressCount++;
+
+        try
+        {
+            return await JiwaAPI.SendAsync(requestDTO, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
+        }
+        catch (ServiceStack.WebServiceException webServiceException)
+        {
+            if (webServiceException.StatusCode == 401)
+            {
+                // We are either not authenticated, or our token we have expired, go log on - but first clear any session info as it's no good no more.
+                WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
+                NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
+            }
+            else
+            {
+                statusMessage = webServiceException.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            APIRequestInProgressCount--;
+        }
+
+        return default(TResponse);
     }
 }

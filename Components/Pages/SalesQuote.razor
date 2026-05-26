@@ -497,7 +497,10 @@
 
     public string SnapshotNo { get; set; }
 
-    private bool APIRequestInProgress;
+    // APIRequestInProgress cannot be simply set to true and restored to original state, due to race conditions arising from asynchronous
+    // calls - so we use a counter instead, and increment or decrement that - and we look at the APIRequestInProgressCount to determine if a request is currently in progress or not.
+    private int APIRequestInProgressCount = 0;
+    public bool APIRequestInProgress => APIRequestInProgressCount > 0;
     private string? statusMessage;
     private JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote salesQuote { get; set; }
     private string SelectedTabId { get; set; } = "Items-tab";
@@ -677,7 +680,7 @@
             {
                 salesQuote = response;
                 SelectedHistory = salesQuote.Histories[currentSnap.Value - 1];
-                StateHasChanged();  // required otherwise the UI doesn't update properly - indeterminate progress indicator just keeps spinning and the new line doesn't appear
+                await InvokeAsync(StateHasChanged);  // required otherwise the UI doesn't update properly - indeterminate progress indicator just keeps spinning and the new line doesn't appear
             }
         }
     }
@@ -699,14 +702,13 @@
         if (salesQuote != null)
         {
             SelectedHistory = salesQuote.Histories[currentSnap.Value - 1];
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         }
     }
 
     private async Task DeleteFromAPI(IReturnVoid requestDTO)
     {
-        bool oldAPIRequestInProgress = APIRequestInProgress;
-        APIRequestInProgress = true;
+        APIRequestInProgressCount++;
 
         try
         {
@@ -731,14 +733,13 @@
         }
         finally
         {
-            APIRequestInProgress = oldAPIRequestInProgress;
+            APIRequestInProgressCount--;
         }
     }
 
     private async Task<TResponse> SendToAPI<TResponse>(IReturn<TResponse> requestDTO)
     {
-        bool oldAPIRequestInProgress = APIRequestInProgress;
-        APIRequestInProgress = true;
+        APIRequestInProgressCount++;
 
         try
         {
@@ -763,7 +764,7 @@
         }
         finally
         {
-            APIRequestInProgress = oldAPIRequestInProgress;
+            APIRequestInProgressCount--;
         }
 
         return default(TResponse);

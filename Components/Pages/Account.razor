@@ -400,7 +400,10 @@
     </div>
 }
 @code {
-    private bool APIRequestInProgress;
+    // APIRequestInProgress cannot be simply set to true and restored to original state, due to race conditions arising from asynchronous
+    // calls - so we use a counter instead, and increment or decrement that - and we look at the APIRequestInProgressCount to determine if a request is currently in progress or not.
+    private int APIRequestInProgressCount = 0;
+    public bool APIRequestInProgress => APIRequestInProgressCount > 0;
     private string? statusMessage;
     private JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.Debtor Debtor { get; set; }
     private string SelectedTabId { get; set; } = "Contacts-tab";
@@ -447,8 +450,7 @@
             return;
         }
 
-        bool oldAPIRequestInProgress = APIRequestInProgress;        
-        APIRequestInProgress = true;
+        APIRequestInProgressCount++;
 
         JiwaFinancials.Jiwa.JiwaServiceModel.CustomerDebtorGETRequest customerDebtorGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.CustomerDebtorGETRequest();
         try
@@ -474,7 +476,7 @@
         }
         finally
         {
-            APIRequestInProgress = oldAPIRequestInProgress;
+            APIRequestInProgressCount--;
         }
 
         if (Debtor != null)
@@ -544,8 +546,7 @@
     {        
         if (Debtor != null)
         {
-            bool oldAPIRequestInProgress = APIRequestInProgress;
-            APIRequestInProgress = true;
+            APIRequestInProgressCount++;
 
             JiwaFinancials.Jiwa.JiwaServiceModel.Tables.DebtorBackordersGETRequest DebtorBackordersGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.DebtorBackordersGETRequest();
             DebtorBackordersGETRequest.DebtorID = Debtor.DebtorID;
@@ -572,7 +573,7 @@
             }
             finally
             {
-                APIRequestInProgress = oldAPIRequestInProgress;
+                APIRequestInProgressCount--;
             }
         }
     }
@@ -932,6 +933,8 @@
 
     public async void CreateContactDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName ContactName)
     {
+        ContactNameToCreate = null;
+
         if (ContactName != null)
         {
             // edit the contact
@@ -944,8 +947,7 @@
             debtorContactNamePOSTRequest.EmailAddress = ContactName.EmailAddress;
             debtorContactNamePOSTRequest.TagMemberships = ContactName.TagMemberships;
 
-            bool oldAPIRequestInProgress = APIRequestInProgress;
-            APIRequestInProgress = true;
+            APIRequestInProgressCount++;
 
             try
             {
@@ -977,7 +979,7 @@
             }
             finally
             {
-                APIRequestInProgress = oldAPIRequestInProgress;
+                APIRequestInProgressCount--;
             }
         }
         else
@@ -985,13 +987,14 @@
             // clear any previously set status message when the user cancels the create
             statusMessage = null;
         }
-
-        ContactNameToCreate = null;
-        StateHasChanged();
+        
+        await InvokeAsync(StateHasChanged);
     }
 
     public async void EditContactDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName ContactName)
     {
+        ContactNameToEdit = null;
+
         if (ContactName != null)
         {
             // edit the contact
@@ -1005,8 +1008,7 @@
             debtorContactNamePATCHRequest.EmailAddress = ContactName.EmailAddress;
             debtorContactNamePATCHRequest.TagMemberships = null; // Tag memberships we ignore in the contact name patch, as we do a subsequent PUT to replace all the tags instead.
 
-            bool oldAPIRequestInProgress = APIRequestInProgress;
-            APIRequestInProgress = true;
+            APIRequestInProgressCount++;
 
             try
             {
@@ -1045,7 +1047,7 @@
             }
             finally
             {
-                APIRequestInProgress = oldAPIRequestInProgress;
+                APIRequestInProgressCount--;
             }
         }
         else
@@ -1053,9 +1055,8 @@
             // clear any previously set status message when the user cancels the edit
             statusMessage = null;
         }
-
-        ContactNameToEdit = null;
-        StateHasChanged();
+        
+        await InvokeAsync(StateHasChanged);
     }
 
     public async void DeleteContactConfirmationDialogClosed(bool resultOK)
@@ -1072,9 +1073,11 @@
             JiwaFinancials.Jiwa.JiwaServiceModel.DebtorContactNameDELETERequest debtorContactNameDELETERequest = new JiwaFinancials.Jiwa.JiwaServiceModel.DebtorContactNameDELETERequest();
             debtorContactNameDELETERequest.DebtorID = Debtor.DebtorID;
             debtorContactNameDELETERequest.ContactNameID = ContactNameToDelete.ContactNameID;
+            
+            string deletedMessage = $"Contact {ContactNameToDelete.DisplayName()}, {ContactNameToDelete.EmailAddress} has been deleted.";
+            ContactNameToDelete = null;
 
-            bool oldAPIRequestInProgress = APIRequestInProgress;
-            APIRequestInProgress = true;
+            APIRequestInProgressCount++;
 
             try
             {
@@ -1085,7 +1088,7 @@
                 debtorContactNamesGETManyRequest.DebtorID = Debtor.DebtorID;
                 Debtor.ContactNames = await JiwaAPI.GetAsync(debtorContactNamesGETManyRequest, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
 
-                statusMessage = $"Contact {ContactNameToDelete.DisplayName()}, {ContactNameToDelete.EmailAddress} has been deleted.";
+                statusMessage = deletedMessage;
             }
             catch (ServiceStack.WebServiceException webServiceException)
             {
@@ -1106,17 +1109,17 @@
             }
             finally
             {
-                APIRequestInProgress = oldAPIRequestInProgress;
+                APIRequestInProgressCount--;
             }
         }
         else
         {
             // clear any previously set status message when the user cancels the delete
             statusMessage = null;
+            ContactNameToDelete = null;
         }
-
-        ContactNameToDelete = null;
-        StateHasChanged();
+        
+        await InvokeAsync(StateHasChanged);
     }
 
     public short GetSnapshotNoFromInvoiceNoDashDocketNumHeaderHistoryNo(string InvoiceNoDashDocketNumHeaderHistoryNo)
