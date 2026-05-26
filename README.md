@@ -315,6 +315,8 @@ AllowedHosts and Kestrel.Endpoints.MyHttpEndpoint.Url must match the CNAME DNS r
 {
   "JiwaAPIURL": "https://yourjiwaapi.domain.com:5492",
   "JiwaAPIKey": "Your Jiwa API Key",
+  "AllowCustomerLogin": true,
+  "AllowStaffLogin": true,
   "Logging": {
     "LogLevel": {
       "Default": "Information",
@@ -430,6 +432,8 @@ AllowedHosts and Kestrel.Endpoints.MyHttpEndpoint.Url must match the CNAME DNS r
 {
   "JiwaAPIURL": "https://yourjiwaapi.domain.com:5492",
   "JiwaAPIKey": "Your Jiwa API Key",
+  "AllowCustomerLogin": true,
+  "AllowStaffLogin": true,
   "Logging": {
     "LogLevel": {
       "Default": "Information",
