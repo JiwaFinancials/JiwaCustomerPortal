@@ -18,8 +18,8 @@
     <EmbeddedResource Remove="wwwroot\bootstrap\**" />
     <None Remove="wwwroot\bootstrap\**" />
   </ItemGroup>
-  <ItemGroup>	
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />	
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
     <PackageReference Include="ServiceStack" />
     <PackageReference Include="ServiceStack.Client" />
   </ItemGroup>

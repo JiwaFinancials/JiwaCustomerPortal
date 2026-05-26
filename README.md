@@ -10,6 +10,8 @@
 # About
 A simple web portal which uses the Jiwa 8 REST API to provide basic account functions.
 
+Requires Jiwa 8.0.61 or later - the introduction of Staff Logins required some changes to the API and data structure which are used by the portal, so it will not work with versions of Jiwa prior to 8.0.61.
+
 The portal is built using ASP.NET 10 Server Side Blazor, ServiceStack Client 8.10 and Bootstrap 5.3.3
 
 # Functions
@@ -24,19 +26,21 @@ The portal is built using ASP.NET 10 Server Side Blazor, ServiceStack Client 8.1
 * Forgot password
 * Dark Mode / Light Mode
 
-Users of the portal authenticate using their email address and password from the debtor contact name.
+Users of the portal authenticate using their email address and password from the debtor contact name, or can authenticate as a staff member using their Jiwa user credentials.
 
 Users are able to request a password reset token to be emailed to them.
 
-Only users with the debtor contact name tag "Customer Web Portal - User" or "Customer Web Portal - Admin" are able to login
+Any enabled Jiwa staff member can login, or any debtor contacts with a debtor contact name tag "Customer Web Portal - User" or "Customer Web Portal - Admin"
 
-Only users with the debtor contact name tag "Customer Web Portal - Admin" are able edit or delete contact records.
+If authenticated as a debtor contact, only those debtor contacts with the debtor contact name tag "Customer Web Portal - Admin" are able edit or delete contact records.
 
-![image](https://github.com/user-attachments/assets/e62b6f58-7d71-47a9-bf91-b7063be35b67)
+For Jiwa staff members, API route permissions will control what functions they are able to perform.
+<img width="1038" height="725" alt="image" src="https://github.com/user-attachments/assets/26c84550-510c-447f-8289-5907d49d7089" />
+<img width="1038" height="725" alt="image" src="https://github.com/user-attachments/assets/a7cadaea-24ab-45a2-8086-5ffb267a0889" />
+<img width="1225" height="739" alt="image" src="https://github.com/user-attachments/assets/9a5472d2-6289-4363-9095-60f1d8f72f79" />
 
-![image](https://github.com/user-attachments/assets/28e9247f-5c1c-4215-a733-e41ee6bcd515)
-
-![image](https://github.com/user-attachments/assets/825e8e74-76cc-4711-a4f5-aac5c32e9e0f)
+<img width="1225" height="739" alt="image" src="https://github.com/user-attachments/assets/260624e5-de09-4707-b48f-b0876642db19" />
+<img width="1920" height="1032" alt="image" src="https://github.com/user-attachments/assets/0a9615bd-506e-41b6-be46-b75efdb952b5" />
 
 ![image](https://github.com/user-attachments/assets/b9d36636-3e14-48a7-8b6b-0b6b35e5f8a8)
 
@@ -276,8 +280,8 @@ sudo certbot certonly --standalone
 
 #### Publish JiwaCustomerPortal project
 If building from source, the following applies - or you can use the linux-x64 release binaries instead
-Publish the project by opening a Visual Studio command prompt and the following command from the same folder as the project:
 
+Publish the project by opening a Visual Studio command prompt and running the following command from the same folder as the project:
 ```console
 dotnet publish -c release -r linux-x64 --self-contained
 ```

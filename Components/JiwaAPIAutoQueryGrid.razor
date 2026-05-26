@@ -18,7 +18,7 @@
 @inject NavigationManager NavigationManager
 @inject BrowserService BrowserService
 
-@if (APIRequestInPogress)
+@if (APIRequestInProgress)
 {
     <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
@@ -61,7 +61,7 @@
             {
                 @foreach (Model item in Response.Results)
                 {
-                    <tr class="@RowClass(item)">
+                    <tr class="@RowClass(item)" @onclick="() => OnRowClick(item)">
                         @foreach (JiwaAutoQueryColumn<Model> column in Columns.Where(x => !x.IsHidden).OrderBy(x => x.DisplayOrder))
                         {
                             @DataCellRenderFragment(item, column.Id)                        
@@ -69,7 +69,7 @@
                         @if (AddSelectButtonColumn)
                         {
                             <td><button @onclick="(() => OnSelectItem(item))" type="button" IsToggle="true" class="btn btn-secondary">Select</button></td>
-                        }
+                        }                        
                     </tr>
                 }
             }
