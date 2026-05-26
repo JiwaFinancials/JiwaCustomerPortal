@@ -15,7 +15,7 @@
 <h1>Sign in</h1>
 <div class="row">
     <div class="col-md-4">
-        @if (APIRequestInPogress)
+        @if (APIRequestInProgress)
         {
             <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
                 <div class="modal-dialog modal-dialog-centered">
@@ -159,7 +159,7 @@
 
 @code {
     private string? errorMessage;
-    private bool APIRequestInPogress;
+    private bool APIRequestInProgress;
     private bool hasMultipleUserIdentitiesWithEmailAddress;
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_DB_ContactNameMultipleQuery DebtorContactNameMultipleAutoQuery;
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_DB_ContactNameMultiple selectedContact { get; set; }
@@ -235,8 +235,8 @@
 
         ServiceStack.AuthenticateResponse? authResponse = null;
 
-        bool oldAPIRequestInPogress = APIRequestInPogress;
-        APIRequestInPogress = true;
+        bool oldAPIRequestInProgress = APIRequestInProgress;
+        APIRequestInProgress = true;
 
         try
         {
@@ -291,7 +291,7 @@
         }
         finally
         {
-            APIRequestInPogress = oldAPIRequestInPogress;
+            APIRequestInProgress = oldAPIRequestInProgress;
         }
 
         if (authResponse?.SessionId == null)
@@ -300,8 +300,8 @@
             return;
         }
 
-        oldAPIRequestInPogress = APIRequestInPogress;
-        APIRequestInPogress = true;
+        oldAPIRequestInProgress = APIRequestInProgress;
+        APIRequestInProgress = true;
         try
         {
             JiwaFinancials.Jiwa.JiwaServiceModel.JiwaAuthUserSessionResponse jiwaAuthUserSession = await JiwaAPI.GetAsync(new JiwaFinancials.Jiwa.JiwaServiceModel.AuthCurrentSessionGETRequest(), jiwaAPISessionId: authResponse.SessionId);
@@ -332,7 +332,7 @@
         }
         finally
         {
-            APIRequestInPogress = oldAPIRequestInPogress;
+            APIRequestInProgress = oldAPIRequestInProgress;
         }
 
         // We want to redirect to where this came from, if we were redirected to here from somewhere else

@@ -8,7 +8,7 @@
 @inject BrowserService BrowserService
 
 <PageTitle>Diagnostics</PageTitle>
-@if (APIRequestInPogress)
+@if (APIRequestInProgress)
 {
     <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
@@ -129,7 +129,7 @@
 </div>
 
 @code{
-    private bool APIRequestInPogress;
+    private bool APIRequestInProgress;
     private string? statusMessage;
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.PluginExceptionQuery PluginExceptionQuery { get; set; } = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.PluginExceptionQuery();
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.StartupLogEntryQuery StartupLogEntryQuery { get; set; } = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.StartupLogEntryQuery();

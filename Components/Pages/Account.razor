@@ -9,7 +9,7 @@
 
 <PageTitle>Account</PageTitle>
 
-@if (APIRequestInPogress)
+@if (APIRequestInProgress)
 {
     <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
@@ -400,7 +400,7 @@
     </div>
 }
 @code {
-    private bool APIRequestInPogress;
+    private bool APIRequestInProgress;
     private string? statusMessage;
     private JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.Debtor Debtor { get; set; }
     private string SelectedTabId { get; set; } = "Contacts-tab";
@@ -447,8 +447,8 @@
             return;
         }
 
-        bool oldAPIRequestInPogress = APIRequestInPogress;        
-        APIRequestInPogress = true;
+        bool oldAPIRequestInProgress = APIRequestInProgress;        
+        APIRequestInProgress = true;
 
         JiwaFinancials.Jiwa.JiwaServiceModel.CustomerDebtorGETRequest customerDebtorGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.CustomerDebtorGETRequest();
         try
@@ -474,7 +474,7 @@
         }
         finally
         {
-            APIRequestInPogress = oldAPIRequestInPogress;
+            APIRequestInProgress = oldAPIRequestInProgress;
         }
 
         if (Debtor != null)
@@ -544,8 +544,8 @@
     {        
         if (Debtor != null)
         {
-            bool oldAPIRequestInPogress = APIRequestInPogress;
-            APIRequestInPogress = true;
+            bool oldAPIRequestInProgress = APIRequestInProgress;
+            APIRequestInProgress = true;
 
             JiwaFinancials.Jiwa.JiwaServiceModel.Tables.DebtorBackordersGETRequest DebtorBackordersGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.DebtorBackordersGETRequest();
             DebtorBackordersGETRequest.DebtorID = Debtor.DebtorID;
@@ -572,7 +572,7 @@
             }
             finally
             {
-                APIRequestInPogress = oldAPIRequestInPogress;
+                APIRequestInProgress = oldAPIRequestInProgress;
             }
         }
     }
@@ -944,8 +944,8 @@
             debtorContactNamePOSTRequest.EmailAddress = ContactName.EmailAddress;
             debtorContactNamePOSTRequest.TagMemberships = ContactName.TagMemberships;
 
-            bool oldAPIRequestInPogress = APIRequestInPogress;
-            APIRequestInPogress = true;
+            bool oldAPIRequestInProgress = APIRequestInProgress;
+            APIRequestInProgress = true;
 
             try
             {
@@ -977,7 +977,7 @@
             }
             finally
             {
-                APIRequestInPogress = oldAPIRequestInPogress;
+                APIRequestInProgress = oldAPIRequestInProgress;
             }
         }
         else
@@ -1005,8 +1005,8 @@
             debtorContactNamePATCHRequest.EmailAddress = ContactName.EmailAddress;
             debtorContactNamePATCHRequest.TagMemberships = null; // Tag memberships we ignore in the contact name patch, as we do a subsequent PUT to replace all the tags instead.
 
-            bool oldAPIRequestInPogress = APIRequestInPogress;
-            APIRequestInPogress = true;
+            bool oldAPIRequestInProgress = APIRequestInProgress;
+            APIRequestInProgress = true;
 
             try
             {
@@ -1045,7 +1045,7 @@
             }
             finally
             {
-                APIRequestInPogress = oldAPIRequestInPogress;
+                APIRequestInProgress = oldAPIRequestInProgress;
             }
         }
         else
@@ -1073,8 +1073,8 @@
             debtorContactNameDELETERequest.DebtorID = Debtor.DebtorID;
             debtorContactNameDELETERequest.ContactNameID = ContactNameToDelete.ContactNameID;
 
-            bool oldAPIRequestInPogress = APIRequestInPogress;
-            APIRequestInPogress = true;
+            bool oldAPIRequestInProgress = APIRequestInProgress;
+            APIRequestInProgress = true;
 
             try
             {
@@ -1106,7 +1106,7 @@
             }
             finally
             {
-                APIRequestInPogress = oldAPIRequestInPogress;
+                APIRequestInProgress = oldAPIRequestInProgress;
             }
         }
         else

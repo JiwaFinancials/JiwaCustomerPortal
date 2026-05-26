@@ -17,7 +17,7 @@
 
             <div class="modal-body">     
                 
-                @if (APIRequestInPogress)
+                @if (APIRequestInProgress)
                 {
                     <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
                         <div class="modal-dialog modal-dialog-centered">
@@ -133,7 +133,7 @@
     [Parameter]
     public EventCallback<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder> OnClose { get; set; }
 
-    private bool APIRequestInPogress;
+    private bool APIRequestInProgress;
     private string? statusMessage;    
 
     protected override async Task OnInitializedAsync()
@@ -171,8 +171,8 @@
 
     private async Task<TResponse> SendToAPI<TResponse>(IReturn<TResponse> requestDTO)
     {
-        bool oldAPIRequestInPogress = APIRequestInPogress;
-        APIRequestInPogress = true;
+        bool oldAPIRequestInProgress = APIRequestInProgress;
+        APIRequestInProgress = true;
 
         try
         {
@@ -197,7 +197,7 @@
         }
         finally
         {
-            APIRequestInPogress = oldAPIRequestInPogress;
+            APIRequestInProgress = oldAPIRequestInProgress;
         }
 
         return default(TResponse);

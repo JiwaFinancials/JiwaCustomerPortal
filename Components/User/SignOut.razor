@@ -11,7 +11,7 @@
 
 <PageTitle>Log out</PageTitle>
 
-@if (APIRequestInPogress)
+@if (APIRequestInProgress)
 {
     <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
@@ -38,14 +38,14 @@ else
 @code {
     private string? errorMessage;
     public JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession WebPortalUserSession { get; set; }
-    private bool APIRequestInPogress;
+    private bool APIRequestInProgress;
 
     protected async override Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        bool oldAPIRequestInPogress = APIRequestInPogress;
-        APIRequestInPogress = true;
+        bool oldAPIRequestInProgress = APIRequestInProgress;
+        APIRequestInProgress = true;
         try
         {
             ProtectedBrowserStorageResult<JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession> result = await ProtectedLocalStore.GetAsync<JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession>("JiwaCustomerWebPortalAuthUserSession");
@@ -78,7 +78,7 @@ else
         }
         finally
         {
-            APIRequestInPogress = oldAPIRequestInPogress;
+            APIRequestInProgress = oldAPIRequestInProgress;
         }
 
         await ProtectedLocalStore.DeleteAsync("JiwaCustomerWebPortalAuthUserSession");

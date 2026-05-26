@@ -48,7 +48,7 @@ namespace JiwaCustomerPortal.Components
         public List<JiwaAutoQueryColumn<Model>> Columns { get; set; } = new List<JiwaAutoQueryColumn<Model>>();
         private ServiceStack.QueryResponse<Model> Response { get; set; }        
         public Model? SelectedItem { get; set; }
-        private bool APIRequestInPogress;
+        private bool APIRequestInProgress;
         
         [Inject] public IJSRuntime JS { get; set; }
         ElementReference? refResults;
@@ -317,8 +317,8 @@ namespace JiwaCustomerPortal.Components
                 }
             }
 
-            bool oldAPIRequestInPogress = APIRequestInPogress;
-            APIRequestInPogress = true;
+            bool oldAPIRequestInProgress = APIRequestInProgress;
+            APIRequestInProgress = true;
             // Signal the page has changed so the spinner starts animating
             StateHasChanged();
 
@@ -346,7 +346,7 @@ namespace JiwaCustomerPortal.Components
             }
             finally
             {
-                APIRequestInPogress = oldAPIRequestInPogress;
+                APIRequestInProgress = oldAPIRequestInProgress;
             }
 
             // Signal the page has changed again, as many properties of the AutoQuery response are used to render the page

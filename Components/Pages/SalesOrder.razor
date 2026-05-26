@@ -10,7 +10,7 @@
 
 <PageTitle>Sales Order</PageTitle>
 
-@if (APIRequestInPogress)
+@if (APIRequestInProgress)
 {
     <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
@@ -518,7 +518,7 @@
 
     public string SnapshotNo { get; set; }
 
-    private bool APIRequestInPogress;
+    private bool APIRequestInProgress;
     private string? statusMessage;
     private JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder salesOrder { get; set; }
     private string SelectedTabId { get; set; } = "Items-tab";
@@ -739,8 +739,8 @@
 
     private async Task DeleteFromAPI(IReturnVoid requestDTO)
     {
-        bool oldAPIRequestInPogress = APIRequestInPogress;
-        APIRequestInPogress = true;
+        bool oldAPIRequestInProgress = APIRequestInProgress;
+        APIRequestInProgress = true;
 
         try
         {
@@ -765,14 +765,14 @@
         }
         finally
         {
-            APIRequestInPogress = oldAPIRequestInPogress;
+            APIRequestInProgress = oldAPIRequestInProgress;
         }
     }
 
     private async Task<TResponse> SendToAPI<TResponse>(IReturn<TResponse> requestDTO)
     {
-        bool oldAPIRequestInPogress = APIRequestInPogress;
-        APIRequestInPogress = true;
+        bool oldAPIRequestInProgress = APIRequestInProgress;
+        APIRequestInProgress = true;
 
         try
         {
@@ -797,7 +797,7 @@
         }
         finally
         {
-            APIRequestInPogress = oldAPIRequestInPogress;
+            APIRequestInProgress = oldAPIRequestInProgress;
         }
 
         return default(TResponse);

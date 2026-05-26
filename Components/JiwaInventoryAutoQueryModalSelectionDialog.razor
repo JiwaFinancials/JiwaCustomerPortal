@@ -12,7 +12,7 @@
      aria-modal="true" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
-            @if (APIRequestInPogress)
+            @if (APIRequestInProgress)
             {
                 <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
                     <div class="modal-dialog modal-dialog-centered">
@@ -76,7 +76,7 @@
 
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery { get; set; }
     private JiwaAPIAutoQueryGrid<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery> InventoryItemsListGrid { get; set; }
-    private bool APIRequestInPogress;
+    private bool APIRequestInProgress;
     private string? statusMessage;
 
     private string? SearchText;    
