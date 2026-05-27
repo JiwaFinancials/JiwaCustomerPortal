@@ -17,6 +17,7 @@
                       UseFilters="false"
                       AutoQuery="@v_Jiwa_Debtor_ListORQuery"
                       ShowPageNavigationHeader="true"
+                      CompactNavigationButtons="@CompactNavigationButtons"
                       HiddenColumns=@(new List<String> {"DebtorID"})
                       CaptionMaps=@(new Dictionary<string, string> { ["AccountNo"] = "Account No." } )
                       AddSelectButtonColumn="false"
@@ -34,10 +35,12 @@
     public EventCallback NoAuthenticationTokenCallbackMethod { get; set; }
     [Parameter]
     public EventCallback<Exception> APIExceptionCallbackMethod { get; set; }
+    [Parameter]
+    public bool CompactNavigationButtons { get; set; }
 
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListORQuery v_Jiwa_Debtor_ListORQuery { get; set; }
     private JiwaAPIAutoQueryGrid<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListOR, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListORQuery> CustomerListGrid { get; set; }
-    
+
     private string? statusMessage;
 
     private string? SearchText;    
@@ -64,6 +67,7 @@
         CancellationTokenSource = new CancellationTokenSource();
 
         SearchText = NewValue;
+        v_Jiwa_Debtor_ListORQuery.Skip = 0;
         v_Jiwa_Debtor_ListORQuery.AccountNoContains = SearchText;
         v_Jiwa_Debtor_ListORQuery.NameContains = SearchText;
         if (string.IsNullOrWhiteSpace(SearchText))

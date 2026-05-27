@@ -28,7 +28,7 @@ namespace JiwaCustomerPortal.Components
         [Parameter]
         public bool ShowPageNavigation { get; set; } = true;
         [Parameter]
-        public int MaxPageNavigationButtons { get; set; } = 7;
+        public bool CompactNavigationButtons { get; set; }
         [Parameter]
         public List<string> HiddenColumns { get; set; } = new List<string>();
         [Parameter]
