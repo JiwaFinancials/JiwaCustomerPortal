@@ -86,33 +86,38 @@ Import the user group https://github.com/JiwaFinancials/JiwaCustomerPortal/blob/
 
 ### Route permissions
 Grant the following REST API permissions to the Customer Web Portal User Group:
-1. GET /CustomerWebPortal/Role
-2. GET /CustomerWebPortal/Settings
-3. POST /Debtors/ContactNames/{ContactNameID}/PasswordReset
-4. POST /Debtors/ContactNames/{Token}/TokenisedPasswordChange
-5. GET /Sessions/Current
-6. GET /auth/logout
-7. GET /SalesOrders/{InvoiceHistoryID}/InvoiceSnapshotReport/{ReportID}
-8. GET /SalesQuotes/{QuoteHistoryID}/QuoteSnapshotReport/{ReportID}
-9. GET /Debtors/{DebtorID}/StatementReport/{ReportID}/At/{AsAtDate}
-10. GET /Debtors
-11. GET /Debtors/{DebtorID}/ContactNames
-12. POST /Debtors/{DebtorID}/ContactNames
-13. PATCH /Debtors/{DebtorID}/ContactNames/{ContactNameID}
-14. DELETE /Debtors/{DebtorID}/ContactNames/{ContactNameID}
-15. GET /Debtors/ContactNamesTag
-16. PUT /Debtors/{DebtorID}/ContactNames/{ContactNameID}/TagMembership
-17. GET /Queries/SalesOrderList
-18. GET /Queries/SalesQuoteList
-19. GET /Queries/ContactNameMultiples
-20. GET /Queries/DebtorTransactionList
-21. GET /Debtors/{DebtorID}/Backorders
-22. GET /Queries/FX_Currency
-23. GET /SystemInfo
-24. GET /Queries/StartupLog
-25. GET /Queries/PluginExceptions
-26. GET /SalesOrders/{InvoiceID}
-27. GET /SalesQuotes/{QuoteID}
+| # | Route | Verb |
+| 1 | /auth/logout | GET |
+| 2 | /CustomerWebPortal/Role | GET |
+| 3 | /CustomerWebPortal/Settings | GET |
+| 4 | /Debtors | GET |
+| 5 | /Debtors/{DebtorID}/Backorders | GET |
+| 6 | /Debtors/{DebtorID}/ContactNames | POST |
+| 7 | /Debtors/{DebtorID}/ContactNames | GET |
+| 8 | /Debtors/{DebtorID}/ContactNames/{ContactNameID} | DELETE |
+| 9 | /Debtors/{DebtorID}/ContactNames/{ContactNameID} | PATCH |
+| 10 | /Debtors/{DebtorID}/ContactNames/{ContactNameID}/TagMembership | PUT |
+| 11 | /Debtors/{DebtorID}/StatementReport/{ReportID}/At/{AsAtDate} | GET |
+| 12 | /Debtors/ContactNames/{ContactNameID}/PasswordChange | POST |
+| 13 | /Debtors/ContactNames/{ContactNameID}/PasswordReset | POST |
+| 14 | /Debtors/ContactNames/{Token}/TokenisedPasswordChange | POST |
+| 15 | /Debtors/ContactNamesTag | GET |
+| 16 | /Queries/ContactNameMultiples | GET |
+| 17 | /Queries/DebtorTransactionList | GET |
+| 18 | /Queries/FX_Currency | GET |
+| 19 | /Queries/PluginExceptions | GET |
+| 20 | /Queries/SalesOrderList | GET |
+| 21 | /Queries/SalesQuoteList | GET |
+| 22 | /Queries/StartupLog | GET |
+| 23 | /SalesOrders/{InvoiceHistoryID}/InvoiceSnapshotReport/{ReportID} | GET |
+| 24 | /SalesOrders/{InvoiceID} | GET |
+| 25 | /SalesQuotes/{QuoteHistoryID}/QuoteSnapshotReport/{ReportID} | GET |
+| 26 | /SalesQuotes/{QuoteID} | GET |
+| 27 | /Sessions/Current | GET |
+| 28 | /Staff/{StaffID}/PasswordChange | POST |
+| 29 | /Staff/{Token}/TokenisedPasswordChange | POST |
+| 30 | /Staff/{Username}/PasswordReset | POST |
+| 31 | /SystemInfo | GET |
 
 ![image](https://github.com/user-attachments/assets/fc2ec691-f12f-429f-90c4-b9cf9395c956)
 
