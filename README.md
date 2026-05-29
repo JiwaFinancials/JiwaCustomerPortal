@@ -86,7 +86,9 @@ Import the user group https://github.com/JiwaFinancials/JiwaCustomerPortal/blob/
 
 ### Route permissions
 Grant the following REST API permissions to the Customer Web Portal User Group:
+
 | # | Route | Verb |
+|---|-------|------|
 | 1 | /auth/logout | GET |
 | 2 | /CustomerWebPortal/Role | GET |
 | 3 | /CustomerWebPortal/Settings | GET |
