@@ -121,7 +121,8 @@ Grant the following REST API permissions to the Customer Web Portal User Group:
 | 30 | /Staff/{Username}/PasswordReset | POST |
 | 31 | /SystemInfo | GET |
 
-![image](https://github.com/user-attachments/assets/fc2ec691-f12f-429f-90c4-b9cf9395c956)
+<img width="1664" height="1061" alt="image" src="https://github.com/user-attachments/assets/2a0d67b9-9ce6-422c-91f4-b2ed321d3641" />
+
 
 ## Create user Customer Web Portal
 Create a new Staff Member in the Staff Maintenance form with the name Customer Web Portal.  Add this Staff member to the Customer Web Portal User Group.
