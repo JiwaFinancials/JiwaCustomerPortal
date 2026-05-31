@@ -130,8 +130,7 @@ If you are allowing staff members to login to the portal, the following permissi
 | 35 | /SalesQuotes | POST |
 | 36 | /SalesQuotes/{QuoteID}/Historys/{QuoteHistoryID}/Lines/{QuoteLineID} | DELETE |
 
-<img width="1664" height="1061" alt="image" src="https://github.com/user-attachments/assets/2a0d67b9-9ce6-422c-91f4-b2ed321d3641" />
-
+<img width="1287" height="1021" alt="image" src="https://github.com/user-attachments/assets/656862e7-5a41-4b05-b5f3-b0a055cdf32a" />
 
 ## Create user Customer Web Portal
 Create a new Staff Member in the Staff Maintenance form with the name Customer Web Portal.  Add this Staff member to the Customer Web Portal User Group.
