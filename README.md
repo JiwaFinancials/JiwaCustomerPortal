@@ -121,6 +121,15 @@ Grant the following REST API permissions to the Customer Web Portal User Group:
 | 30 | /Staff/{Username}/PasswordReset | POST |
 | 31 | /SystemInfo | GET |
 
+If you are allowing staff members to login to the portal, the following permissions are also required:
+| # | Route | Verb |
+|---|-------|------|
+| 32 | /Queries/OR/DebtorList | GET |
+| 33 | /SalesOrders | POST |
+| 34 | /SalesOrders/{InvoiceID}/Historys/{InvoiceHistoryID}/Lines/{InvoiceLineID} | DELETE |
+| 35 | /SalesQuotes | POST |
+| 36 | /SalesQuotes/{QuoteID}/Historys/{QuoteHistoryID}/Lines/{QuoteLineID} | DELETE |
+
 <img width="1664" height="1061" alt="image" src="https://github.com/user-attachments/assets/2a0d67b9-9ce6-422c-91f4-b2ed321d3641" />
 
 
