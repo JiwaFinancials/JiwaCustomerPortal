@@ -9,25 +9,6 @@
   <DefaultReadAccessLevel>Undefined</DefaultReadAccessLevel>
   <DefaultWriteAccessLevel>Undefined</DefaultWriteAccessLevel>
   <DefaultAbstractAccessLevel>Undefined</DefaultAbstractAccessLevel>
-  <UserGroupMembers>
-    <UserGroupMember>
-      <StaffMember>
-        <RecID xmlns="Entities.Staff" />
-        <StaffID xmlns="Entities.Staff" />
-        <UserName xmlns="Entities.Staff">CustomerWebPortal</UserName>
-        <FirstName xmlns="Entities.Staff">CustomerWebPortal</FirstName>
-        <Surname xmlns="Entities.Staff">CustomerWebPortal</Surname>
-        <EmailAddress xmlns="Entities.Staff">portal@example.com</EmailAddress>
-        <EmailDisplayName xmlns="Entities.Staff">Jiwa Customer Web Portal</EmailDisplayName>
-        <SMTPUsername xmlns="Entities.Staff">portal@example.com</SMTPUsername>
-        <IsActive xmlns="Entities.Staff">false</IsActive>
-        <IsEnabled xmlns="Entities.Staff">false</IsEnabled>
-        <JobCostHourlyCost d5p1:nil="true" xmlns:d5p1="http://www.w3.org/2001/XMLSchema-instance" xmlns="Entities.Staff" />
-      </StaffMember>
-      <RecID>eef24338-4877-4a3a-9571-8baf08b81d52</RecID>
-    </UserGroupMember>
-  </UserGroupMembers>    
-  <MenuSpecified>true</MenuSpecified>
   <DefaultAbstractAccessLevel>Undefined</DefaultAbstractAccessLevel>  
   <UserGroupRESTAPIPermissions>
     <UserGroupRESTAPIPermission>
