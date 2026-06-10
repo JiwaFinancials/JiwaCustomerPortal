@@ -73,9 +73,10 @@
             {                
                 <input type="date" class="form-control" id="Date" value="@salesQuote.InvoiceInitDate.Value.ToString("yyyy-MM-dd")" @onchange="@(async (e) =>
                                                               {
-                                                                                         await QuoteChanged(e, (q) =>
-                                                                                         {
-                                                                                             q.InvoiceInitDate = DateTime.ParseExact(e.Value.ToString(), "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture); });
+                                                                await QuoteChanged(e, (dtoQuote) =>
+                                                                    {
+                                                                        dtoQuote.InvoiceInitDate = DateTime.ParseExact(e.Value.ToString(), "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture); 
+                                                                    });
                                                               })">
             }
         </div>
@@ -89,7 +90,10 @@
             {
                 <input type="text" class="form-control" id="OrderNo" value="@salesQuote.OrderNo" @onchange="async (e) =>
                                        {
-                                           await QuoteChanged(e, (q) => { q.OrderNo = e.Value.ToString(); });
+                                        await QuoteChanged(e, (dtoQuote) => 
+                                                { 
+                                                    dtoQuote.OrderNo = e.Value.ToString(); 
+                                                });
                                        }">
             }
         </div>
@@ -103,7 +107,10 @@
             {
                 <input type="text" class="form-control" id="Reference" value="@salesQuote.SOReference" @onchange="async (e) => 
                 { 
-                    await QuoteChanged(e, (q) => { q.SOReference = e.Value.ToString();  });
+                    await QuoteChanged(e, (dtoQuote) =>
+                        {
+                            dtoQuote.SOReference = e.Value.ToString();
+                        });
                 }">
             }
         </div>
@@ -177,8 +184,26 @@
                             <tr class="align-middle">
                                 @if (salesQuoteLine.CommentLine.Value)
                                 {
-                                    <td>@salesQuoteLine.ItemNo</td>
-                                    <td colspan="9">@salesQuoteLine.CommentText</td>
+                                    <td>@salesQuoteLine.ItemNo</td>                                    
+
+                                    @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                    {
+                                        <td colspan="9">@salesQuoteLine.CommentText</td>
+                                    }
+                                    else
+                                    {
+                                        <td colspan="8">
+                                            <input type="text" class="form-control" id="CommentText"
+                                                   value=@salesQuoteLine.CommentText
+                                                   @onchange="async (e) =>
+                                                    {
+                                                                await QuoteLineChanged(e, salesQuoteLine.QuoteLineID, (line) =>
+                                                                {
+                                                                    line.CommentText = e.Value.ToString();
+                                                                });
+                                                    }">
+                                        </td>
+                                    }
                                 }
                                 else
                                 {
@@ -208,12 +233,12 @@
                                                     min="0"
                                                     @onchange="async (e) =>
                                                     {
-                                                        await QuoteLineChanged(e, salesQuoteLine.QuoteLineID, (q) => 
+                                                        await QuoteLineChanged(e, salesQuoteLine.QuoteLineID, (dtoQuoteLine) => 
                                                         {
                                                             decimal value = 0;
                                                             decimal.TryParse(e.Value.ToString(), out value);
                                                             // We don't test the result of the decimal.TryPase - anything invalid is 0
-                                                            q.QuantityOrdered = value;                                                             
+                                                            dtoQuoteLine.QuantityOrdered = value;
                                                         });
                                                     }">
                                         </td>                                        
@@ -233,12 +258,12 @@
                                                 min="0"
                                                 @onchange="async (e) =>
                                                 {
-                                                    await QuoteLineChanged(e, salesQuoteLine.QuoteLineID, (q) =>
+                                                    await QuoteLineChanged(e, salesQuoteLine.QuoteLineID, (dtoQuoteLine) =>
                                                         {
                                                             decimal value = 0;
                                                             decimal.TryParse(e.Value.ToString(), out value);
                                                             // We don't test the result of the decimal.TryPase - anything invalid is 0
-                                                            q.FXDiscountedPrice = value;
+                                                            dtoQuoteLine.FXDiscountedPrice = value;
                                                         });
                                                 }">
                                         </td>
@@ -246,16 +271,17 @@
 
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal - salesQuoteLine.FXTaxToCharge, @salesQuote.CurrencyID)</td>
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXTaxToCharge, salesQuote.CurrencyID)</td>
-                                    <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal, salesQuote.CurrencyID)</td>
-                                    <td class="text-center">
-                                        <button @onclick="_ => DeleteQuoteLine(salesQuoteLine)" class="btn" style="background-color:transparent">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="red" class="bi bi-x-circle" viewBox="0 0 20 20">
-                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
-                                            </svg>
-                                        </button>
-                                    </td>
+                                    <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal, salesQuote.CurrencyID)</td>                                    
                                 }
+
+                                <td class="text-center">
+                                    <button @onclick="_ => DeleteQuoteLine(salesQuoteLine)" class="btn" style="background-color:transparent">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="red" class="bi bi-x-circle" viewBox="0 0 20 20">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                                        </svg>
+                                    </button>
+                                </td>
                             </tr>
                         }
                         <tr class="align-middle">
@@ -307,6 +333,7 @@
                         </tr>
                     </tbody>
                 </table>
+
                 <button @onclick="(() => AddQuoteLine())" type="button" class="btn btn-success">
                     Add Item
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="-6 -6 48 48">
@@ -314,7 +341,15 @@
                         <line x1="16" y1="6" x2="16" y2="26" style="stroke: white;stroke-width:2" />
                         <line x1="6" y1="16" x2="26" y2="16" style="stroke: white;stroke-width:2" />
                     </svg>
-                </button>                
+                </button>
+                <button @onclick="(() => AddQuoteCommentLine())" type="button" class="btn btn-success">
+                    Add Comment
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="-6 -6 48 48">
+                        <circle cx="16" cy="16" r="14" style="stroke: white;stroke-width:2" fill="transparent" />
+                        <line x1="16" y1="6" x2="16" y2="26" style="stroke: white;stroke-width:2" />
+                        <line x1="6" y1="16" x2="26" y2="16" style="stroke: white;stroke-width:2" />
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -658,6 +693,25 @@
     private async Task AddQuoteLine()
     {
         AddingItem = true;
+    }
+
+    private async Task AddQuoteCommentLine()
+    {
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest salesQuotePATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest();
+        salesQuotePATCHRequest.QuoteID = salesQuote.QuoteID;
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine quoteLine = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine();
+        quoteLine.CommentLine = true;
+        salesQuotePATCHRequest.Lines = new List<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine>();
+        salesQuotePATCHRequest.Lines.Add(quoteLine);
+
+        int? currentSnap = SelectedHistory.HistoryNo;
+
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuotePATCHRequest);
+        if (response != null)
+        {
+            salesQuote = response;
+            SelectedHistory = salesQuote.Histories[currentSnap.Value - 1];
+        }
     }
 
     public async void AddItemDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR InventoryItem)
