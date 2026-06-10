@@ -116,19 +116,26 @@ Grant the following REST API permissions to the Customer Web Portal User Group:
 | 25 | /SalesQuotes/{QuoteHistoryID}/QuoteSnapshotReport/{ReportID} | GET |
 | 26 | /SalesQuotes/{QuoteID} | GET |
 | 27 | /Sessions/Current | GET |
-| 28 | /Staff/{StaffID}/PasswordChange | POST |
-| 29 | /Staff/{Token}/TokenisedPasswordChange | POST |
-| 30 | /Staff/{Username}/PasswordReset | POST |
-| 31 | /SystemInfo | GET |
+| 28 | /SystemInfo | GET |
 
-If you are allowing staff members to login to the portal, the following permissions are also required:
+If you are allowing staff members to login to the portal, the following permissions are also required for the Customer Web Portal User Group:
 | # | Route | Verb |
 |---|-------|------|
-| 32 | /Queries/OR/DebtorList | GET |
-| 33 | /SalesOrders | POST |
-| 34 | /SalesOrders/{InvoiceID}/Historys/{InvoiceHistoryID}/Lines/{InvoiceLineID} | DELETE |
-| 35 | /SalesQuotes | POST |
-| 36 | /SalesQuotes/{QuoteID}/Historys/{QuoteHistoryID}/Lines/{QuoteLineID} | DELETE |
+| 1 | /Staff/{Username}/PasswordReset | POST |
+| 2 | /Staff/{Token}/TokenisedPasswordChange | POST |
+
+
+Also if you are allowing staff members to login to the portal, they will need to be a member of the Customer Web Portal group, and another group with these additional permissions:
+| # | Route | Verb |
+|---|-------|------|
+| 1 | /Staff/{StaffID}/PasswordChange | POST |
+| 2 | /Queries/OR/DebtorList | GET |
+| 3 | /SalesOrders | POST |
+| 4 | /SalesOrders/{InvoiceID} | PATCH |
+| 5 | /SalesOrders/{InvoiceID}/Historys/{InvoiceHistoryID}/Lines/{InvoiceLineID} | DELETE |
+| 6 | /SalesQuotes | POST |
+| 7 | /SalesQuotes/{QuoteID} | PATCH |
+| 8 | /SalesQuotes/{QuoteID}/Historys/{QuoteHistoryID}/Lines/{QuoteLineID} | DELETE |
 
 <img width="1287" height="1021" alt="image" src="https://github.com/user-attachments/assets/656862e7-5a41-4b05-b5f3-b0a055cdf32a" />
 

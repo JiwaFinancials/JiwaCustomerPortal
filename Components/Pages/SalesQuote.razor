@@ -173,8 +173,10 @@
                             <th class="text-end">Total Ex</th>
                             <th class="text-end">Tax</th>
                             <th class="text-end">Total Inc.</th>
-                            <th class="text-center" width="50px"></th>
-
+                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            {
+                                <th class="text-center" width="50px"></th>
+                            }
                         </tr>
                     </thead>
 
@@ -274,14 +276,17 @@
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal, salesQuote.CurrencyID)</td>                                    
                                 }
 
-                                <td class="text-center">
-                                    <button @onclick="_ => DeleteQuoteLine(salesQuoteLine)" class="btn" style="background-color:transparent">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="red" class="bi bi-x-circle" viewBox="0 0 20 20">
-                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
-                                        </svg>
-                                    </button>
-                                </td>
+                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                                {
+                                    <td class="text-center">
+                                        <button @onclick="_ => DeleteQuoteLine(salesQuoteLine)" class="btn" style="background-color:transparent">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="red" class="bi bi-x-circle" viewBox="0 0 20 20">
+                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                                            </svg>
+                                        </button>
+                                    </td>
+                                }
                             </tr>
                         }
                         <tr class="align-middle">
@@ -289,7 +294,10 @@
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal - x.FXTaxToCharge), salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXTaxToCharge), salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal), salesQuote.CurrencyID)</td>
-                            <td class="text-end"></td>
+                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            {
+                                <td class="text-end"></td>
+                            }
                         </tr>
 
                         <tr class="align-middle">
@@ -308,6 +316,9 @@
                             <td class="text-end"></td>
                             <td class="text-end"></td>                           
                         }
+
+                        @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                        {
                             <td class="text-center">
                                 <button @onclick="_ => EditFreight()" class="btn" style="background-color:transparent">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 20 20">
@@ -316,6 +327,7 @@
                                     </svg>
                                 </button>
                             </td>
+                        }
                         </tr>
 
                         <tr class="align-middle">
@@ -329,11 +341,16 @@
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal - x.FXTaxToCharge) + salesQuote.FXCartage1ExGst + salesQuote.FXCartage2ExGst + salesQuote.FXCartage3ExGst, salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXTaxToCharge) + salesQuote.FXCartage1Gst + salesQuote.FXCartage2Gst + salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal) + salesQuote.FXCartage1ExGst + salesQuote.FXCartage2ExGst + salesQuote.FXCartage3ExGst + salesQuote.FXCartage1Gst + salesQuote.FXCartage2Gst + salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
-                            <td class="text-end"></td>
+                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            {
+                                <td class="text-end"></td>
+                            }
                         </tr>
                     </tbody>
                 </table>
 
+                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                {
                 <button @onclick="(() => AddQuoteLine())" type="button" class="btn btn-success">
                     Add Item
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="-6 -6 48 48">
@@ -350,6 +367,7 @@
                         <line x1="6" y1="16" x2="26" y2="16" style="stroke: white;stroke-width:2" />
                     </svg>
                 </button>
+                }
             </div>
         </div>
 
