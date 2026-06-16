@@ -18,10 +18,6 @@
 
 <StatusMessage Message="@statusMessage"/>
 
-<JiwaInventoryAutoQueryModalSelectionDialog @ref="@AddItemDialog" Title="Select Item" OnItemSelected="@AddInventoryItem" />
-
-<EditSalesOrderFreightModalDialog @ref="@EditFreightDialog" Title="Edit Freight" salesOrder="@salesOrder" SelectedHistory="@SelectedHistory" OnOrderChanged="@FreightChanged" />
-
 @if (CustomFieldLookupRenderFragment != null)
 {
     @CustomFieldLookupRenderFragment
@@ -29,6 +25,12 @@
 
 @if (salesOrder != null)
 {
+    if (IsEditable)
+    {
+        <JiwaInventoryAutoQueryModalSelectionDialog @ref="@AddItemDialog" Title="Select Item" OnItemSelected="@AddInventoryItem" />
+
+        <EditSalesOrderFreightModalDialog @ref="@EditFreightDialog" Title="Edit Freight" salesOrder="@salesOrder" SelectedHistory="@SelectedHistory" OnOrderChanged="@FreightChanged" />
+    }
     <div class="row">
         <div class="col-3">
             <label for="InvoiceNo" class="form-label">Invoice No.</label>

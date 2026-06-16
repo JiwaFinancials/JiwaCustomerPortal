@@ -17,13 +17,15 @@
 
 <StatusMessage Message="@statusMessage"/>
 
-<JiwaInventoryAutoQueryModalSelectionDialog @ref="@AddItemDialog" Title="Select Item" OnItemSelected="@AddInventoryItem" />
-
-<EditQuoteFreightModalDialog @ref="@EditFreightDialog" Title="Edit Freight" salesQuote="@salesQuote" SelectedHistory="@SelectedHistory" OnQuoteChanged="@FreightChanged" />
-
-
 @if (salesQuote != null)
 {
+    if (IsEditable)
+    {
+        <JiwaInventoryAutoQueryModalSelectionDialog @ref="@AddItemDialog" Title="Select Item" OnItemSelected="@AddInventoryItem" />
+
+        <EditQuoteFreightModalDialog @ref="@EditFreightDialog" Title="Edit Freight" salesQuote="@salesQuote" SelectedHistory="@SelectedHistory" OnQuoteChanged="@FreightChanged" />
+    }
+
     <div class="row">
         <div class="col-3">
             <label for="QuoteNo" class="form-label">Quote No.</label>
@@ -56,7 +58,7 @@
     <div class="row">
         <div class="col-3">
             <label for="Date" class="form-label">Date</label>
-            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+            @if(!IsEditable)
             {
                 <input type="text" class="form-control" id="Date" readonly placeholder="@salesQuote.InvoiceInitDate.Value.ToString(@BrowserService.DateFormat)">
             }
@@ -73,7 +75,7 @@
         </div>
         <div class="col-3">
             <label for="OrderNo" class="form-label">Order No.</label>
-            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+            @if(!IsEditable)
             {
                 <input type="text" class="form-control" id="OrderNo" readonly placeholder="@salesQuote.OrderNo">
             }
@@ -90,7 +92,7 @@
         </div>
         <div class="col-3">
             <label for="Reference" class="form-label">Reference</label>            
-            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+            @if(!IsEditable)
             {
                 <input type="text" class="form-control" id="Reference" readonly placeholder="@salesQuote.SOReference">
             }
@@ -164,7 +166,7 @@
                             <th class="text-end">Total Ex</th>
                             <th class="text-end">Tax</th>
                             <th class="text-end">Total Inc.</th>
-                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            @if(IsEditable)
                             {
                                 <th class="text-center" width="50px"></th>
                             }
@@ -179,7 +181,7 @@
                                 {
                                     <td class="text-end">@salesQuoteLine.ItemNo</td>
 
-                                    @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                    @if(!IsEditable)
                                     {
                                         <td colspan="9">@salesQuoteLine.CommentText</td>
                                     }
@@ -212,7 +214,7 @@
                                         <td>@salesQuoteLine.SKUUnitName</td>
                                     }
 
-                                    @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                    @if(!IsEditable)
                                     {
                                         <td class="text-end">@Config.FormattedDecimals(@salesQuoteLine.QuantityOrdered, salesQuoteLine.QuantityDecimalPlaces)</td>
                                     }
@@ -237,7 +239,7 @@
                                         </td>                                        
                                     }                                    
 
-                                    @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                    @if(!IsEditable)
                                     {
                                         <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXDiscountedPrice, salesQuote.CurrencyID)</td>
                                     }
@@ -267,7 +269,7 @@
                                     <td class="text-end">@Config.FormattedCurrency(@salesQuoteLine.FXLineTotal, salesQuote.CurrencyID)</td>                                    
                                 }
 
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                                @if(IsEditable)
                                 {
                                     <td class="text-center">
                                         <button @onclick="_ => DeleteQuoteLine(salesQuoteLine)" class="btn" style="background-color:transparent">
@@ -285,7 +287,7 @@
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal - x.FXTaxToCharge), salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXTaxToCharge), salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal), salesQuote.CurrencyID)</td>
-                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            @if(IsEditable)
                             {
                                 <td class="text-end"></td>
                             }
@@ -308,7 +310,7 @@
                             <td class="text-end"></td>                           
                         }
 
-                        @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                        @if(IsEditable)
                         {
                             <td class="text-center">
                                     <button @onclick="_ => EditFreightDialog.Open()" class="btn" style="background-color:transparent">
@@ -332,7 +334,7 @@
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal - x.FXTaxToCharge) + salesQuote.FXCartage1ExGst + salesQuote.FXCartage2ExGst + salesQuote.FXCartage3ExGst, salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXTaxToCharge) + salesQuote.FXCartage1Gst + salesQuote.FXCartage2Gst + salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency(SelectedHistory.Lines.Sum(x => x.FXLineTotal) + salesQuote.FXCartage1ExGst + salesQuote.FXCartage2ExGst + salesQuote.FXCartage3ExGst + salesQuote.FXCartage1Gst + salesQuote.FXCartage2Gst + salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
-                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            @if(IsEditable)
                             {
                                 <td class="text-end"></td>
                             }
@@ -340,7 +342,7 @@
                     </tbody>
                 </table>
 
-                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                @if(IsEditable)
                 {
                     <button @onclick="(() => AddItemDialog.Open())" type="button" class="btn btn-success">
                         Add Item
@@ -372,7 +374,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressee" class="form-label">Addressee</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressee" readonly placeholder="@salesQuote.DeliveryAddressee">
                                 }
@@ -387,7 +389,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressContactName" class="form-label">Contact Name</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressContactName" readonly placeholder="@salesQuote.DeliveryAddressContactName">
                                 }
@@ -405,7 +407,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddress1" class="form-label">Address 1</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddress1" readonly placeholder="@salesQuote.DeliveryAddress1">
                                 }
@@ -420,7 +422,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddress2" class="form-label">Address 2</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddress2" readonly placeholder="@salesQuote.DeliveryAddress2">
                                 }
@@ -437,7 +439,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressState" class="form-label">State</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressState" readonly placeholder="@salesQuote.DeliveryAddressState">
                                 }
@@ -451,7 +453,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressSuburb" class="form-label">Suburb</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressSuburb" readonly placeholder="@salesQuote.DeliveryAddressSuburb">
                                 }
@@ -468,7 +470,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressPostcode" class="form-label">Postcode</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressPostcode" readonly placeholder="@salesQuote.DeliveryAddressPostcode">
                                 }
@@ -482,7 +484,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressCountry" class="form-label">Country</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressCountry" readonly placeholder="@salesQuote.DeliveryAddressCountry">
                                 }
@@ -499,7 +501,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressCourierDetails" class="form-label">Delivery Instructions</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <textarea rows="3" class="form-control" id="DeliveryAddressCourierDetails" readonly placeholder="@salesQuote.DeliveryAddressCourierDetails"></textarea>
                                 }
@@ -513,7 +515,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressNotes" class="form-label">Notes</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if(!IsEditable)
                                 {
                                     <textarea rows="3" class="form-control" id="DeliveryAddressNotes" readonly placeholder="@salesQuote.DeliveryAddressNotes"></textarea>
                                 }
@@ -551,6 +553,14 @@
     private JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory SelectedHistory { get; set; }
     private JiwaInventoryAutoQueryModalSelectionDialog AddItemDialog { get; set; }
     private EditQuoteFreightModalDialog EditFreightDialog { get; set; }
+
+    public bool IsEditable
+    {
+        get
+        {
+            return salesQuote.Status == JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote.e_SalesQuoteStatuses.e_SalesQuoteEntered && WebPortalUserSessionStateContainer.WebPortalUserSession?.AuthProvider == "credentials";
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
