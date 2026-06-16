@@ -1,5 +1,6 @@
 ﻿@page "/SalesOrder/{InvoiceId}"
 @attribute [type: RenderModeInteractiveServer]
+@using JiwaCustomerPortal.Components.User
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using ServiceStack;
 @inject ProtectedLocalStorage ProtectedLocalStore
@@ -12,31 +13,24 @@
 
 @if (APIRequestInProgress)
 {
-    <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <Throbber></Throbber>
 }
 
 <StatusMessage Message="@statusMessage"/>
 
 @if (AddingItem)
-{
-    <div class="relative">
-        <JiwaInventoryAutoQueryModalSelectionDialog Title="Select Item" OnClose="@AddItemDialogClosed" />
-    </div>
+{    
+    <JiwaInventoryAutoQueryModalSelectionDialog Title="Select Item" OnClose="@AddItemDialogClosed" />    
 }
 
 @if (EditingFreight)
+{    
+    <EditSalesOrderFreightModalDialog Title="Edit Freight" salesOrder="@salesOrder" SelectedHistory="@SelectedHistory" OnClose="@EditFreightDialogClosed" />
+}
+
+@if (CustomFieldLookupRenderFragment != null)
 {
-    <div class="relative">
-        <EditSalesOrderFreightModalDialog Title="Edit Freight" salesOrder="@salesOrder" SelectedHistory="@SelectedHistory" OnClose="@EditFreightDialogClosed" />
-    </div>
+    @CustomFieldLookupRenderFragment
 }
 
 @if (salesOrder != null)
@@ -50,14 +44,27 @@
             <label for="Name" class="form-label">Name</label>
             <input type="text" class="form-control" id="Name" readonly placeholder="@salesOrder.DebtorName">
         </div>
-        <div class="col-3 text-end">
-            <a href="/SalesOrderPDF/@SelectedHistory.InvoiceHistoryID" target="_blank" rel="noopener noreferrer">
-                <button class="btn" style="background-color:transparent">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
-                        <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1" />
-                        <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1" />
-                    </svg>
-                </button>
+        <div class="col-1">
+            @if (salesOrder.Status == JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder.SalesOrderStatuses.e_SalesOrderProcessed)
+            {
+                <div class="badge rounded-pill bg-warning">Processed</div>
+            }
+            else if (salesOrder.Status == JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder.SalesOrderStatuses.e_SalesOrderClosed)
+            {
+                <div class="badge rounded-pill bg-danger">Closed</div>                
+            }
+            else
+            {
+                <div class="badge rounded-pill bg-success">Entered</div>
+                
+            }
+        </div>
+        <div class="col-2 text-end">
+            <a href="/SalesOrderPDF/@SelectedHistory.InvoiceHistoryID" target="_blank" rel="noopener noreferrer">                
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
+                    <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1" />
+                    <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1" />
+                </svg>                
             </a>
         </div>
     </div>
@@ -65,7 +72,7 @@
     <div class="row">
         <div class="col-3">
             <label for="Date" class="form-label">Date</label>
-            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+            @if (!IsEditable)
             {
                 <input type="text" class="form-control" id="Date" readonly placeholder="@salesOrder.InvoiceInitDate.Value.ToString(@BrowserService.DateFormat)">
             }
@@ -82,7 +89,7 @@
         </div>
         <div class="col-3">
             <label for="OrderNo" class="form-label">Order No.</label>
-            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+            @if (!IsEditable)
             {
                 <input type="text" class="form-control" id="OrderNo" readonly placeholder="@salesOrder.OrderNo">
             }
@@ -99,7 +106,7 @@
         </div>
         <div class="col-3">
             <label for="Reference" class="form-label">Reference</label>
-            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+            @if (!IsEditable)
             {
                 <input type="text" class="form-control" id="Reference" readonly placeholder="@salesOrder.SOReference">
             }
@@ -155,7 +162,10 @@
         </li>
         <li class="nav-item" role="presentation">
             <a @onclick='(() => OnSelectTab("Shipping-tab"))' class=@String.Format("nav-link{0}", SelectedTabId=="Shipping-tab" ? " active": null) id="Shipping-tab" data-bs-toggle="tab" data-bs-target="#Shipping" type="button" role="tab" aria-controls="Shipping" aria-selected=@String.Format("nav-link{0}", SelectedTabId=="Shipping-tab" ? "true": "false")>Shipping</a>
-        </li>        
+        </li>
+        <li class="nav-item" role="presentation">
+            <a @onclick='(() => OnSelectTab("CustomFields-tab"))' class=@String.Format("nav-link{0}", SelectedTabId == "CustomFields-tab" ? " active" : null) id="CustomFields-tab" data-bs-toggle="tab" data-bs-target="#CustomFields" type="button" role="tab" aria-controls="CustomFields" aria-selected=@String.Format("nav-link{0}", SelectedTabId == "CustomFields-tab" ? "true" : "false")>Custom Fields</a>
+        </li>
     </ul>
 
     <div class="tab-content">
@@ -186,7 +196,7 @@
                                     }
                                 </div>
                             </th>
-                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            @if (IsEditable)
                             {
                                 <th class="text-center" width="50px"></th>
                             }
@@ -196,7 +206,7 @@
                             <th class="text-end">Total Ex</th>
                             <th class="text-end">Tax</th>
                             <th class="text-end">Total Inc.</th>
-                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            @if (IsEditable)
                             {
                                 <th class="text-center" width="50px"></th>
                             }
@@ -209,8 +219,8 @@
                             <tr class="align-middle">
                                 @if (salesOrderLine.CommentLine.Value)
                                 {
-                                    <td>@salesOrderLine.ItemNo</td>
-                                    @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                    <td class="text-end">@salesOrderLine.ItemNo</td>
+                                    @if (!IsEditable)
                                     {
                                         <td colspan="12">@salesOrderLine.CommentText</td>
                                     }
@@ -231,7 +241,7 @@
                                 }
                                 else
                                 {
-                                    <td>@salesOrderLine.ItemNo</td>
+                                    <td class="text-end">@salesOrderLine.ItemNo</td>
                                     <td>@salesOrderLine.PartNo</td>
                                     <td>@salesOrderLine.Description</td>
                                     @if (@salesOrderLine.UnitOfMeasure != null)
@@ -243,7 +253,7 @@
                                         <td>@salesOrderLine.SKUUnitName</td>
                                     }
 
-                                    @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                    @if (!IsEditable)
                                     {
                                         <td class="text-end">@Config.FormattedDecimals(@salesOrderLine.QuantityOrdered, salesOrderLine.QuantityDecimalPlaces)</td>
                                     }
@@ -271,7 +281,7 @@
                                     <td class="text-end" width="160px">@Config.FormattedDecimals(@salesOrderLine.QuantityThisDel, salesOrderLine.QuantityDecimalPlaces)</td>
                                     <td class="text-end" width="160px">@Config.FormattedDecimals(@salesOrderLine.QuantityBackOrd, salesOrderLine.QuantityDecimalPlaces)</td>
 
-                                    @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                    @if (!IsEditable)
                                     {
                                         <td class="text-end">@Config.FormattedCurrency(@salesOrderLine.FXDiscountedPrice, salesOrder.CurrencyID)</td>
                                     }
@@ -301,7 +311,7 @@
                                     <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrderLine.FXOrderedIncGSTTotal : salesOrderLine.FXLineTotal, salesOrder.CurrencyID)</td>                                    
                                 }
 
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                                @if (IsEditable)
                                 {
                                     <td class="text-center">
                                         <button @onclick="_ => DeleteSalesOrderLine(salesOrderLine)" class="btn" style="background-color:transparent">
@@ -319,7 +329,7 @@
                             <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.LinesFXOrderedExGSTTotal : SelectedHistory.LinesFXExGSTTotal, salesOrder.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.LinesFXOrderedGSTTotal : SelectedHistory.LinesFXGSTTotal, salesOrder.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.LinesFXOrderedIncGSTTotal : SelectedHistory.LinesFXIncGSTTotal, salesOrder.CurrencyID)</td>
-                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            @if (IsEditable)
                             {
                                 <td class="text-end"></td>
                             }
@@ -342,7 +352,7 @@
                             <td class="text-end"></td>                                                        
                         }
 
-                        @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                        @if (IsEditable)
                         {
                             <td class="text-center">
                                 <button @onclick="_ => EditFreight()" class="btn" style="background-color:transparent">
@@ -366,7 +376,7 @@
                             <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.FXOrderedExGSTTotal : SelectedHistory.FXExGSTTotal, salesOrder.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.FXOrderedGSTTotal : SelectedHistory.FXGSTTotal, salesOrder.CurrencyID)</td>
                             <td class="text-end">@Config.FormattedCurrency((TotalsTypeIsOrdered) ? salesOrder.FXOrderedIncGSTTotal : SelectedHistory.FXIncGSTTotal, salesOrder.CurrencyID)</td>
-                            @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                            @if (IsEditable)
                             {
                                 <td class="text-end"></td>
                             }
@@ -374,7 +384,7 @@
                     </tbody>
                 </table>
 
-                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider == "credentials")
+                @if (IsEditable)
                 {
                     <button @onclick="(() => AddSalesOrderLine())" type="button" class="btn btn-success">
                         Add Item
@@ -406,7 +416,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressee" class="form-label">Addressee</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if (!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressee" readonly placeholder="@salesOrder.DeliveryAddressee">
                                 }
@@ -420,7 +430,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressContactName" class="form-label">Contact Name</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if (!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressContactName" readonly placeholder="@salesOrder.DeliveryAddressContactName">
                                 }
@@ -437,7 +447,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddress1" class="form-label">Address 1</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if (!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddress1" readonly placeholder="@salesOrder.DeliveryAddress1">
                                 }
@@ -451,7 +461,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddress2" class="form-label">Address 2</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if (!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddress2" readonly placeholder="@salesOrder.DeliveryAddress2">
                                 }
@@ -468,7 +478,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressState" class="form-label">State</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if (!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressState" readonly placeholder="@salesOrder.DeliveryAddressState">
                                 }
@@ -482,7 +492,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressSuburb" class="form-label">Suburb</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if (!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressSuburb" readonly placeholder="@salesOrder.DeliveryAddressSuburb">
                                 }
@@ -499,7 +509,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressPostcode" class="form-label">Postcode</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if (!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressPostcode" readonly placeholder="@salesOrder.DeliveryAddressPostcode">
                                 }
@@ -513,7 +523,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressCountry" class="form-label">Country</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if (!IsEditable)
                                 {
                                     <input type="text" class="form-control" id="DeliveryAddressCountry" readonly placeholder="@salesOrder.DeliveryAddressCountry">
                                 }
@@ -530,7 +540,7 @@
                         <div class="row">
                             <div class="col-3">
                                 <label for="DeliveryAddressCourierDetails" class="form-label">Delivery Instructions</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                                @if (!IsEditable)
                                 {
                                     <textarea rows="3" class="form-control" id="DeliveryAddressCourierDetails" readonly placeholder="@salesOrder.DeliveryAddressCourierDetails"></textarea>
                                 }
@@ -545,7 +555,7 @@
                             </div>
                             <div class="col-3">
                                 <label for="DeliveryAddressNotes" class="form-label">Notes</label>
-                                @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
+                            @if (!IsEditable)
                                 {
                                     <textarea rows="3" class="form-control" id="DeliveryAddressNotes" readonly placeholder="@salesOrder.DeliveryAddressNotes"></textarea>
                                 }
@@ -563,6 +573,220 @@
                 </div>                
             </div>
         </div>        
+
+        <div class=@String.Format("tab-pane{0}", SelectedTabId == "CustomFields-tab" ? " active" : null) id="CustomFields" role="tabpanel" aria-labelledby="CustomFields-tab">
+            <ul class="nav nav-tabs" id="CustomFieldsTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                <a @onclick='(() => OnSelectCustomFieldsTab("OrderCustomFields-tab"))' class=@String.Format("nav-link{0}", CustomFieldsSelectedTabId == "OrderCustomFields-tab" ? " active" : null) id="OrderCustomFields-tab" data-bs-toggle="tab" data-bs-target="#OrderCustomFields" type="button" role="tab" aria-controls="OrderCustomFields" aria-selected=@String.Format("nav-link{0}", CustomFieldsSelectedTabId == "OrderCustomFields-tab" ? "true" : "false")>Order</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                <a @onclick='(() => OnSelectCustomFieldsTab("HistoryCustomFields-tab"))' class=@String.Format("nav-link{0}", CustomFieldsSelectedTabId == "HistoryCustomFields-tab" ? " active" : null) id="HistoryCustomFields-tab" data-bs-toggle="tab" data-bs-target="#HistoryCustomFields" type="button" role="tab" aria-controls="HistoryCustomFields" aria-selected=@String.Format("nav-link{0}", CustomFieldsSelectedTabId == "HistoryCustomFields-tab" ? "true" : "false")>History</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                    <div class=@String.Format("tab-pane{0}", CustomFieldsSelectedTabId == "OrderCustomFields-tab" ? " active" : null) id="OrderCustomFields" role="tabpanel" aria-labelledby="OrderCustomFields-tab">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped small">
+                                    <thead>
+                                        <tr>
+                                            <th>Plugin Name</th>
+                                            <th>Setting Name</th>
+                                            <th>Contents</th>
+                                            <th class="text-center" width="50px"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField in Config.SalesOrderCustomFields)
+                                        {
+                                            JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue customFieldValue = @salesOrder.CustomFieldValues?.Where(x => x.SettingID == customField.SettingID).FirstOrDefault();
+
+                                            <tr class="align-middle">
+                                                <td>@customField.PluginName</td>
+                                                <td>@customField.SettingName</td>
+                                                
+                                                @switch(customField.CellType)                                        
+                                                {                                                    
+                                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Date:
+                                                        if (IsEditable)
+                                                        {
+                                                            string dateValue = @customFieldValue?.Contents;
+                                                            if (!string.IsNullOrWhiteSpace(dateValue))
+                                                            {
+                                                                dateValue = DateTime.ParseExact(dateValue, "yyyy-MM-ddTHH:mm:ss", System.Globalization.CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
+                                                            }
+                                                            <td>
+                                                                <input type="date" class="form-control" id="CustomField.@customField.SettingID" value="@dateValue" @onchange="@(async (e) =>
+                                                                {
+                                                                    await SetCustomFieldValue(customField, e);
+                                                                })">
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>@customFieldValue?.Contents</td>
+                                                        }                                                            
+                                                        break;
+
+                                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Text:                                                                                                                                                                        
+                                                        if (IsEditable)
+                                                        {         
+                                                            <td>
+                                                                <input type="text" class="form-control" id="CustomField.@customField.SettingID" value="@customFieldValue?.Contents" maxlength="@customField.TextMaxLength" @onchange="async (e) =>
+                                                                    {
+                                                                        await SetCustomFieldValue(customField, e);
+                                                                    }">
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>@customFieldValue?.Contents</td>
+                                                        }                                                
+                                                        break;
+
+                                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Float:
+                                                        if (IsEditable)
+                                                        {
+                                                            <td>
+                                                                <input type="number" class="form-control" id="CustomField.@customField.SettingID" style="text-align: right;" value="@customFieldValue?.Contents" step="@(Math.Pow(10, (double)-customField.DecimalPlaces))" min="@customField.DecimalMinValue" max="@customField.DecimalMaxValue" @onchange="async (e) =>
+                                                                    {
+                                                                        await SetCustomFieldValue(customField, e);
+                                                                    }">
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            decimal decimalValue;
+                                                            if (decimal.TryParse(@customFieldValue?.Contents, out decimalValue))
+                                                            {
+                                                                <td class="text-end">@Config.FormattedDecimals(decimalValue, 2)</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                // empty value
+                                                                <td class="text-end"></td>
+                                                            }                                            
+                                                        }
+                                                        break;
+
+                                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Integer:
+                                                        if (IsEditable)
+                                                        {
+                                                            <td>
+                                                                <input type="number" class="form-control" id="CustomField.@customField.SettingID" style="text-align: right;" value="@customFieldValue?.Contents" step="1" min="@customField.IntegerMinValue" max="@customField.IntegerMaxValue" @onchange="async (e) =>
+                                                                    {
+                                                                        await SetCustomFieldValue(customField, e);
+                                                                    }">
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            int intValue;
+                                                            if (int.TryParse(@customFieldValue?.Contents, out intValue))
+                                                            {
+                                                                <td class="text-end">@Config.FormattedDecimals(intValue, 0)</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                // empty value
+                                                                <td class="text-end"></td>
+                                                            }
+                                                        }
+                                                        break;
+
+                                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Lookup:
+                                                        <td>@customFieldValue?.Contents</td>
+                                                        break;
+
+                                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Combo:
+                                                        if (IsEditable)
+                                                        {
+                                                            <td>
+                                                                <select class="form-control" name="CustomField.@customFieldValue.SettingName" id="CustomField.@customFieldValue.SettingID" @onchange="async (e) =>
+                                                                                {
+                                                                                    await SetCustomFieldValue(customField, e);
+                                                                                }">>       
+
+                                                                    @foreach(var item in customField.ComboKeyValuePairs)
+                                                                    {
+                                                                        if (customFieldValue.Contents == @item.Key)
+                                                                        {
+                                                                            <option value="@item.Key" selected>@item.Value</option>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <option value="@item.Key">@item.Value</option>
+                                                                        }                                                                
+                                                                    }   
+                                                                </select>
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            string? value = null;
+                                                            if (customField.ComboKeyValuePairs.TryGetValue(customFieldValue.Contents, out value))
+                                                            {
+                                                                <td>@value</td>
+                                                            }
+                                                            else
+                                                            {
+                                                                // invalid value
+                                                                <td></td>
+                                                            }                                                            
+                                                        }
+                                                        break;
+
+                                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Checkbox:
+                                                        if (IsEditable)
+                                                        {
+                                                            <td class="text-center">
+                                                                <input type="checkbox" id="CustomField.@customField.SettingID" value="@customFieldValue?.Contents" @onchange="async (e) =>
+                                                                                {
+                                                                                    await SetCustomFieldValue(customField, e);
+                                                                                }">
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="text-center">
+                                                                @if (!string.IsNullOrWhiteSpace(customFieldValue?.Contents) && bool.Parse(customFieldValue?.Contents))
+                                                                {
+                                                                    <input type="checkbox" disabled id="CustomField.@customField.SettingID" checked>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input type="checkbox" disabled id="CustomField.@customField.SettingID">                                                
+                                                                }                                                            
+                                                            </td>
+                                                        }
+                                                        break;
+                                                    }                   
+
+                                                @if(customField.CellType == JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Lookup)
+                                                {
+                                                    <td class="text-center">
+                                                        <button @onclick="_ => SalesOrderCustomFieldLookup(customField)" class="btn" style="background-color:transparent">
+                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
+                                                              <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707z"/>
+                                                            </svg>
+                                                        </button>
+                                                    </td>
+                                                 }
+                                                 else
+                                                 {
+                                                    <td></td>
+                                                 }                                                
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                    </div>
+                    <div class=@String.Format("tab-pane{0}", CustomFieldsSelectedTabId == "HistoryCustomFields-tab" ? " active" : null) id="HistoryCustomFields" role="tabpanel" aria-labelledby="HistoryCustomFields-tab">
+                        <!-- History custom fields go in here -->
+                    </div>            
+            </div>
+        </div>
     </div>    
 }
 @code {
@@ -581,10 +805,20 @@
     private string? statusMessage;
     private JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder salesOrder { get; set; }
     private string SelectedTabId { get; set; } = "Items-tab";
+    private string CustomFieldsSelectedTabId { get; set; } = "OrderCustomFields-tab";
     private JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderHistory SelectedHistory { get; set; }
     private bool AddingItem { get; set; }
     private bool EditingFreight { get; set; }
     private bool _TotalsTypeIsOrdered = true;
+    private RenderFragment? CustomFieldLookupRenderFragment { get; set; }
+
+    public bool IsEditable
+    {
+        get
+        {
+            return salesOrder.Status == JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder.SalesOrderStatuses.e_SalesOrderEntered && WebPortalUserSessionStateContainer.WebPortalUserSession?.AuthProvider == "credentials";
+        }   
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -653,6 +887,11 @@
     private async Task OnSelectTab(string tabId)
     {
         SelectedTabId = tabId;
+    }
+
+    private async Task OnSelectCustomFieldsTab(string tabId)
+    {
+        CustomFieldsSelectedTabId = tabId;
     }
 
     private async Task SelectedHistoryChange(ChangeEventArgs e)
@@ -767,6 +1006,40 @@
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
         }
+    }
+
+    private async Task SetCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, ChangeEventArgs e)
+    {
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest salesOrderPATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest();
+        salesOrderPATCHRequest.InvoiceID = salesOrder.InvoiceID;
+        salesOrderPATCHRequest.CustomFieldValues = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue>();
+        JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue customFieldValue = new JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue();
+        customFieldValue.SettingID = customField.SettingID;
+        customFieldValue.Contents = e.Value.ToString();
+        salesOrderPATCHRequest.CustomFieldValues.Add(customFieldValue);
+        int? currentSnap = SelectedHistory.HistoryNo;
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>(salesOrderPATCHRequest);
+        if (response != null)
+        {
+            salesOrder = response;
+            SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
+        }
+    }
+
+    private async Task SalesOrderCustomFieldLookup(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField)
+    {
+        CustomFieldLookupRenderFragment = builder =>
+        {     
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "relative");            
+
+            builder.OpenComponent<JiwaInventoryAutoQueryModalSelectionDialog>(0);
+            builder.AddAttribute(1, "Title", "Select Item");
+            //builder.AddAttribute(2, "OnClose", "@AddItemDialogClosed");
+            builder.CloseComponent();
+
+            builder.CloseElement();
+        };
     }
 
     public async void AddItemDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR InventoryItem)

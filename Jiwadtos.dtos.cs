@@ -569,6 +569,33 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string InvoiceHistoryID { get; set; }
         public virtual string InvoiceLineID { get; set; }
     }
+
+    [Route("/SalesOrders/CustomFields", "GET")]
+    [ApiResponse(Description = "Read OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public partial class SalesOrderCustomFieldsGETManyRequest
+        : IReturn<List<CustomField>>
+    {
+    }
+
+    [Route("/SalesOrders/Historys/CustomFields", "GET")]
+    [ApiResponse(Description = "Read OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public partial class SalesOrderHistoryCustomFieldsGETManyRequest
+       : IReturn<List<CustomField>>
+    {
+    }
+
+    [Route("/SalesOrders/Lines/CustomFields", "GET")]
+    [ApiResponse(Description = "Read OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public partial class SalesOrderLineCustomFieldsGETManyRequest
+        : IReturn<List<CustomField>>
+    {
+    }
     #endregion
 
     #region "Sales Quotes"
@@ -707,6 +734,25 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string QuoteHistoryID { get; set; }
         public virtual string QuoteLineID { get; set; }
     }
+
+    [Route("/SalesQuotes/CustomFields", "GET")]
+    [ApiResponse(Description = "Read OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public partial class SalesQuoteCustomFieldsGETManyRequest
+        : IReturn<List<CustomField>>
+    {
+    }
+
+    [Route("/SalesQuotes/Lines/CustomFields", "GET")]
+    [ApiResponse(Description = "Read OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public partial class SalesQuoteLineCustomFieldsGETManyRequest
+        : IReturn<List<CustomField>>
+    {
+    }
+
     #endregion
 }
 #endregion
@@ -734,6 +780,17 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields
         public virtual string PluginName { get; set; }
         public virtual CellTypes CellType { get; set; }
         public virtual int DisplayOrder { get; set; }
+        public virtual short? DecimalPlaces { get; set; }
+        public virtual decimal? DecimalMinValue { get; set; }
+        public virtual decimal? DecimalMaxValue { get; set; }
+        public virtual int? IntegerMinValue { get; set; }
+        public virtual int? IntegerMaxValue { get; set; }
+        public virtual DateTime? DateMinValue { get; set; }
+        public virtual DateTime? DateMaxValue { get; set; }
+        public virtual int? TextMinLength { get; set; }
+        public virtual int? TextMaxLength { get; set; }
+        public virtual string TextValidationRegex { get; set; }
+        public virtual Dictionary<string, string> ComboKeyValuePairs { get; set; }
     }
 
     public partial class CustomFieldValue

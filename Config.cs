@@ -44,47 +44,12 @@ namespace JiwaCustomerPortal
                 return _ServiceStackJsonAPIClientVersion;
             }
         }
-
-        // Currencies are a dictionary we populate the first time requested.
-        // We do this so everyone doesn't need to pull back currency images for each row of data - they can get it from here if they know the CurrencyID
+        
         public static System.Collections.Generic.Dictionary<string, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency> _Currencies;
         public static System.Collections.Generic.Dictionary<string, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency> Currencies
         {
             get 
-            { 
-                if (_Currencies == null)
-                {
-                    // lazy load currencies
-                    JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_CurrencyQuery currencyAutoQuery = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_CurrencyQuery();
-                    currencyAutoQuery.IsEnabled = true;
-
-                    try
-                    {
-                        Task readCurrenciesTask = Task.Run( async () =>
-                        {
-                            ServiceStack.QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency> currencyAutoQueryResponse = await JiwaAPI.GetAsync(currencyAutoQuery, jiwaAPIKey: JiwaAPIKey);
-
-                            _Currencies = new System.Collections.Generic.Dictionary<string, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency>();
-                            foreach (JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency currency in currencyAutoQueryResponse.Results)
-                            {
-                                _Currencies.Add(currency.RecID, currency);
-
-                                if (currency.IsLocal)
-                                {
-                                    _LocalCurrency = currency;
-                                }   
-                            }
-                        });
-
-                        readCurrenciesTask.Wait();
-                    }
-                    catch (Exception ex)
-                    {
-                        // TODO: we might want to wrap this or somehow indicate to the user why this failed.
-                        throw;
-                    }
-                }
-
+            {                 
                 return _Currencies;
             }            
         }
@@ -98,9 +63,19 @@ namespace JiwaCustomerPortal
             }
         }
 
-        public static async Task ReadSettingsFromAPI()
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _SalesOrderCustomFields;
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> SalesOrderCustomFields
         {
-            CustomerWebPortalSettings response = await JiwaAPI.GetAsync(new CustomerWebPortalSettingsGETRequest(), jiwaAPIKey: JiwaAPIKey);
+            get
+            {
+                return _SalesOrderCustomFields;
+            }
+        }
+
+        public static async Task ReadSettingsFromAPI(CancellationToken cancellationToken = default)
+        {
+            CustomerWebPortalSettings response = await JiwaAPI.GetAsync(new CustomerWebPortalSettingsGETRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
             SalesOrderReport = response.SalesOrderReport;
             SalesQuoteReport = response.SalesQuoteReport;
             DebtorStatementReport = response.DebtorStatementReport;
@@ -111,7 +86,25 @@ namespace JiwaCustomerPortal
             IN_PhysicalID = response.IN_PhysicalID;
             PhysicalWarehouseDescription = response.PhysicalWarehouseDescription;
 
-            JiwaAPISystemInformation = await JiwaAPI.GetAsync(new SystemInformationGETRequest(), jiwaAPIKey: JiwaAPIKey);
+            JiwaAPISystemInformation = await JiwaAPI.GetAsync(new SystemInformationGETRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+
+            // Read the currencies
+            JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_CurrencyQuery currencyAutoQuery = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_CurrencyQuery();
+            currencyAutoQuery.IsEnabled = true;
+            ServiceStack.QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency> currencyAutoQueryResponse = await JiwaAPI.GetAsync(currencyAutoQuery, jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+            _Currencies = new System.Collections.Generic.Dictionary<string, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency>();
+            foreach (JiwaFinancials.Jiwa.JiwaServiceModel.Tables.FX_Currency currency in currencyAutoQueryResponse.Results)
+            {
+                _Currencies.Add(currency.RecID, currency);
+
+                if (currency.IsLocal)
+                {
+                    _LocalCurrency = currency;
+                }
+            }
+
+            // Read the custom field definitions
+            _SalesOrderCustomFields = await JiwaAPI.GetAsync(new SalesOrderCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
         }
 
         public static string FormattedDecimals(decimal value, short decimalPlaces, bool useCommas = true)

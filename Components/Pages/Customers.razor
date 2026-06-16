@@ -11,38 +11,24 @@
 
 @if (APIRequestInProgress)
 {
-    <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <Throbber></Throbber>
 }
 
 <StatusMessage Message="@statusMessage"/>
 
 @if (ContactNameToCreate != null)
-{
-    <div class="relative">
-        <CreateEditContactDialog Title="Create Contact" ContactName="@ContactNameToCreate" OnClose="@CreateContactDialogClosed" />
-    </div>
+{    
+    <CreateEditContactDialog Title="Create Contact" ContactName="@ContactNameToCreate" OnClose="@CreateContactDialogClosed" />    
 }
 
 @if (ContactNameToEdit != null)
-{
-    <div class="relative">
-        <CreateEditContactDialog Title="Edit Contact" ContactName="@ContactNameToEdit" OnClose="@EditContactDialogClosed" />
-    </div>
+{    
+    <CreateEditContactDialog Title="Edit Contact" ContactName="@ContactNameToEdit" OnClose="@EditContactDialogClosed" />
 }
 
 @if (ContactNameToDelete != null)
 {
-    <div class="relative">
-        <ModalDialogOKCancel Title="Delete Contact?" Text="@($"Delete contact {ContactNameToDelete.DisplayName()}, {ContactNameToDelete.EmailAddress} ?")" OnClose="@DeleteContactConfirmationDialogClosed" />
-    </div>
+    <ModalDialogOKCancel Title="Delete Contact?" Text="@($"Delete contact {ContactNameToDelete.DisplayName()}, {ContactNameToDelete.EmailAddress} ?")" OnClose="@DeleteContactConfirmationDialogClosed" />
 }
 
 <div class="row">

@@ -12,31 +12,19 @@
 
 @if (APIRequestInProgress)
 {
-    <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <Throbber></Throbber>
 }
 
 <StatusMessage Message="@statusMessage"/>
 
 @if (AddingItem)
 {
-    <div class="relative">
-        <JiwaInventoryAutoQueryModalSelectionDialog Title="Select Item" OnClose="@AddItemDialogClosed" />
-    </div>
+    <JiwaInventoryAutoQueryModalSelectionDialog Title="Select Item" OnClose="@AddItemDialogClosed" />
 }
 
 @if (EditingFreight)
-{
-    <div class="relative">
-        <EditQuoteFreightModalDialog Title="Edit Freight" salesQuote="@salesQuote" SelectedHistory="@SelectedHistory" OnClose="@EditFreightDialogClosed" />
-    </div>
+{    
+    <EditQuoteFreightModalDialog Title="Edit Freight" salesQuote="@salesQuote" SelectedHistory="@SelectedHistory" OnClose="@EditFreightDialogClosed" />
 }
 
 @if (salesQuote != null)
@@ -50,14 +38,22 @@
             <label for="Name" class="form-label">Name</label>
             <input type="text" class="form-control" id="Name" readonly placeholder="@salesQuote.DebtorName">
         </div>
-        <div class="col-3 text-end">
-            <a href="/SalesQuotePDF/@SelectedHistory.QuoteHistoryID" target="_blank" rel="noopener noreferrer">
-                <button class="btn" style="background-color:transparent">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
-                        <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1" />
-                        <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1" />
-                    </svg>
-                </button>
+        <div class="col-1">
+            @if (salesQuote.Status == JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote.e_SalesQuoteStatuses.e_SalesQuoteEntered)
+            {
+                <div class="badge rounded-pill bg-success">Open</div>
+            }    
+            else
+            {
+                <div class="badge rounded-pill bg-danger">Closed</div>
+            }
+        </div>
+        <div class="col-2 text-end">
+            <a href="/SalesQuotePDF/@SelectedHistory.QuoteHistoryID" target="_blank" rel="noopener noreferrer">                
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
+                    <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1" />
+                    <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1" />
+                </svg>                
             </a>
         </div>
     </div>
@@ -186,7 +182,7 @@
                             <tr class="align-middle">
                                 @if (salesQuoteLine.CommentLine.Value)
                                 {
-                                    <td>@salesQuoteLine.ItemNo</td>                                    
+                                    <td class="text-end">@salesQuoteLine.ItemNo</td>
 
                                     @if (WebPortalUserSessionStateContainer.WebPortalUserSession.AuthProvider != "credentials")
                                     {

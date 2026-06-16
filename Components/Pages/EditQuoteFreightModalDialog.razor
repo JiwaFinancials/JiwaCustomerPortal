@@ -7,117 +7,111 @@
 @inject ProtectedLocalStorage ProtectedLocalStore
 @inject WebPortalUserSessionStateContainer WebPortalUserSessionStateContainer
 
-<div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);"
-     aria-modal="true" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">                        
-                <h4 class="modal-title">@Title</h4>                
-            </div>            
+<div class="relative">
+    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);"
+         aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">                        
+                    <h4 class="modal-title">@Title</h4>                
+                </div>            
 
-            <div class="modal-body">     
+                <div class="modal-body">     
                 
-                @if (APIRequestInProgress)
-                {
-                    <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content border-0">
-                                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </div>
+                    @if (APIRequestInProgress)
+                    {
+                        <Throbber></Throbber>
+                    }
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped small">
+                            <thead>
+                                <tr>
+                                    <th class="text-start">#</th>
+                                    <th>Ex Tax</th>                                        
+                                    <th>Tax</th>
+                                    <th>Inc Tax</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td class="text-start">Cartage 1</td>
+                                    <td class="text-end" width="160px">
+                                        <input type="number" class="form-control" id="FXCartage1ExGst"                                       
+                                               style="text-align: right;"
+                                               value="@Config.FormattedDecimals(@salesQuote.FXCartage1ExGst, Config.CurrencyDecimals(salesQuote.CurrencyID), false)"
+                                               step="@(Math.Pow(10, (double)-Config.CurrencyDecimals(salesQuote.CurrencyID)))"
+                                               min="0"
+                                               @onchange="async (e) =>
+                                                {
+                                                    await QuoteChanged(e, (q) =>
+                                                        {
+                                                            decimal value = 0;
+                                                            decimal.TryParse(e.Value.ToString(), out value);
+                                                            // We don't test the result of the decimal.TryPase - anything invalid is 0
+                                                            q.Cartage1ExGst = value;
+                                                        });
+                                                }">
+                                    </td>
+                                    <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage1Gst, salesQuote.CurrencyID)</td>
+                                    <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage1ExGst + salesQuote.FXCartage1Gst, salesQuote.CurrencyID)</td>                            
+                                </tr>
+
+                                <tr>
+                                    <td class="text-start">Cartage 2</td>
+                                    <td class="text-end" width="160px">
+                                        <input type="number" class="form-control" id="FXCartage2ExGst"
+                                               style="text-align: right;"
+                                               value="@Config.FormattedDecimals(@salesQuote.FXCartage2ExGst, Config.CurrencyDecimals(salesQuote.CurrencyID), false)"
+                                               step="@(Math.Pow(10, (double)-Config.CurrencyDecimals(salesQuote.CurrencyID)))"
+                                               min="0"
+                                               @onchange="async (e) =>
+                                                {
+                                                    await QuoteChanged(e, (q) => 
+                                                        { 
+                                                            decimal value = 0;
+                                                            decimal.TryParse(e.Value.ToString(), out value);
+                                                            // We don't test the result of the decimal.TryPase - anything invalid is 0
+                                                            q.Cartage2ExGst = value; 
+                                                        });
+                                                }">
+                                    </td>
+                                    <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage2Gst, salesQuote.CurrencyID)</td>
+                                    <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage2ExGst + salesQuote.FXCartage2Gst, salesQuote.CurrencyID)</td>
+                                </tr>
+
+                                <tr>
+                                    <td class="text-start">Cartage 3</td>
+                                    <td class="text-end" width="160px">
+                                        <input type="number" class="form-control" id="FXCartage3ExGst"
+                                               style="text-align: right;"
+                                               value="@Config.FormattedDecimals(@salesQuote.FXCartage3ExGst, Config.CurrencyDecimals(salesQuote.CurrencyID), false)"
+                                               step="@(Math.Pow(10, (double)-Config.CurrencyDecimals(salesQuote.CurrencyID)))"
+                                               min="0"
+                                               @onchange="async (e) =>
+                                                {
+                                                    await QuoteChanged(e, (q) =>
+                                                        {
+                                                            decimal value = 0;
+                                                            decimal.TryParse(e.Value.ToString(), out value);
+                                                            // We don't test the result of the decimal.TryPase - anything invalid is 0
+                                                            q.Cartage3ExGst = value;
+                                                        });
+                                                }">
+                                    </td>
+                                    <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
+                                    <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage3ExGst + salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                }
-
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped small">
-                        <thead>
-                            <tr>
-                                <th class="text-start">#</th>
-                                <th>Ex Tax</th>                                        
-                                <th>Tax</th>
-                                <th>Inc Tax</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr>
-                                <td class="text-start">Cartage 1</td>
-                                <td class="text-end" width="160px">
-                                    <input type="number" class="form-control" id="FXCartage1ExGst"                                       
-                                           style="text-align: right;"
-                                           value="@Config.FormattedDecimals(@salesQuote.FXCartage1ExGst, Config.CurrencyDecimals(salesQuote.CurrencyID), false)"
-                                           step="@(Math.Pow(10, (double)-Config.CurrencyDecimals(salesQuote.CurrencyID)))"
-                                           min="0"
-                                           @onchange="async (e) =>
-                                            {
-                                                await QuoteChanged(e, (q) =>
-                                                    {
-                                                        decimal value = 0;
-                                                        decimal.TryParse(e.Value.ToString(), out value);
-                                                        // We don't test the result of the decimal.TryPase - anything invalid is 0
-                                                        q.Cartage1ExGst = value;
-                                                    });
-                                            }">
-                                </td>
-                                <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage1Gst, salesQuote.CurrencyID)</td>
-                                <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage1ExGst + salesQuote.FXCartage1Gst, salesQuote.CurrencyID)</td>                            
-                            </tr>
-
-                            <tr>
-                                <td class="text-start">Cartage 2</td>
-                                <td class="text-end" width="160px">
-                                    <input type="number" class="form-control" id="FXCartage2ExGst"
-                                           style="text-align: right;"
-                                           value="@Config.FormattedDecimals(@salesQuote.FXCartage2ExGst, Config.CurrencyDecimals(salesQuote.CurrencyID), false)"
-                                           step="@(Math.Pow(10, (double)-Config.CurrencyDecimals(salesQuote.CurrencyID)))"
-                                           min="0"
-                                           @onchange="async (e) =>
-                                            {
-                                                await QuoteChanged(e, (q) => 
-                                                    { 
-                                                        decimal value = 0;
-                                                        decimal.TryParse(e.Value.ToString(), out value);
-                                                        // We don't test the result of the decimal.TryPase - anything invalid is 0
-                                                        q.Cartage2ExGst = value; 
-                                                    });
-                                            }">
-                                </td>
-                                <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage2Gst, salesQuote.CurrencyID)</td>
-                                <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage2ExGst + salesQuote.FXCartage2Gst, salesQuote.CurrencyID)</td>
-                            </tr>
-
-                            <tr>
-                                <td class="text-start">Cartage 3</td>
-                                <td class="text-end" width="160px">
-                                    <input type="number" class="form-control" id="FXCartage3ExGst"
-                                           style="text-align: right;"
-                                           value="@Config.FormattedDecimals(@salesQuote.FXCartage3ExGst, Config.CurrencyDecimals(salesQuote.CurrencyID), false)"
-                                           step="@(Math.Pow(10, (double)-Config.CurrencyDecimals(salesQuote.CurrencyID)))"
-                                           min="0"
-                                           @onchange="async (e) =>
-                                            {
-                                                await QuoteChanged(e, (q) =>
-                                                    {
-                                                        decimal value = 0;
-                                                        decimal.TryParse(e.Value.ToString(), out value);
-                                                        // We don't test the result of the decimal.TryPase - anything invalid is 0
-                                                        q.Cartage3ExGst = value;
-                                                    });
-                                            }">
-                                </td>
-                                <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
-                                <td class="text-end">@Config.FormattedCurrency(salesQuote.FXCartage3ExGst + salesQuote.FXCartage3Gst, salesQuote.CurrencyID)</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
+                <div class="modal-footer">                
+                    <button type="button" class="btn btn-success" @onclick=@ModalOk>OK</button>
+                </div>
+                <StatusMessage Message="@statusMessage" />
             </div>
-            <div class="modal-footer">                
-                <button type="button" class="btn btn-success" @onclick=@ModalOk>OK</button>
-            </div>
-            <StatusMessage Message="@statusMessage" />
         </div>
     </div>
 </div>
