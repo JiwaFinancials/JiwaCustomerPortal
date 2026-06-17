@@ -786,10 +786,10 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields
         public virtual int? IntegerMinValue { get; set; }
         public virtual int? IntegerMaxValue { get; set; }
         public virtual DateTime? DateMinValue { get; set; }
-        public virtual DateTime? DateMaxValue { get; set; }
-        public virtual int? TextMinLength { get; set; }
+        public virtual DateTime? DateMaxValue { get; set; }        
         public virtual int? TextMaxLength { get; set; }
-        public virtual string TextValidationRegex { get; set; }
+        public virtual Dictionary<string, string> LookupProviders { get; set; }
+        public virtual Dictionary<string, string> LookupDisplayValueResolvers { get; set; }
         public virtual Dictionary<string, string> ComboKeyValuePairs { get; set; }
     }
 

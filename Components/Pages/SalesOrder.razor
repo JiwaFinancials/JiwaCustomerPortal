@@ -691,7 +691,7 @@
                                                         break;
 
                                                     case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Lookup:
-                                                        <td>@customFieldValue?.Contents</td>
+                                                        <td>@ResolveCustomFieldDisplayValue(customField, customFieldValue.Contents)</td>
                                                         break;
 
                                                     case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Combo:
@@ -761,7 +761,10 @@
                                                 @if(customField.CellType == JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Lookup)
                                                 {
                                                     <td class="text-center">
-                                                        <button @onclick="_ => SalesOrderCustomFieldLookup(customField)" class="btn" style="background-color:transparent">
+                                                        <button @onclick="async (e) =>
+                                                            {
+                                                                await SalesOrderCustomFieldLookupOnClick(customField);
+                                                            }" class="btn" style="background-color:transparent">
                                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
                                                               <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707z"/>
                                                             </svg>
@@ -806,7 +809,7 @@
     private JiwaInventoryAutoQueryModalSelectionDialog AddItemDialog { get; set; }
     private EditSalesOrderFreightModalDialog EditFreightDialog { get; set; }
     private bool _TotalsTypeIsOrdered = true;
-    private RenderFragment? CustomFieldLookupRenderFragment { get; set; }
+    public RenderFragment? CustomFieldLookupRenderFragment { get; set; }
 
     public bool IsEditable
     {
@@ -1024,7 +1027,7 @@
         }
     }
 
-    private async Task SetCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, ChangeEventArgs e)
+    public async Task SetCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, ChangeEventArgs e)
     {
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest salesOrderPATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest();
         salesOrderPATCHRequest.InvoiceID = salesOrder.InvoiceID;
@@ -1042,20 +1045,57 @@
         }
     }
 
-    private async Task SalesOrderCustomFieldLookup(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField)
+    private async Task SalesOrderCustomFieldLookupOnClick(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField)
+    {        
+        CustomFieldLookupRenderFragment = null;
+
+        // example of what the fragment looks like for the Inventory lookup - a Jiwa plugin defines this fragment as a string, 
+        // and provides it to us in the CustomField.LookupProviders dictionary - and we can then compile and run that code to get the RenderFragment 
+        // to render the lookup dialog for that custom field.  This allows the plugin to define not only which dialog to show, but also what happens 
+        // when the user selects something in that dialog - in this case we set the value of the custom field to the InventoryID of the item they selected in the dialog.
+        // @"CustomFieldLookupRenderFragment = async builder =>
+        // {
+        //     builder.OpenComponent(0, typeof(JiwaInventoryAutoQueryModalSelectionDialog)); 
+        //     builder.AddAttribute(1, ""Title"", ""Select Item""); 
+        //     builder.AddAttribute(2, ""AutoOpen"", true); 
+        //     builder.AddAttribute(3, ""OnItemSelected"", EventCallback.Factory.Create<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR>(Host, async (i) => 
+        //     { 
+        //         await Host.SetCustomFieldValue(CustomField, new ChangeEventArgs() { Value = i.InventoryID }); 
+        //         CustomFieldLookupRenderFragment = null; 
+        //         await Host.InvokeStateChanged(); 
+        //     })); 
+        //     builder.CloseComponent();
+        // }";
+
+        string fragment = null;
+        if (customField.LookupProviders.TryGetValue("Jiwa Customer Web Portal", out fragment))
+        {
+            if (!string.IsNullOrWhiteSpace(fragment))
+            {
+                var scriptOptions = Microsoft.CodeAnalysis.Scripting.ScriptOptions.Default;
+                scriptOptions = scriptOptions.WithImports("System", "JiwaCustomerPortal", "JiwaCustomerPortal.Components", "Microsoft.AspNetCore.Components");
+                scriptOptions = scriptOptions.AddReferences(System.Reflection.Assembly.GetExecutingAssembly());
+                var script = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.Create(fragment, scriptOptions, globalsType: typeof(SalesOrderCustomFieldLookupRenderFragmentContext));
+                script.Compile();
+
+                SalesOrderCustomFieldLookupRenderFragmentContext g = new SalesOrderCustomFieldLookupRenderFragmentContext() { CustomFieldLookupRenderFragment = CustomFieldLookupRenderFragment, Host = this, CustomField = customField };
+                var result = await script.RunAsync(globals: g);
+            }       
+        }        
+    }
+
+    public string ResolveCustomFieldDisplayValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, string Contents?)
     {
-        CustomFieldLookupRenderFragment = builder =>
-        {     
-            builder.OpenElement(0, "div");
-            builder.AddAttribute(1, "class", "relative");            
-
-            builder.OpenComponent<JiwaInventoryAutoQueryModalSelectionDialog>(0);
-            builder.AddAttribute(1, "Title", "Select Item");
-            //builder.AddAttribute(2, "OnClose", "@AddItemDialogClosed");
-            builder.CloseComponent();
-
-            builder.CloseElement();
-        };
+        // The purpose of this method is to resolve the display value for a custom field of type Lookup - we look to see if the plugin has provided a resolver for this custom field, and if so we execute the code in that resolver to get the display value.  If not, then we just return the contents as is.
+        string fragment = null;
+        if (customField.LookupDisplayValueResolvers.TryGetValue("Jiwa Customer Web Portal", out fragment))
+        {
+            if (!string.IsNullOrWhiteSpace(fragment))
+            {
+                
+            }
+        }
+        return Contents ?? string.Empty;
     }
 
     public async void FreightChanged(JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder FreightDTO)

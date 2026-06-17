@@ -83,6 +83,8 @@
     public string Title { get; set; }
     [Parameter]
     public string Text { get; set; }
+    [Parameter]
+    public bool AutoOpen { get; set; } = false;
 
     [Parameter]
     public EventCallback<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR> OnItemSelected { get; set; }
@@ -148,6 +150,11 @@
             Take = 12,            
             Immutable_IN_LogicalID=Config.IN_LogicalID
         };        
+
+        if (AutoOpen)
+        {
+            Open();
+        }
     }
 
     public void Open()
