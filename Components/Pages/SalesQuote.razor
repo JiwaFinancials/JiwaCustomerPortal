@@ -672,6 +672,11 @@
 
     private async Task QuoteLineChanged(ChangeEventArgs e, string quoteLineID, Action<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine> patchDTOAction)
     {
+        // You may be wondering why do use salesQuotePATCHRequest instead of using the existing route to PATCH the quote line
+        // It's because we need to GET the whole sales quote back in the response, not just the comment line as we have no idea
+        // what business logic rules at the other side have done to the sales quote
+        // So we construct a salesQuotePATCHRequest with only the fields we are changing, but the response will contain the whole sales quote with all changes applied and we can update our UI with that
+
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest salesQuotePATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest();
         salesQuotePATCHRequest.QuoteID = salesQuote.QuoteID;
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine quoteLine = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine();
@@ -711,6 +716,11 @@
 
     private async Task AddInventoryItem(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR InventoryItem)
     {
+        // You may be wondering why do use salesQuotePATCHRequest instead of using the existing route to POST a new quote line
+        // It's because we need to GET the whole sales quote back in the response, not just the comment line as we have no idea
+        // what business logic rules at the other side have done to the sales quote
+        // So we construct a salesQuotePATCHRequest with only the fields we are changing, but the response will contain the whole sales quote with all changes applied and we can update our UI with that
+
         AddItemDialog.Close(); // don't really need to close the dialog explicitly, as the dialog does this itself, but if we don't then we don't see the throbber during the API call below.
 
         if (InventoryItem != null)
@@ -736,6 +746,11 @@
 
     private async Task AddQuoteCommentLine()
     {
+        // You may be wondering why do use salesQuotePATCHRequest instead of using the existing route to POST a new comment line
+        // It's because we need to GET the whole sales quote back in the response, not just the comment line as we have no idea
+        // what business logic rules at the other side have done to the sales quote
+        // So we construct a salesQuotePATCHRequest with only the fields we are changing, but the response will contain the whole sales quote with all changes applied and we can update our UI with that
+
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest salesQuotePATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotePATCHRequest();
         salesQuotePATCHRequest.QuoteID = salesQuote.QuoteID;
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine quoteLine = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine();

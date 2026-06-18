@@ -199,6 +199,11 @@
                             {
                                 <th class="text-center" width="50px"></th>
                             }
+                             <!-- Sales Order Line Custom Fields -->
+                            @foreach (JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField in Config.SalesOrderLineCustomFields)
+                            {
+                                <th>@customField.SettingName</th>
+                            }
                         </tr>
                         <tr>
                             <th class="text-center" colspan="9"></th>                            
@@ -209,7 +214,12 @@
                             {
                                 <th class="text-center" width="50px"></th>
                             }
-                        </tr>
+                            <!-- Sales Order Line Custom Fields -->
+                            @foreach (JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField in Config.SalesOrderLineCustomFields)
+                            {
+                                <th></th>
+                            }
+                        </tr>                       
                     </thead>
 
                     <tbody>
@@ -321,6 +331,179 @@
                                         </button>
                                     </td>
                                 }
+
+                                <!-- Sales Order Line Custom Fields -->
+                                @foreach (JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField in Config.SalesOrderLineCustomFields)
+                                {
+                                    JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue customFieldValue = @salesOrderLine.CustomFieldValues?.Where(x => x.SettingID == customField.SettingID).FirstOrDefault();
+                                    <td>
+                                        @switch(customField.CellType)
+                                        {
+                                            case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Date:
+                                                if (IsEditable)
+                                                {
+                                                    string dateValue = @customFieldValue?.Contents;
+                                                    if (!string.IsNullOrWhiteSpace(dateValue))
+                                                    {
+                                                        dateValue = DateTime.ParseExact(dateValue, "yyyy-MM-ddTHH:mm:ss", System.Globalization.CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
+                                                    }
+                                                    <td>
+                                                        <input type="date" class="form-control" id="@($"LineCustomField.{salesOrderLine.InvoiceLineID}.{customField.SettingID}");" value="@dateValue" @onchange="@(async (e) =>
+                                                        {
+                                                            await SetLineCustomFieldValue(salesOrderLine, customField, e);
+                                                        })">
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td>@customFieldValue?.Contents</td>
+                                                }                                                            
+                                                break;
+
+                                            case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Text:
+                                                if (IsEditable)
+                                                {
+                                                    <input type="text" class="form-control" id="@($"LineCustomField.{salesOrderLine.InvoiceLineID}.{customField.SettingID}");" value="@customFieldValue?.Contents" maxlength="@customField.TextMaxLength" @onchange="async (e) =>
+                                                            {
+                                                                await SetLineCustomFieldValue(salesOrderLine, customField, e);
+                                                            }">
+                                                }
+                                                else
+                                                {
+                                                    @customFieldValue?.Contents
+                                                }
+                                                break;
+
+                                            case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Float:
+                                                if (IsEditable)
+                                                {
+                                                    <td>
+                                                        <input type="number" class="form-control" id="@($"LineCustomField.{salesOrderLine.InvoiceLineID}.{customField.SettingID}");" style="text-align: right;" value="@customFieldValue?.Contents" step="@(Math.Pow(10, (double)-customField.DecimalPlaces))" min="@customField.DecimalMinValue" max="@customField.DecimalMaxValue" @onchange="async (e) =>
+                                                            {
+                                                                await SetLineCustomFieldValue(salesOrderLine, customField, e);
+                                                            }">
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    decimal decimalValue;
+                                                    if (decimal.TryParse(@customFieldValue?.Contents, out decimalValue))
+                                                    {
+                                                        <td class="text-end">@Config.FormattedDecimals(decimalValue, 2)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        // empty value
+                                                        <td class="text-end"></td>
+                                                    }
+                                                }
+                                                break;
+
+                                            case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Integer:
+                                                if (IsEditable)
+                                                {
+                                                    <td>
+                                                        <input type="number" class="form-control" id="@($"LineCustomField.{salesOrderLine.InvoiceLineID}.{customField.SettingID}");" value="@customFieldValue?.Contents" step="1" min="@customField.IntegerMinValue" max="@customField.IntegerMaxValue" @onchange="async (e) =>
+                                                                {
+                                                                    await SetLineCustomFieldValue(salesOrderLine, customField, e);
+                                                                }">
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    int intValue;
+                                                    if (int.TryParse(@customFieldValue?.Contents, out intValue))
+                                                    {
+                                                        <td class="text-end">@Config.FormattedDecimals(intValue, 0)</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        // empty value
+                                                        <td class="text-end"></td>
+                                                    }
+                                                }
+                                                break;
+
+                                            case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Lookup:
+                                                <td>@customFieldValue.DisplayValue</td>
+                                                break;
+
+                                            case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Combo:
+                                                if (IsEditable)
+                                                {
+                                                    <td>
+                                                        <select class="form-control" name="CustomField.@customFieldValue.SettingID" id="@($"LineCustomField.{salesOrderLine.InvoiceLineID}.{customField.SettingID}");" @onchange="async (e) =>
+                                                            {
+                                                                await SetLineCustomFieldValue(salesOrderLine, customField, e);
+                                                            }">
+
+                                                            @foreach (var item in customField.ComboKeyValuePairs)
+                                                            {
+                                                                if (customFieldValue.Contents == @item.Key)
+                                                                {
+                                                                    <option value="@item.Key" selected>@item.Value</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@item.Key">@item.Value</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    string? value = null;
+                                                    if (customField.ComboKeyValuePairs.TryGetValue(customFieldValue.Contents, out value))
+                                                    {
+                                                        <td>@value</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        // invalid value
+                                                        <td></td>
+                                                    }
+                                                }
+                                                break;
+
+                                            case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Checkbox:
+                                                if (IsEditable)
+                                                {
+                                                    <td class="text-center">
+                                                        @if (!string.IsNullOrWhiteSpace(customFieldValue?.Contents) && bool.Parse(customFieldValue?.Contents))
+                                                        {
+                                                            <input type="checkbox" id="@($"LineCustomField.{salesOrderLine.InvoiceLineID}.{customField.SettingID}");" checked @onchange="async (e) =>
+                                                                    {
+                                                                        await SetLineCustomFieldValue(salesOrderLine, customField, e);
+                                                                    }">
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="checkbox" id="@($"LineCustomField.{salesOrderLine.InvoiceLineID}.{customField.SettingID}");" @onchange="async (e) =>
+                                                                    {
+                                                                        await SetLineCustomFieldValue(salesOrderLine, customField, e);
+                                                                    }">
+                                                        }
+
+                                                    </td>
+                                                }
+                                                else
+                                                {
+                                                    <td class="text-center">
+                                                        @if (!string.IsNullOrWhiteSpace(customFieldValue?.Contents) && bool.Parse(customFieldValue?.Contents))
+                                                        {
+                                                            <input type="checkbox" disabled id="@($"LineCustomField.{salesOrderLine.InvoiceLineID}.{customField.SettingID}");" checked>
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="checkbox" disabled id="@($"LineCustomField.{salesOrderLine.InvoiceLineID}.{customField.SettingID}");">
+                                                        }
+                                                    </td>
+                                                }
+                                                break;
+                                        }
+                                    </td>
+                                }
                             </tr>
                         }
                         <tr class="align-middle">
@@ -331,6 +514,12 @@
                             @if (IsEditable)
                             {
                                 <td class="text-end"></td>
+                            }
+
+                            <!-- Sales Order Line Custom Fields -->
+                            @foreach (JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField in Config.SalesOrderLineCustomFields)
+                            {
+                                <td></td>
                             }
                         </tr>
 
@@ -362,6 +551,12 @@
                                 </button>
                             </td>   
                         }
+
+                            <!-- Sales Order Line Custom Fields -->
+                        @foreach (JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField in Config.SalesOrderLineCustomFields)
+                        {
+                            <td></td>
+                        }
                         </tr>
 
                         <tr class="align-middle">
@@ -378,6 +573,12 @@
                             @if (IsEditable)
                             {
                                 <td class="text-end"></td>
+                            }
+
+                            <!-- Sales Order Line Custom Fields -->
+                            @foreach (JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField in Config.SalesOrderLineCustomFields)
+                            {
+                                <td></td>
                             }
                         </tr>
                     </tbody>
@@ -1171,6 +1372,11 @@
 
     private async Task SalesOrderLineChanged(ChangeEventArgs e, string InvoiceLineID, Action<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine> patchDTOAction)
     {
+        // You may be wondering why do use salesOrderPATCHRequest instead of using the existing route to PATCH a sales order line
+        // It's because we need to GET the whole sales order back in the response, not just the line as we have no idea
+        // what business logic rules at the other side have done to the sales order
+        // So we construct a salesOrderPATCHRequest with only the fields we are changing, but the response will contain the whole sales order with all changes applied and we can update our UI with that
+
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest salesOrderPATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest();
         salesOrderPATCHRequest.InvoiceID = salesOrder.InvoiceID;
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine OrderLine = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine();
@@ -1214,6 +1420,11 @@
 
     private async Task AddInventoryItem(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR InventoryItem)
     {
+        // You may be wondering why do use salesOrderPATCHRequest instead of using the existing route to POST a new sales order line
+        // It's because we need to GET the whole sales order back in the response, not just the line as we have no idea
+        // what business logic rules at the other side have done to the sales order
+        // So we construct a salesOrderPATCHRequest with only the fields we are changing, but the response will contain the whole sales order with all changes applied and we can update our UI with that
+
         AddItemDialog.Close(); // don't really need to close the dialog explicitly, as the dialog does this itself, but if we don't then we don't see the throbber during the API call below.
 
         if (InventoryItem != null)
@@ -1241,6 +1452,11 @@
 
     private async Task AddSalesOrderCommentLine()
     {
+        // You may be wondering why do use salesOrderPATCHRequest instead of using the existing route to POST a new comment line
+        // It's because we need to GET the whole sales order back in the response, not just the comment line as we have no idea
+        // what business logic rules at the other side have done to the sales order
+        // So we construct a salesOrderPATCHRequest with only the fields we are changing, but the response will contain the whole sales order with all changes applied and we can update our UI with that
+
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest salesOrderPATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest();
         salesOrderPATCHRequest.InvoiceID = salesOrder.InvoiceID;
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine OrderLine = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine();
@@ -1260,13 +1476,18 @@
         }
     }
 
-    public async Task SetCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, ChangeEventArgs e)
+    public async Task SetCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField, ChangeEventArgs e)
     {
+        // You may be wondering why do use salesOrderPATCHRequest instead of using the existing route to PATCH the custom field value
+        // It's because we need to GET the whole sales order back in the response, not just the line as we have no idea
+        // what business logic rules at the other side have done to the sales order
+        // So we construct a salesOrderPATCHRequest with only the fields we are changing, but the response will contain the whole sales order with all changes applied and we can update our UI with that
+
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest salesOrderPATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest();
         salesOrderPATCHRequest.InvoiceID = salesOrder.InvoiceID;
         salesOrderPATCHRequest.CustomFieldValues = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue>();
         JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue customFieldValue = new JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue();
-        customFieldValue.SettingID = customField.SettingID;
+        customFieldValue.SettingID = CustomField.SettingID;
         customFieldValue.Contents = e.Value.ToString();
         salesOrderPATCHRequest.CustomFieldValues.Add(customFieldValue);
         int? currentSnap = SelectedHistory.HistoryNo;
@@ -1280,8 +1501,12 @@
         }
     }
 
-    public async Task SetHistoryCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, ChangeEventArgs e)
+    public async Task SetHistoryCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField, ChangeEventArgs e)
     {
+        // You may be wondering why do use salesOrderPATCHRequest instead of using the existing route to PATCH the custom field value
+        // It's because we need to GET the whole sales order back in the response, not just the line as we have no idea
+        // what business logic rules at the other side have done to the sales order
+
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest salesOrderPATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest();
         salesOrderPATCHRequest.InvoiceID = salesOrder.InvoiceID;        
 
@@ -1292,7 +1517,7 @@
         history.CustomFieldValues = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue>();
 
         JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue customFieldValue = new JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue();
-        customFieldValue.SettingID = customField.SettingID;
+        customFieldValue.SettingID = CustomField.SettingID;
         customFieldValue.Contents = e.Value.ToString();
         history.CustomFieldValues.Add(customFieldValue);
 
@@ -1302,6 +1527,37 @@
         {
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];            
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+        }
+    }
+
+    public async Task SetLineCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine SalesOrderLine, JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField, ChangeEventArgs e)
+    {
+        // You may be wondering why do use salesOrderPATCHRequest instead of using the existing route to PATCH a sales order line custom field value
+        // It's because we need to GET the whole sales order back in the response, not just the line as we have no idea
+        // what business logic rules at the other side have done to the sales order
+        // So we construct a salesOrderPATCHRequest with only the fields we are changing, but the response will contain the whole sales order with all changes applied and we can update our UI with that
+
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest salesOrderPATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest();
+        salesOrderPATCHRequest.InvoiceID = salesOrder.InvoiceID;
+        salesOrderPATCHRequest.Lines = new List<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine>();
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine line = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine() { InvoiceLineID = SalesOrderLine.InvoiceLineID };
+
+        line.CustomFieldValues = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue>();
+        JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue customFieldValue = new JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue();
+        customFieldValue.SettingID = CustomField.SettingID;
+        customFieldValue.Contents = e.Value.ToString();
+        line.CustomFieldValues.Add(customFieldValue);
+
+        salesOrderPATCHRequest.Lines.Add(line);
+        
+        int? currentSnap = SelectedHistory.HistoryNo;
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>(salesOrderPATCHRequest);
+        if (response != null)
+        {
+            salesOrder = response;
+            SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
             await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
             await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
         }
