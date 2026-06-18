@@ -791,6 +791,10 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields
         public virtual Dictionary<string, string> LookupProviders { get; set; }
         public virtual Dictionary<string, string> LookupDisplayValueResolvers { get; set; }
         public virtual Dictionary<string, string> ComboKeyValuePairs { get; set; }
+
+        // LookupButtonScript and LookupDisplayValueResolverScript added for our purposes here - this is not populated or used by the Jiwa REST API
+        public virtual Microsoft.CodeAnalysis.Scripting.Script LookupButtonScript { get; set; }
+        public virtual Microsoft.CodeAnalysis.Scripting.Script LookupDisplayValueResolverScript { get; set; }
     }
 
     public partial class CustomFieldValue

@@ -113,10 +113,13 @@ Grant the following REST API permissions to the Customer Web Portal User Group:
 | 22 | /Queries/StartupLog | GET |
 | 23 | /SalesOrders/{InvoiceHistoryID}/InvoiceSnapshotReport/{ReportID} | GET |
 | 24 | /SalesOrders/{InvoiceID} | GET |
-| 25 | /SalesQuotes/{QuoteHistoryID}/QuoteSnapshotReport/{ReportID} | GET |
-| 26 | /SalesQuotes/{QuoteID} | GET |
-| 27 | /Sessions/Current | GET |
-| 28 | /SystemInfo | GET |
+| 25 | /SalesOrders/CustomFields | GET |
+| 26 | /SalesOrders/Historys/CustomFields | GET |
+| 27 | /SalesOrders/Lines/CustomFields | GET |
+| 28 | /SalesQuotes/{QuoteHistoryID}/QuoteSnapshotReport/{ReportID} | GET |
+| 29 | /SalesQuotes/{QuoteID} | GET |
+| 30 | /Sessions/Current | GET |
+| 31 | /SystemInfo | GET |
 
 If you are allowing staff members to login to the portal, the following permissions are also required for the Customer Web Portal User Group:
 | # | Route | Verb |

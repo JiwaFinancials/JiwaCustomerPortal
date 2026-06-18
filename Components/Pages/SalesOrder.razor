@@ -1311,44 +1311,56 @@
     {        
         CustomFieldLookupRenderFragment = null;
 
-        // example of what the fragment looks like for the Inventory lookup - a Jiwa plugin defines this fragment as a string, 
-        // and provides it to us in the CustomField.LookupProviders dictionary - and we can then compile and run that code to get the RenderFragment 
-        // to render the lookup dialog for that custom field.  This allows the plugin to define not only which dialog to show, but also what happens 
-        // when the user selects something in that dialog - in this case we set the value of the custom field to the InventoryID of the item they selected in the dialog.
-        // This would be returned by the LookupProviders method of the IJiwaLookupCustomFieldPlugin implemention of the Jiwa plugin
-        // @"CustomFieldLookupRenderFragment = async builder =>
-        // {
-        //     builder.OpenComponent(0, typeof(JiwaInventoryAutoQueryModalSelectionDialog)); 
-        //     builder.AddAttribute(1, ""Title"", ""Select Item""); 
-        //     builder.AddAttribute(2, ""AutoOpen"", true); 
-        //     builder.AddAttribute(3, ""OnItemSelected"", EventCallback.Factory.Create<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR>(Host, async (i) => 
-        //     { 
-        //         await Host.SetCustomFieldValue(CustomField, new ChangeEventArgs() { Value = i.InventoryID }); 
-        //         CustomFieldLookupRenderFragment = null; 
-        //         await Host.InvokeStateChanged(); 
-        //     })); 
-        //     builder.CloseComponent();
-        // }";
-
-        string fragment = null;
-        if (CustomField.LookupProviders.TryGetValue("Jiwa Customer Web Portal", out fragment))
+        if (CustomField.LookupButtonScript == null)
         {
-            if (!string.IsNullOrWhiteSpace(fragment))
-            {
-                var scriptOptions = Microsoft.CodeAnalysis.Scripting.ScriptOptions.Default;
-                scriptOptions = scriptOptions.WithImports("System", "JiwaCustomerPortal", "JiwaCustomerPortal.Components", "Microsoft.AspNetCore.Components");
-                scriptOptions = scriptOptions.AddReferences(System.Reflection.Assembly.GetExecutingAssembly());
-                var script = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.Create(fragment, scriptOptions, globalsType: typeof(SalesOrderCustomFieldLookupRenderFragmentContext));
-                script.Compile();
+            // example of what the fragment looks like for the Inventory lookup - a Jiwa plugin defines this fragment as a string,
+            // and provides it to us in the CustomField.LookupProviders dictionary - and we can then compile and run that code to get the RenderFragment
+            // to render the lookup dialog for that custom field.  This allows the plugin to define not only which dialog to show, but also what happens
+            // when the user selects something in that dialog - in this case we set the value of the custom field to the InventoryID of the item they selected in the dialog.
+            // This would be returned by the LookupProviders method of the IJiwaLookupCustomFieldPlugin implemention of the Jiwa plugin
+            // @"CustomFieldLookupRenderFragment = async builder =>
+            // {
+            //     builder.OpenComponent(0, typeof(JiwaInventoryAutoQueryModalSelectionDialog));
+            //     builder.AddAttribute(1, ""Title"", ""Select Item"");
+            //     builder.AddAttribute(2, ""AutoOpen"", true);
+            //     builder.AddAttribute(3, ""OnItemSelected"", EventCallback.Factory.Create<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR>(Host, async (i) =>
+            //     {
+            //         await Host.SetCustomFieldValue(CustomField, new ChangeEventArgs() { Value = i.InventoryID });
+            //         CustomFieldLookupRenderFragment = null;            
+            //     }));
+            //     builder.CloseComponent();
+            // }";
 
-                SalesOrderCustomFieldLookupRenderFragmentContext g = new SalesOrderCustomFieldLookupRenderFragmentContext() { CustomFieldLookupRenderFragment = CustomFieldLookupRenderFragment, Host = this, CustomField = CustomField };
-                var result = await script.RunAsync(globals: g);
-                if (result.Exception != null)
+            string fragment = null;
+            if (CustomField.LookupProviders.TryGetValue("Jiwa Customer Web Portal", out fragment))
+            {
+                if (!string.IsNullOrWhiteSpace(fragment))
                 {
-                    statusMessage = result.Exception.Message;
-                }                
-            }       
-        }        
+                    var scriptOptions = Microsoft.CodeAnalysis.Scripting.ScriptOptions.Default;
+                    scriptOptions = scriptOptions.WithImports("System", "JiwaCustomerPortal", "JiwaCustomerPortal.Components", "Microsoft.AspNetCore.Components");
+                    scriptOptions = scriptOptions.AddReferences(System.Reflection.Assembly.GetExecutingAssembly());
+                    CustomField.LookupButtonScript = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.Create(fragment, scriptOptions, globalsType: typeof(SalesOrderCustomFieldLookupRenderFragmentContext));
+                    try
+                    {
+                        CustomField.LookupButtonScript.Compile();
+                    }
+                    catch(Exception compileException)
+                    {
+                        statusMessage = compileException.Message;
+                    }
+                }
+            }
+        }
+
+        if (CustomField.LookupButtonScript != null)
+        {
+            SalesOrderCustomFieldLookupRenderFragmentContext g = new SalesOrderCustomFieldLookupRenderFragmentContext() { CustomFieldLookupRenderFragment = CustomFieldLookupRenderFragment, Host = this, CustomField = CustomField };
+            var result = await CustomField.LookupButtonScript.RunAsync(globals: g);
+            if (result.Exception != null)
+            {
+                statusMessage = result.Exception.Message;
+            }
+        }
     }
 
     public async Task ResolveCustomFieldDisplayValues(List<CustomField> CustomFields, List<CustomFieldValue> CustomFieldValues)
@@ -1366,40 +1378,56 @@
     public async Task<string> ResolveCustomFieldDisplayValue(CustomField CustomField, CustomFieldValue CustomFieldValue)
     {
         // The purpose of this method is to resolve the display value for a custom field of type Lookup - we look to see if the plugin has provided a resolver for this custom field, and if so we execute the code in that resolver to get the display value.  If not, then we just return the contents as is.
-        string fragment = null;
-        if (CustomField.LookupDisplayValueResolvers != null && CustomField.LookupDisplayValueResolvers.TryGetValue("Jiwa Customer Web Portal", out fragment))
+
+        if (CustomField.LookupDisplayValueResolverScript == null)
         {
-            if (!string.IsNullOrWhiteSpace(fragment))
+            string fragment = null;
+            if (CustomField.LookupDisplayValueResolvers != null && CustomField.LookupDisplayValueResolvers.TryGetValue("Jiwa Customer Web Portal", out fragment))
             {
-                // Example of a resolver fragment for resolving an InventoryID to PartNo - Description
-                // This would be returned by the LookupDisplayValueResolvers method of the IJiwaLookupCustomFieldPlugin implemention of the Jiwa plugin
-                // IN_MainQuery inMainQuery = new IN_MainQuery() { InventoryID = CustomFieldValue.Contents };
-                // var response = await SendToAPI<QueryResponse<IN_Main>>(inMainQuery);
-                // if (response.Results.Count == 1)
-                // {
-                //     CustomFieldValue.DisplayValue = $"{response.Results[0].PartNo} - {response.Results[0].Description}";
-                // }
-                // else
-                // {
-                //     // The provided inventoryID was not found, we use a blank display value for now.
-                //     CustomFieldValue.DisplayValue = "";
-                // }
-
-                var scriptOptions = Microsoft.CodeAnalysis.Scripting.ScriptOptions.Default;
-                scriptOptions = scriptOptions.WithImports("System", "JiwaCustomerPortal", "JiwaCustomerPortal.Components", "Microsoft.AspNetCore.Components", "JiwaFinancials.Jiwa.JiwaServiceModel.Tables", "JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields", "ServiceStack");
-                scriptOptions = scriptOptions.AddReferences(System.Reflection.Assembly.GetExecutingAssembly());
-                var script = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.Create(fragment, scriptOptions, globalsType: typeof(SalesOrderCustomFieldLookupDisplayResolverContext));
-                script.Compile();
-
-                SalesOrderCustomFieldLookupDisplayResolverContext g = new SalesOrderCustomFieldLookupDisplayResolverContext() { Host = this, CustomFieldValue = CustomFieldValue };
-                var result = await script.RunAsync(globals: g);
-                if (result.Exception != null)
+                if (!string.IsNullOrWhiteSpace(fragment))
                 {
-                    statusMessage = result.Exception.Message;
+                    // Example of a resolver fragment for resolving an InventoryID to PartNo - Description
+                    // This would be returned by the LookupDisplayValueResolvers method of the IJiwaLookupCustomFieldPlugin implemention of the Jiwa plugin
+                    // IN_MainQuery inMainQuery = new IN_MainQuery() { InventoryID = CustomFieldValue.Contents };
+                    // var response = await SendToAPI<QueryResponse<IN_Main>>(inMainQuery);
+                    // if (response.Results.Count == 1)
+                    // {
+                    //     CustomFieldValue.DisplayValue = $"{response.Results[0].PartNo} - {response.Results[0].Description}";
+                    // }
+                    // else
+                    // {
+                    //     // The provided inventoryID was not found, we use a blank display value for now.
+                    //     CustomFieldValue.DisplayValue = "";
+                    // }
+
+                    // Compile the script and store it against the custom field - we only want to compile it once, and then we can just run it to get the display value each time after that without the overhead of compiling the code each time.
+                    var scriptOptions = Microsoft.CodeAnalysis.Scripting.ScriptOptions.Default;
+                    scriptOptions = scriptOptions.WithImports("System", "JiwaCustomerPortal", "JiwaCustomerPortal.Components", "Microsoft.AspNetCore.Components", "JiwaFinancials.Jiwa.JiwaServiceModel.Tables", "JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields", "ServiceStack");
+                    scriptOptions = scriptOptions.AddReferences(System.Reflection.Assembly.GetExecutingAssembly());
+                    CustomField.LookupDisplayValueResolverScript = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.Create(fragment, scriptOptions, globalsType: typeof(SalesOrderCustomFieldLookupDisplayResolverContext));
+                    try
+                    {
+                        CustomField.LookupDisplayValueResolverScript.Compile();
+                    }
+                    catch(Exception compileException)
+                    {
+                        statusMessage = compileException.Message;
+                    }
                 }
-                return g.CustomFieldValue.DisplayValue;
             }
         }
+
+        if (CustomField.LookupDisplayValueResolverScript != null)
+        {
+            SalesOrderCustomFieldLookupDisplayResolverContext g = new SalesOrderCustomFieldLookupDisplayResolverContext() { Host = this, CustomFieldValue = CustomFieldValue };
+            var result = await CustomField.LookupDisplayValueResolverScript.RunAsync(globals: g);
+            if (result.Exception != null)
+            {
+                statusMessage = result.Exception.Message;
+            }
+            return g.CustomFieldValue.DisplayValue;
+        }
+        
         return CustomFieldValue.Contents ?? string.Empty;
     }
 
