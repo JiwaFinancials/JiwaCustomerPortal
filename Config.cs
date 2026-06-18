@@ -73,6 +73,26 @@ namespace JiwaCustomerPortal
             }
         }
 
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _SalesOrderHistoryCustomFields;
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> SalesOrderHistoryCustomFields
+        {
+            get
+            {
+                return _SalesOrderHistoryCustomFields;
+            }
+        }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _SalesOrderLineCustomFields;
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> SalesOrderLineCustomFields
+        {
+            get
+            {
+                return _SalesOrderLineCustomFields;
+            }
+        }
+
         public static async Task ReadSettingsFromAPI(CancellationToken cancellationToken = default)
         {
             CustomerWebPortalSettings response = await JiwaAPI.GetAsync(new CustomerWebPortalSettingsGETRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
@@ -105,6 +125,8 @@ namespace JiwaCustomerPortal
 
             // Read the custom field definitions
             _SalesOrderCustomFields = await JiwaAPI.GetAsync(new SalesOrderCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+            _SalesOrderHistoryCustomFields = await JiwaAPI.GetAsync(new SalesOrderHistoryCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+            _SalesOrderLineCustomFields = await JiwaAPI.GetAsync(new SalesOrderLineCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
         }
 
         public static string FormattedDecimals(decimal value, short decimalPlaces, bool useCommas = true)

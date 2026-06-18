@@ -226,7 +226,7 @@
                                     else
                                     {                                        
                                         <td colspan="11">
-                                            <input type="text" class="form-control" id="CommentText"
+                                            <input type="text" class="form-control" id="CommentText.@salesOrderLine.InvoiceLineID"
                                                    value=@salesOrderLine.CommentText                                                                                                                                                         
                                                    @onchange="async (e) =>
                                                         {
@@ -259,7 +259,7 @@
                                     else
                                     {
                                         <td width="160px">
-                                            <input type="number" class="form-control" id="QuantityOrdered"
+                                            <input type="number" class="form-control" id="QuantityOrdered.@salesOrderLine.InvoiceLineID"
                                                    style="text-align: right;"
                                                    value="@Config.FormattedDecimals(@salesOrderLine.QuantityOrdered, salesOrderLine.QuantityDecimalPlaces)"
                                                    step="@(Math.Pow(10, (double)-salesOrderLine.QuantityDecimalPlaces))"
@@ -287,7 +287,7 @@
                                     else
                                     {
                                         <td width="160px">
-                                            <input type="number" class="form-control" id="FXDiscountedPrice"
+                                            <input type="number" class="form-control" id="FXDiscountedPrice.@salesOrderLine.InvoiceLineID"
                                                    value="@Config.FormattedDecimals(@salesOrderLine.FXDiscountedPrice, Config.CurrencyDecimals(salesOrder.CurrencyID), false)"
                                                    style="text-align: right;"
                                                    step="@(Math.Pow(10, (double)-Config.CurrencyDecimals(salesOrder.CurrencyID)))"
@@ -701,10 +701,10 @@
                                                 if (IsEditable)
                                                 {
                                                     <td>
-                                                        <select class="form-control" name="CustomField.@customFieldValue.SettingName" id="CustomField.@customFieldValue.SettingID" @onchange="async (e) =>
+                                                <select class="form-control" name="CustomField.@customFieldValue.SettingID" id="CustomField.@customFieldValue.SettingID" @onchange="async (e) =>
                                                                         {
                                                                             await SetCustomFieldValue(customField, e);
-                                                                        }">>       
+                                                                        }">       
 
                                                             @foreach(var item in customField.ComboKeyValuePairs)
                                                             {
@@ -739,10 +739,21 @@
                                                 if (IsEditable)
                                                 {
                                                     <td class="text-center">
-                                                        <input type="checkbox" id="CustomField.@customField.SettingID" value="@customFieldValue?.Contents" @onchange="async (e) =>
+                                                        @if (!string.IsNullOrWhiteSpace(customFieldValue?.Contents) && bool.Parse(customFieldValue?.Contents))
+                                                        {
+                                                            <input type="checkbox" id="CustomField.@customField.SettingID" checked @onchange="async (e) =>
                                                                         {
                                                                             await SetCustomFieldValue(customField, e);
                                                                         }">
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="checkbox" id="CustomField.@customField.SettingID" @onchange="async (e) =>
+                                                                        {
+                                                                            await SetCustomFieldValue(customField, e);
+                                                                        }">
+                                                        }
+                                                        
                                                     </td>
                                                 }
                                                 else
@@ -764,7 +775,7 @@
                                         @if(customField.CellType == JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Lookup)
                                         {
                                             <td class="text-center">
-                                                <button @onclick="async (e) =>
+                                                <button id="LookupButton.@customField.SettingID" @onclick="async (e) =>
                                                     {
                                                         await SalesOrderCustomFieldLookupOnClick(customField);
                                                     }" class="btn" style="background-color:transparent">
@@ -785,7 +796,214 @@
                     </div>
                 </div>
                 <div class=@String.Format("tab-pane{0}", CustomFieldsSelectedTabId == "HistoryCustomFields-tab" ? " active" : null) id="HistoryCustomFields" role="tabpanel" aria-labelledby="HistoryCustomFields-tab">
-                    <!-- History custom fields go in here -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped small">
+                    <thead>
+                        <tr>
+                            <th>Plugin Name</th>
+                            <th>Setting Name</th>
+                            <th>Contents</th>
+                            <th class="text-center" width="50px"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField in Config.SalesOrderHistoryCustomFields)
+                        {
+                            JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue customFieldValue = SelectedHistory.CustomFieldValues?.Where(x => x.SettingID == customField.SettingID).FirstOrDefault();
+
+                            <tr class="align-middle">
+                                <td>@customField.PluginName</td>
+                                <td>@customField.SettingName</td>
+
+                                @switch (customField.CellType)
+                                {
+                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Date:
+                                        if (IsEditable)
+                                        {
+                                            string dateValue = @customFieldValue?.Contents;
+                                            if (!string.IsNullOrWhiteSpace(dateValue))
+                                            {
+                                                dateValue = DateTime.ParseExact(dateValue, "yyyy-MM-ddTHH:mm:ss", System.Globalization.CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
+                                            }
+                                            <td>
+                                                <input type="date" class="form-control" id="HistoryCustomField.@customField.SettingID" value="@dateValue" @onchange="@(async (e) =>
+                                                                                                               {
+                                                                                                                    await SetHistoryCustomFieldValue(customField, e);
+                                                                                                               })">
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>@customFieldValue?.Contents</td>
+                                        }
+                                        break;
+
+                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Text:
+                                        if (IsEditable)
+                                        {
+                                            <td>
+                                                <input type="text" class="form-control" id="HistoryCustomField.@customField.SettingID" value="@customFieldValue?.Contents" maxlength="@customField.TextMaxLength" @onchange="async (e) =>
+                                                                                                                   {
+                                                                                                                       await SetHistoryCustomFieldValue(customField, e);
+                                                                                                                   }">
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>@customFieldValue?.Contents</td>
+                                        }
+                                        break;
+
+                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Float:
+                                        if (IsEditable)
+                                        {
+                                            <td>
+                                                <input type="number" class="form-control" id="HistoryCustomField.@customField.SettingID" style="text-align: right;" value="@customFieldValue?.Contents" step="@(Math.Pow(10, (double)-customField.DecimalPlaces))" min="@customField.DecimalMinValue" max="@customField.DecimalMaxValue" @onchange="async (e) =>
+                                                                                                                   {
+                                                                                                                      await SetHistoryCustomFieldValue(customField, e);
+                                                                                                                   }">
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            decimal decimalValue;
+                                            if (decimal.TryParse(@customFieldValue?.Contents, out decimalValue))
+                                            {
+                                                <td class="text-end">@Config.FormattedDecimals(decimalValue, 2)</td>
+                                            }
+                                            else
+                                            {
+                                                // empty value
+                                                <td class="text-end"></td>
+                                            }
+                                        }
+                                        break;
+
+                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Integer:
+                                        if (IsEditable)
+                                        {
+                                            <td>
+                                                <input type="number" class="form-control" id="HistoryCustomField.@customField.SettingID" style="text-align: right;" value="@customFieldValue?.Contents" step="1" min="@customField.IntegerMinValue" max="@customField.IntegerMaxValue" @onchange="async (e) =>
+                                                    {
+                                                        await SetHistoryCustomFieldValue(customField, e);
+                                                    }">
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            int intValue;
+                                            if (int.TryParse(@customFieldValue?.Contents, out intValue))
+                                            {
+                                                <td class="text-end">@Config.FormattedDecimals(intValue, 0)</td>
+                                            }
+                                            else
+                                            {
+                                                // empty value
+                                                <td class="text-end"></td>
+                                            }
+                                        }
+                                        break;
+
+                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Lookup:
+                                        <td>@customFieldValue.DisplayValue</td>
+                                        break;
+
+                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Combo:
+                                        if (IsEditable)
+                                        {
+                                            <td>
+                                                <select class="form-control" name="HistoryCustomField.@customFieldValue.SettingID" id="CustomField.@customFieldValue.SettingID" @onchange="async (e) =>
+                                                    {
+                                                        await SetHistoryCustomFieldValue(customField, e);
+                                                    }">
+
+                                                    @foreach (var item in customField.ComboKeyValuePairs)
+                                                    {
+                                                        if (customFieldValue.Contents == @item.Key)
+                                                        {
+                                                            <option value="@item.Key" selected>@item.Value</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@item.Key">@item.Value</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            string? value = null;
+                                            if (customField.ComboKeyValuePairs.TryGetValue(customFieldValue.Contents, out value))
+                                            {
+                                                <td>@value</td>
+                                            }
+                                            else
+                                            {
+                                                // invalid value
+                                                <td></td>
+                                            }
+                                        }
+                                        break;
+
+                                    case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Checkbox:
+                                        if (IsEditable)
+                                        {
+                                            <td class="text-center">
+                                                @if (!string.IsNullOrWhiteSpace(customFieldValue?.Contents) && bool.Parse(customFieldValue?.Contents))
+                                                {
+                                                    <input type="checkbox" id="HistoryCustomField.@customField.SettingID" checked @onchange="async (e) =>
+                                                                                                               {
+                                                                                                                   await SetHistoryCustomFieldValue(customField, e);
+                                                                                                               }">
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" id="HistoryCustomField.@customField.SettingID" @onchange="async (e) =>
+                                                    {
+                                                        await SetHistoryCustomFieldValue(customField, e);
+                                                    }">
+                                                }                                                
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="text-center">
+                                                @if (!string.IsNullOrWhiteSpace(customFieldValue?.Contents) && bool.Parse(customFieldValue?.Contents))
+                                                {
+                                                    <input type="checkbox" disabled id="HistoryCustomField.@customField.SettingID" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" disabled id="HistoryCustomField.@customField.SettingID">
+                                                }
+                                            </td>
+                                        }
+                                        break;
+                                }
+
+                                @if (customField.CellType == JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Lookup)
+                                {
+                                    <td class="text-center">
+                                        <button id="LookupButton.@customField.SettingID" @onclick="async (e) =>
+                                            {
+                                                await SalesOrderCustomFieldLookupOnClick(customField);
+                                            }" class="btn" style="background-color:transparent">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707z" />
+                                            </svg>
+                                        </button>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td></td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
                 </div>            
             </div>
         </div>
@@ -860,9 +1078,9 @@
 
         if (salesOrder != null)
         {
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
-
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);            
             SelectedHistory = salesOrder.Histories[0];
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
 
             if (QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query).TryGetValue("SnapshotNo", out var snapshotNoParam))
             {
@@ -947,6 +1165,7 @@
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
             await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
         }
     }
 
@@ -968,6 +1187,7 @@
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
             await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
         }
     }
 
@@ -988,6 +1208,7 @@
         {
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
             await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
         }
     }
 
@@ -1012,6 +1233,7 @@
                 salesOrder = response;
                 SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
                 await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
+                await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
                 await InvokeAsync(StateHasChanged); // required otherwise the UI doesn't update properly - indeterminate progress indicator just keeps spinning and the new line doesn't appear
             }
         }
@@ -1034,6 +1256,7 @@
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
             await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
         }
     }
 
@@ -1053,6 +1276,34 @@
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
             await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+        }
+    }
+
+    public async Task SetHistoryCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, ChangeEventArgs e)
+    {
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest salesOrderPATCHRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPATCHRequest();
+        salesOrderPATCHRequest.InvoiceID = salesOrder.InvoiceID;        
+
+        salesOrderPATCHRequest.Histories = new List<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderHistory>();
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderHistory history = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderHistory() { InvoiceHistoryID = SelectedHistory.InvoiceHistoryID };
+        salesOrderPATCHRequest.Histories.Add(history);
+
+        history.CustomFieldValues = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue>();
+
+        JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue customFieldValue = new JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomFieldValue();
+        customFieldValue.SettingID = customField.SettingID;
+        customFieldValue.Contents = e.Value.ToString();
+        history.CustomFieldValues.Add(customFieldValue);
+
+        int? currentSnap = SelectedHistory.HistoryNo;
+        JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>(salesOrderPATCHRequest);
+        if (response != null)
+        {
+            salesOrder = response;
+            SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];            
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
         }
     }
 
@@ -1092,6 +1343,10 @@
 
                 SalesOrderCustomFieldLookupRenderFragmentContext g = new SalesOrderCustomFieldLookupRenderFragmentContext() { CustomFieldLookupRenderFragment = CustomFieldLookupRenderFragment, Host = this, CustomField = CustomField };
                 var result = await script.RunAsync(globals: g);
+                if (result.Exception != null)
+                {
+                    statusMessage = result.Exception.Message;
+                }                
             }       
         }        
     }
@@ -1138,6 +1393,10 @@
 
                 SalesOrderCustomFieldLookupDisplayResolverContext g = new SalesOrderCustomFieldLookupDisplayResolverContext() { Host = this, CustomFieldValue = CustomFieldValue };
                 var result = await script.RunAsync(globals: g);
+                if (result.Exception != null)
+                {
+                    statusMessage = result.Exception.Message;
+                }
                 return g.CustomFieldValue.DisplayValue;
             }
         }
