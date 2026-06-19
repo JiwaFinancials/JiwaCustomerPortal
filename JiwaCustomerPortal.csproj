@@ -34,10 +34,10 @@
     <_ContentIncludedByDefault Remove="Components\User\PasswordReset.razor" />
   </ItemGroup>
   <ItemGroup>
-    <Content Update="Components\Pages\SalesQuote.razor">
+    <Content Update="Components\Pages\SalesQuote\SalesQuote.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
-    <Content Update="Components\Pages\SalesOrder.razor">
+    <Content Update="Components\Pages\SalesOrder\SalesOrder.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Update="Components\Pages\Diagnostics.razor">
@@ -46,7 +46,7 @@
     <Content Update="Components\Pages\StatementPDF.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
-    <Content Update="Components\Pages\SalesQuotePDF.razor">
+    <Content Update="Components\Pages\SalesQuote\SalesQuotePDF.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Update="Components\User\ChangePasswordConfirmation.razor">

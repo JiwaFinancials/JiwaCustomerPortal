@@ -1,6 +1,4 @@
-﻿using JiwaCustomerPortal.Components;
-
-namespace JiwaCustomerPortal
+﻿namespace JiwaCustomerPortal.Components.AutoQueryGrid
 {
     public enum AuthTypes
     {

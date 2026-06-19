@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace JiwaCustomerPortal
+namespace JiwaCustomerPortal.Components.Pages.SalesOrder
 {
     public class SalesOrderCustomFieldLookupRenderFragmentContext
     {
@@ -21,7 +21,9 @@ namespace JiwaCustomerPortal
                 }                
             }
         }
-        public JiwaCustomerPortal.Components.Pages.SalesOrder Host { get; set; }
+        public SalesOrder Host { get; set; }
         public JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField { get; set; }
+        // SalesOrderLine is only populated for sales order line custom fields
+        public JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine SalesOrderLine { get; set; }
     }
 }

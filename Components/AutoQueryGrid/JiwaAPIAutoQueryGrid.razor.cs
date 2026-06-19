@@ -10,7 +10,7 @@ using ServiceStack.DataAnnotations;
 using System.Reflection;
 using System.Threading;
 
-namespace JiwaCustomerPortal.Components
+namespace JiwaCustomerPortal.Components.AutoQueryGrid
 {
     public partial class JiwaAPIAutoQueryGrid<Model, QueryType> where QueryType : ServiceStack.IQuery
     {

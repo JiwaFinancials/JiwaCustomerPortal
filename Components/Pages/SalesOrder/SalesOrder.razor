@@ -1,6 +1,6 @@
 ﻿@page "/SalesOrder/{InvoiceId}"
 @attribute [type: RenderModeInteractiveServer]
-@using JiwaCustomerPortal.Components.User
+@using JiwaCustomerPortal.Components.AutoQueryGrid.Inventory
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using ServiceStack;
 @inject ProtectedLocalStorage ProtectedLocalStore
@@ -425,7 +425,14 @@
                                                 break;
 
                                             case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Lookup:
-                                                <td>@customFieldValue.DisplayValue</td>
+                                                <td>@customFieldValue.DisplayValue <button id="LookupButton.@customField.SettingID" @onclick="async (e) =>
+                                            {
+                                                await SalesOrderCustomFieldLookupOnClick(salesOrderLine, customField);
+                                            }" class="btn" style="background-color:transparent">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707z" />
+                                            </svg>
+                                        </button></td>
                                                 break;
 
                                             case JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CellTypes.Combo:
@@ -1278,10 +1285,9 @@
         }
 
         if (salesOrder != null)
-        {
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);            
+        {            
             SelectedHistory = salesOrder.Histories[0];
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues();            
 
             if (QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query).TryGetValue("SnapshotNo", out var snapshotNoParam))
             {
@@ -1365,8 +1371,7 @@
         {
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues();            
         }
     }
 
@@ -1392,8 +1397,7 @@
         {
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues();            
         }
     }
 
@@ -1413,8 +1417,7 @@
         if (salesOrder != null)
         {
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues();            
         }
     }
 
@@ -1443,8 +1446,7 @@
             {
                 salesOrder = response;
                 SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
-                await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
-                await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+                await ResolveCustomFieldDisplayValues();                
                 await InvokeAsync(StateHasChanged); // required otherwise the UI doesn't update properly - indeterminate progress indicator just keeps spinning and the new line doesn't appear
             }
         }
@@ -1471,11 +1473,11 @@
         {
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues();            
         }
     }
 
+    #region "Custom Fields"
     public async Task SetCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField, ChangeEventArgs e)
     {
         // You may be wondering why do use salesOrderPATCHRequest instead of using the existing route to PATCH the custom field value
@@ -1496,8 +1498,7 @@
         {
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues();            
         }
     }
 
@@ -1527,8 +1528,7 @@
         {
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];            
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues();            
         }
     }
 
@@ -1551,20 +1551,19 @@
         line.CustomFieldValues.Add(customFieldValue);
 
         salesOrderPATCHRequest.Lines.Add(line);
-        
+
         int? currentSnap = SelectedHistory.HistoryNo;
         JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>(salesOrderPATCHRequest);
         if (response != null)
         {
             salesOrder = response;
             SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
-            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues();            
         }
     }
 
-    private async Task SalesOrderCustomFieldLookupOnClick(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField)
-    {        
+    private async Task SalesOrderCustomFieldLookupOnClick(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField, SalesOrderCustomFieldLookupRenderFragmentContext context)
+    {
         CustomFieldLookupRenderFragment = null;
 
         if (CustomField.LookupButtonScript == null)
@@ -1582,25 +1581,25 @@
             //     builder.AddAttribute(3, ""OnItemSelected"", EventCallback.Factory.Create<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR>(Host, async (i) =>
             //     {
             //         await Host.SetCustomFieldValue(CustomField, new ChangeEventArgs() { Value = i.InventoryID });
-            //         CustomFieldLookupRenderFragment = null;            
+            //         CustomFieldLookupRenderFragment = null;
             //     }));
             //     builder.CloseComponent();
             // }";
 
             string fragment = null;
-            if (CustomField.LookupProviders.TryGetValue("Jiwa Customer Web Portal", out fragment))
+            if (CustomField.LookupProviders != null && CustomField.LookupProviders.TryGetValue("Jiwa Customer Web Portal", out fragment))
             {
                 if (!string.IsNullOrWhiteSpace(fragment))
                 {
-                    var scriptOptions = Microsoft.CodeAnalysis.Scripting.ScriptOptions.Default;
-                    scriptOptions = scriptOptions.WithImports("System", "JiwaCustomerPortal", "JiwaCustomerPortal.Components", "Microsoft.AspNetCore.Components");
+                    var scriptOptions = Microsoft.CodeAnalysis.Scripting.ScriptOptions.Default;                    
+                    scriptOptions = scriptOptions.WithImports("System", "JiwaCustomerPortal", "JiwaCustomerPortal.Components", "JiwaCustomerPortal.Components.AutoQueryGrid", "JiwaCustomerPortal.Components.AutoQueryGrid.Inventory", "JiwaCustomerPortal.Components.AutoQueryGrid.Debtor", "Microsoft.AspNetCore.Components");
                     scriptOptions = scriptOptions.AddReferences(System.Reflection.Assembly.GetExecutingAssembly());
                     CustomField.LookupButtonScript = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.Create(fragment, scriptOptions, globalsType: typeof(SalesOrderCustomFieldLookupRenderFragmentContext));
                     try
                     {
                         CustomField.LookupButtonScript.Compile();
                     }
-                    catch(Exception compileException)
+                    catch (Exception compileException)
                     {
                         statusMessage = compileException.Message;
                     }
@@ -1610,12 +1609,53 @@
 
         if (CustomField.LookupButtonScript != null)
         {
-            SalesOrderCustomFieldLookupRenderFragmentContext g = new SalesOrderCustomFieldLookupRenderFragmentContext() { CustomFieldLookupRenderFragment = CustomFieldLookupRenderFragment, Host = this, CustomField = CustomField };
-            var result = await CustomField.LookupButtonScript.RunAsync(globals: g);
+            Microsoft.CodeAnalysis.Scripting.ScriptState result;
+            APIRequestInProgressCount++;
+            try
+            {
+                result = await CustomField.LookupButtonScript.RunAsync(globals: context);
+            }
+            finally
+            {
+                APIRequestInProgressCount--;
+            }
+            
             if (result.Exception != null)
             {
                 statusMessage = result.Exception.Message;
             }
+        }
+    }
+
+    private async Task SalesOrderCustomFieldLookupOnClick(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField)
+    {        
+        SalesOrderCustomFieldLookupRenderFragmentContext context = new SalesOrderCustomFieldLookupRenderFragmentContext() { CustomFieldLookupRenderFragment = CustomFieldLookupRenderFragment, Host = this, CustomField = CustomField };
+        await SalesOrderCustomFieldLookupOnClick(CustomField, context);        
+    }
+
+    private async Task SalesOrderCustomFieldLookupOnClick(JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine SalesOrderLine, JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField)
+    {
+        SalesOrderCustomFieldLookupRenderFragmentContext context = new SalesOrderCustomFieldLookupRenderFragmentContext() { CustomFieldLookupRenderFragment = CustomFieldLookupRenderFragment, Host = this, CustomField = CustomField, SalesOrderLine = SalesOrderLine };
+        await SalesOrderCustomFieldLookupOnClick(CustomField, context);
+    }
+
+    public async Task ResolveCustomFieldDisplayValues()
+    {
+        APIRequestInProgressCount++;
+
+        try
+        {
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderCustomFields, salesOrder.CustomFieldValues);
+            await ResolveCustomFieldDisplayValues(Config.SalesOrderHistoryCustomFields, SelectedHistory.CustomFieldValues);
+
+            foreach (JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine salesOrderLine in SelectedHistory.Lines)
+            {
+                await ResolveCustomFieldDisplayValues(Config.SalesOrderLineCustomFields, salesOrderLine.CustomFieldValues);
+            }
+        }
+        finally
+        {
+            APIRequestInProgressCount--;
         }
     }
 
@@ -1675,17 +1715,29 @@
 
         if (CustomField.LookupDisplayValueResolverScript != null)
         {
-            SalesOrderCustomFieldLookupDisplayResolverContext g = new SalesOrderCustomFieldLookupDisplayResolverContext() { Host = this, CustomFieldValue = CustomFieldValue };
-            var result = await CustomField.LookupDisplayValueResolverScript.RunAsync(globals: g);
+            SalesOrderCustomFieldLookupDisplayResolverContext context = new SalesOrderCustomFieldLookupDisplayResolverContext() { Host = this, CustomFieldValue = CustomFieldValue };
+            Microsoft.CodeAnalysis.Scripting.ScriptState result;
+
+            APIRequestInProgressCount++;
+            try
+            {
+                result = await CustomField.LookupDisplayValueResolverScript.RunAsync(globals: context);                
+            }
+            finally
+            {
+                APIRequestInProgressCount--;
+            }
+             
             if (result.Exception != null)
             {
                 statusMessage = result.Exception.Message;
             }
-            return g.CustomFieldValue.DisplayValue;
+            return context.CustomFieldValue.DisplayValue;
         }
-        
+
         return CustomFieldValue.Contents ?? string.Empty;
     }
+    #endregion
 
     public async void FreightChanged(JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder FreightDTO)
     {        
@@ -1734,7 +1786,7 @@
     public async Task<TResponse> SendToAPI<TResponse>(IReturn<TResponse> requestDTO)
     {
         APIRequestInProgressCount++;
-
+        
         try
         {
             return await JiwaAPI.SendAsync(requestDTO, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);            
