@@ -1,3 +1,4 @@
+using JiwaCustomerPortal.Components.Grid.CustomField;
 using JiwaCustomerPortal.Components.Pages;
 using JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields;
 using JiwaFinancials.Jiwa.JiwaServiceModel.Debtors;
@@ -795,6 +796,8 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields
         // LookupButtonScript and LookupDisplayValueResolverScript added for our purposes here - this is not populated or used by the Jiwa REST API
         public virtual Microsoft.CodeAnalysis.Scripting.Script LookupButtonScript { get; set; }
         public virtual Microsoft.CodeAnalysis.Scripting.Script LookupDisplayValueResolverScript { get; set; }
+        public virtual Exception? LookupDisplayValueResolverScriptException { get; set; }
+        public virtual Exception? LookupButtonClickScriptException { get; set; }
     }
 
     public partial class CustomFieldValue
@@ -1195,8 +1198,9 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders
         //public virtual BankAccount BankAccount { get; set; } // Don't need this, so we don't include it
         public virtual DateTimeOffset? LastSavedDateTime { get; set; }
     }
-
-    public partial class SalesOrder
+    
+    // ICustomFieldValuesHost interface added to the class declaration for our purposes here in the web portal - this is not populated or used by the Jiwa REST API
+    public partial class SalesOrder : ICustomFieldValuesHost
     {
         public virtual string Type { get; set; }
         public virtual SalesOrderSystemSettings SystemSettings { get; set; }
@@ -1448,7 +1452,8 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders
         public virtual List<CustomFieldValue> CustomFieldValues { get; set; }
     }
 
-    public partial class SalesOrderHistory
+    // ICustomFieldValuesHost interface added to the class declaration for our purposes here in the web portal - this is not populated or used by the Jiwa REST API
+    public partial class SalesOrderHistory : ICustomFieldValuesHost
     {
         public virtual string InvoiceHistoryID { get; set; }
         public virtual int? HistoryNo { get; set; }
@@ -1567,7 +1572,8 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders
         public virtual string Description { get; set; }
     }
 
-    public partial class SalesOrderLine
+    // ICustomFieldValuesHost interface added to the class declaration for our purposes here in the web portal - this is not populated or used by the Jiwa REST API
+    public partial class SalesOrderLine : ICustomFieldValuesHost
     {
         public virtual int? ItemNo { get; set; }
         public virtual bool? CommentLine { get; set; }

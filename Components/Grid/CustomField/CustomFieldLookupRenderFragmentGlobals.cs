@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using JiwaCustomerPortal.Components.Pages.SalesOrder;
+using Microsoft.AspNetCore.Components;
 
-namespace JiwaCustomerPortal.Components.Pages.SalesOrder
+namespace JiwaCustomerPortal.Components.Grid.CustomField
 {
-    public class SalesOrderCustomFieldLookupRenderFragmentContext
+    public class CustomFieldLookupRenderFragmentGlobals
     {
         private RenderFragment? _CustomFieldLookupRenderFragment;
         public RenderFragment? CustomFieldLookupRenderFragment 
@@ -11,7 +12,6 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             {
                 return _CustomFieldLookupRenderFragment;
             }
-
             set
             {
                 _CustomFieldLookupRenderFragment = value;
@@ -21,9 +21,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 }                
             }
         }
-        public SalesOrder Host { get; set; }
-        public JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField { get; set; }
-        // SalesOrderLine is only populated for sales order line custom fields
-        public JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine SalesOrderLine { get; set; }
+        public ICustomFieldPageHost Host { get; set; }
+        public JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField { get; set; }        
+
+        public ICustomFieldValuesHost CustomFieldValuesHost { get; set; }
     }
 }

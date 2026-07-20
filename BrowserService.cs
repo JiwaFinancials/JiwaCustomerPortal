@@ -44,7 +44,7 @@ namespace JiwaCustomerPortal
                     DateFormat = "MM/dd/yyyy";
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // We don't care if this had an issue - we already have the default set and we were just trying to be super nice in displaying dates in
                 // the users date format, but we don't care.

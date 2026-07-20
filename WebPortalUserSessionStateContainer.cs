@@ -97,7 +97,7 @@ namespace JiwaCustomerPortal
                     await ProtectedLocalStore.SetAsync("JiwaCustomerWebPortalAuthUserSession", webPortalUserSession);
                     SetWebPortalUserSession(webPortalUserSession);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // We don't care if this failed - it's more than likely because the JiwaAPISessionId had expired, so we behave as though they never were authenticated.
                     // so just clear the stored JiwaAPIAuthUserSession                    

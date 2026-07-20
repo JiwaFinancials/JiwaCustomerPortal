@@ -130,7 +130,7 @@ namespace JiwaCustomerPortal
         }
 
         public static string FormattedDecimals(decimal value, short decimalPlaces, bool useCommas = true)
-        {
+        {            
             string decimalsFormat = new string('0', decimalPlaces);
             if (useCommas)
             {
