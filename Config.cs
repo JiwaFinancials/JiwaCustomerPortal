@@ -93,6 +93,26 @@ namespace JiwaCustomerPortal
             }
         }
 
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _SalesQuoteCustomFields;
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> SalesQuoteCustomFields
+        {
+            get
+            {
+                return _SalesQuoteCustomFields;
+            }
+        }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _SalesQuoteLineCustomFields;
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> SalesQuoteLineCustomFields
+        {
+            get
+            {
+                return _SalesQuoteLineCustomFields;
+            }
+        }
+
         public static async Task ReadSettingsFromAPI(CancellationToken cancellationToken = default)
         {
             CustomerWebPortalSettings response = await JiwaAPI.GetAsync(new CustomerWebPortalSettingsGETRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
@@ -127,6 +147,9 @@ namespace JiwaCustomerPortal
             _SalesOrderCustomFields = await JiwaAPI.GetAsync(new SalesOrderCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
             _SalesOrderHistoryCustomFields = await JiwaAPI.GetAsync(new SalesOrderHistoryCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
             _SalesOrderLineCustomFields = await JiwaAPI.GetAsync(new SalesOrderLineCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+
+            _SalesQuoteCustomFields = await JiwaAPI.GetAsync(new SalesQuoteCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+            _SalesQuoteLineCustomFields = await JiwaAPI.GetAsync(new SalesQuoteLineCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
         }
 
         public static string FormattedDecimals(decimal value, short decimalPlaces, bool useCommas = true)

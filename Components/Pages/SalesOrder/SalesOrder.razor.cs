@@ -159,6 +159,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             await DisplayTotals();
         }
 
+        #region "Sales Order Lines Grid"
         public async Task InitialiseSalesOrderLinesGrid()
         {            
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
@@ -186,8 +187,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 SalesOrderLinesGridCells.Columns.Add(new Column("Bin", new Components.Grid.CellType.ButtonCellType() { ButtonType = Components.Grid.CellType.ButtonCellType.ButtonTypes.Bin }, "") { Width = 10 });
             }
 
-            // Add sales order line custom field controller
-            // TODO: re-instate line custom fields - temporarily disabled whilst working out display issues
+            // Add sales order line custom field controller            
             SalesOrderLineCustomFieldController = new Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesOrder.SalesOrder, JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine>(SalesOrderLinesGridCells, Config.SalesOrderLineCustomFields);
         }
 
@@ -258,11 +258,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                     {
                         SalesOrderLinesGridCells["Bin", row].IsEditable = IsEditable;
                     }
-
-                    // TODO: re-instate line custom fields - temporarily disabled whilst working out display issues
+                    
                     SalesOrderLineCustomFieldController.DisplayCustomFieldValues(this, salesOrderLine, row, IsEditable);
-                }
-                //await InvokeAsync(StateHasChanged);
+                }                
             }
         }
 
@@ -338,6 +336,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 }
             }
         }
+        #endregion
+        
+        #region "Freight Grid"
 
         public async Task InitialiseFreightGrid()
         {
@@ -401,7 +402,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             FreightGridCells["ExTax", 1].IsEditable = IsEditable;
             FreightGridCells["ExTax", 2].IsEditable = IsEditable;
         }
+        #endregion
 
+        #region "Totals Grid"
         public async Task InitialiseTotalsGrid()
         {            
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
@@ -410,7 +413,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
 
             TotalsGridCells = new Grid.CellArray();
 
-            TotalsGridCells.Columns.Add(new Column("TotalLabel", new Components.Grid.CellType.TextCellType(), "") { Width = 10 });
+            TotalsGridCells.Columns.Add(new Column("TotalLabel", new Components.Grid.CellType.TextCellType(), "Totals") { Width = 10 });
             TotalsGridCells.Columns.Add(new Column("ExTax", currencyCellType, "Ex Tax") { Width = 10 });
             TotalsGridCells.Columns.Add(new Column("Tax", currencyCellType, "Tax") { Width = 10 });
             TotalsGridCells.Columns.Add(new Column("IncTax", currencyCellType, "Inc Tax") { Width = 10 });
@@ -436,7 +439,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             TotalsGridCells["Tax", 2].Value = SelectedHistory.FXGSTTotal;
             TotalsGridCells["IncTax", 2].Value = SelectedHistory.FXIncGSTTotal;
         }
+        #endregion
 
+        #region "Custom Fields Grids"
         public async Task SalesOrderCustomFieldsGrid_CustomFieldChanged((JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, Cell cell, ChangeEventArgs e) args)
         {
             await SetSalesOrderCustomFieldValue(args.customField, args.e);            
@@ -446,6 +451,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         {
             await SetSalesOrderHistoryCustomFieldValue(args.customField, args.e);
         }
+        #endregion
 
         private async Task OnSelectTab(string tabId)
         {
@@ -706,18 +712,6 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             }
         }        
         #endregion
-
-        public async void FreightChanged(JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder FreightDTO)
-        {
-            // Apply the order
-            int? currentSnap = SelectedHistory.HistoryNo;
-            salesOrder = FreightDTO;
-
-            if (salesOrder != null)
-            {
-                SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];                
-            }
-        }
 
         private async Task DeleteFromAPI(IReturnVoid requestDTO)
         {

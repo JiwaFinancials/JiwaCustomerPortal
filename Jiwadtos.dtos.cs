@@ -1765,7 +1765,8 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes
 
     }
 
-    public partial class SalesQuote
+    // ICustomFieldValuesHost interface added to the class declaration for our purposes here in the web portal - this is not populated or used by the Jiwa REST API
+    public partial class SalesQuote : ICustomFieldValuesHost
     {
         public virtual string Type { get; set; }
         public virtual SalesQuoteSettings SystemSettings { get; set; }
@@ -1953,7 +1954,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes
         public virtual string Description { get; set; }
     }
 
-    public partial class SalesQuoteLine
+    public partial class SalesQuoteLine : ICustomFieldValuesHost
     {
         public virtual int? ItemNo { get; set; }
         public virtual string QuoteLineID { get; set; }

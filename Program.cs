@@ -36,7 +36,7 @@ namespace JiwaCustomerPortal
             catch (Exception ex)
             {
                 // wrap the exception with something more obvious to the operator what the problem is.
-                throw new Exception("Could not read the Config settings from the API - ensure the Jiwa API is running and you have configured in appsettings.json the correct value for JiwaAPIURL and JiwaAPIKey.", ex);
+                throw new Exception($"Could not read the Config settings from the API - ensure the Jiwa API is running and you have configured in appsettings.json the correct value for JiwaAPIURL and JiwaAPIKey. Also ensure route permissions are set appropriately. {ex.GetInnerMostException().Message}", ex);
             }
 
             // Add services to the container.
