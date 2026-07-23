@@ -395,6 +395,46 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
     }
     #endregion
 
+    #region "Inventory"
+    [Route("/Inventory/{InventoryID}/Images", "GET")]
+    [ApiResponse(Description = "Read Ok", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No inventory with the InventoryID provided was found", StatusCode = 404)]
+    public partial class InventoryImageGETManyRequest
+        : IReturn<List<JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryImage>>
+    {
+        public virtual string InventoryID { get; set; }
+    }
+
+    [Route("/Inventory/Picture", "GET")]
+    [ApiResponse(Description = "Read OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No inventory with the InventoryID or PartNo provided was found", StatusCode = 404)]
+    public partial class InventoryPictureGETRequest
+        : IReturn<IHttpResult>
+    {
+        public virtual string InventoryID { get; set; }
+        public virtual string PartNo { get; set; }
+        public virtual bool AsAttachment { get; set; }
+    }
+
+    [Route("/Inventory/{InventoryID}/Pricing/{DebtorID}/{IN_LogicalID}/{Date}/{Quantity}", "GET")]
+    [ApiResponse(Description = "Read OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    public partial class InventoryPriceGETRequest
+        : IReturn<JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryPriceGETResponse>
+    {
+        public virtual string InventoryID { get; set; }
+        public virtual string DebtorID { get; set; }
+        public virtual string IN_LogicalID { get; set; }
+        public virtual DateTime Date { get; set; }
+        public virtual decimal Quantity { get; set; }
+    }
+    #endregion
+
     #region "Sales Orders"
     [Route("/SalesOrders/{InvoiceID}", "GET")]
     [ApiResponse(Description = "Read OK", StatusCode = 200)]
@@ -1085,27 +1125,60 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Debtors
 #endregion
 
 #region "Inventory"
-public partial class InventoryUnitOfMeasure
+namespace JiwaFinancials.Jiwa.JiwaServiceModel.Inventory
 {
-    public virtual string RecID { get; set; }
-    public virtual InventoryUnitOfMeasure InnerUnitOfMeasure { get; set; }
-    public virtual decimal? QuantityInnersPerUnitOfMeasure { get; set; }
-    public virtual bool? IsSell { get; set; }
-    public virtual bool? IsDefaultSell { get; set; }
-    public virtual bool? IsPurchase { get; set; }
-    public virtual int? ItemNo { get; set; }
-    public virtual DateTimeOffset? LastSavedDateTime { get; set; }
-    public virtual string UnitOfMeasureID { get; set; }
-    public virtual string Name { get; set; }
-    public virtual string PartNo { get; set; }
-    public virtual string Barcode { get; set; }
-    public virtual decimal? Length { get; set; }
-    public virtual decimal? Width { get; set; }
-    public virtual decimal? Height { get; set; }
-    public virtual decimal? Volume { get; set; }
-    public virtual decimal? Weight { get; set; }
-    public virtual List<CustomFieldValue> CustomFieldValues { get; set; }
-    public virtual bool? IsEnabled { get; set; }
+    public partial class InventoryPriceGETResponse
+    {
+        public virtual decimal? Price { get; set; }
+        public virtual bool? IncludesTax { get; set; }
+    }
+
+    public partial class InventoryImage
+    {
+        public InventoryImage()
+        {
+            FileBinary = new byte[] { };
+            RowHash = new byte[] { };
+        }
+
+        public virtual string RecID { get; set; }
+        public virtual byte[] FileBinary { get; set; }
+        public virtual string AltText { get; set; }
+        public virtual string Title { get; set; }
+        public virtual string Caption { get; set; }
+        public virtual string Description { get; set; }
+        public virtual string PhysicalFileName { get; set; }
+        public virtual DateTimeOffset? LastSavedDateTime { get; set; }
+        public virtual int? ItemNo { get; set; }
+        public virtual byte[] RowHash { get; set; }
+        public virtual string WebStore_Image_id { get; set; }
+        public virtual string WebStore_Image_src { get; set; }
+        public virtual string WebStore_Image_name { get; set; }
+        public virtual string WebStore_Image_altText { get; set; }
+    }
+
+    public partial class InventoryUnitOfMeasure
+    {
+        public virtual string RecID { get; set; }
+        public virtual InventoryUnitOfMeasure InnerUnitOfMeasure { get; set; }
+        public virtual decimal? QuantityInnersPerUnitOfMeasure { get; set; }
+        public virtual bool? IsSell { get; set; }
+        public virtual bool? IsDefaultSell { get; set; }
+        public virtual bool? IsPurchase { get; set; }
+        public virtual int? ItemNo { get; set; }
+        public virtual DateTimeOffset? LastSavedDateTime { get; set; }
+        public virtual string UnitOfMeasureID { get; set; }
+        public virtual string Name { get; set; }
+        public virtual string PartNo { get; set; }
+        public virtual string Barcode { get; set; }
+        public virtual decimal? Length { get; set; }
+        public virtual decimal? Width { get; set; }
+        public virtual decimal? Height { get; set; }
+        public virtual decimal? Volume { get; set; }
+        public virtual decimal? Weight { get; set; }
+        public virtual List<CustomFieldValue> CustomFieldValues { get; set; }
+        public virtual bool? IsEnabled { get; set; }
+    }
 }
 #endregion
 
@@ -1630,7 +1703,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders
         public virtual List<CustomFieldValue> CustomFieldValues { get; set; }
         public virtual List<SalesOrderLineDetail> LineDetails { get; set; }
         public virtual List<SalesOrderShippingLabel> ShippingLabels { get; set; }
-        public virtual InventoryUnitOfMeasure UnitOfMeasure { get; set; }
+        public virtual JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryUnitOfMeasure UnitOfMeasure { get; set; }
         public virtual SalesOrderKitLineTypesEnum? KitLineType { get; set; }
         public virtual decimal? KitUnits { get; set; }
         public virtual string KitHeaderLineID { get; set; }
@@ -1993,7 +2066,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes
         public virtual SalesQuoteKitLineTypesEnum? KitLineType { get; set; }
         public virtual decimal? KitUnits { get; set; }
         public virtual string KitHeaderLineID { get; set; }
-        public virtual InventoryUnitOfMeasure UnitOfMeasure { get; set; }
+        public virtual JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryUnitOfMeasure UnitOfMeasure { get; set; }
         public virtual string SKUUnitName { get; set; }
 
         public enum SalesQuoteKitLineTypesEnum

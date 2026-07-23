@@ -29,15 +29,7 @@
 
 @if (APIRequestInProgress)
 {
-    <div class="modal fade show" id="myModal" style="display:inline-flex" aria-modal="true" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <Throbber></Throbber>
 }
 
 <StatusMessage Message="@statusMessage" />
@@ -235,7 +227,29 @@
 @code {
     private const int PageSize = 25;
 
-    private bool APIRequestInProgress;
+    // APIRequestInProgress cannot be simply set to true and restored to original state, due to race conditions arising from asynchronous
+    // calls - so we use a counter instead, and increment or decrement that - and we look at the APIRequestInProgressCount to determine if a request is currently in progress or not.
+    private int _APIRequestInProgressCount = 0;
+    public int APIRequestInProgressCount
+    {
+        get
+        {
+            return _APIRequestInProgressCount;
+        }
+        set
+        {
+            int previousValue = _APIRequestInProgressCount;
+            _APIRequestInProgressCount = value;
+
+            if ((previousValue > 0 && value == 0) || (previousValue == 0 && value > 0))
+            {
+                // only trigger a render if we're changing from 0 to >0 or >0 to 0 - otherwise we don't need to trigger a render to show the APIRequestInProgress indicator
+                InvokeAsync(StateHasChanged);
+            }
+        }
+    }
+    public bool APIRequestInProgress => APIRequestInProgressCount > 0;
+
     private string? statusMessage;
     private string? SessionNotice;
 
@@ -306,32 +320,18 @@
     }
 
     private async Task LoadProducts()
-    {
-        bool oldAPIRequestInProgress = APIRequestInProgress;
-        APIRequestInProgress = true;
+    {        
+        List<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR> products = await LoadProductsUnscoped();
 
-        try
+        if (products.Count == 0)
         {
-            List<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR> products = await LoadProductsUnscoped();
+            AppendSessionNotice("No products were returned by the Jiwa inventory query.");
+        }
 
-            if (products.Count == 0)
-            {
-                AppendSessionNotice("No products were returned by the Jiwa inventory query.");
-            }
-
-            AllProducts = products
-                .GroupBy(x => x.InventoryID)
-                .Select(x => x.First())
-                .ToList();
-        }
-        catch (Exception ex)
-        {
-            HandleAPIException(ex);
-        }
-        finally
-        {
-            APIRequestInProgress = oldAPIRequestInProgress;
-        }
+        AllProducts = products
+            .GroupBy(x => x.InventoryID)
+            .Select(x => x.First())
+            .ToList();
     }
 
     private async Task<List<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR>> LoadProductsUnscoped()
@@ -345,17 +345,7 @@
         {
             JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery query = BuildInventoryListQuery(skip, take);
 
-            QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR> response =
-                await JiwaAPI.GetAsync(query, WebPortalUserSessionStateContainer.WebPortalUserSession.Id);
-
-            if ((response?.Results == null || response.Results.Count == 0) && !string.IsNullOrWhiteSpace(Config.JiwaAPIKey))
-            {
-                response = await JiwaAPI.GetAsync(query, jiwaAPIKey: Config.JiwaAPIKey);
-                if (response?.Results != null && response.Results.Count > 0)
-                {
-                    AppendSessionNotice("No products were returned for your current session context. Showing products via portal API key fallback.");
-                }
-            }
+            QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR> response = await SendToAPI<QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR>>(query);
 
             if (response?.Results == null || response.Results.Count == 0)
             {
@@ -380,7 +370,7 @@
     {
         JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery query = new()
         {
-            IN_LogicalID = Config.IN_LogicalID,
+            Immutable_IN_LogicalID = Config.IN_LogicalID,
             OrderBy = "PartNo",
             Fields = fields,
             Take = take,
@@ -641,168 +631,26 @@
     }
 
     private async Task<List<ProductGalleryImage>> GetInventoryImages(string inventoryId)
-    {
-        string path = $"/Inventory/{Uri.EscapeDataString(inventoryId)}/Images";
+    {        
+        List<ProductGalleryImage> galleryImages = new List<ProductGalleryImage>();
+        JiwaFinancials.Jiwa.JiwaServiceModel.InventoryImageGETManyRequest request = new JiwaFinancials.Jiwa.JiwaServiceModel.InventoryImageGETManyRequest() { InventoryID = inventoryId };
+        List<JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryImage> images = await SendToAPI<List<JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryImage>>(request);
 
-        string? sessionId = WebPortalUserSessionStateContainer.WebPortalUserSession?.Id;
-        if (!string.IsNullOrWhiteSpace(sessionId))
+        if (images != null)
         {
-            List<ProductGalleryImage>? sessionImages = await TryGetInventoryImages(path, sessionId, null);
-            if (sessionImages != null && sessionImages.Count > 0)
+            foreach (JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryImage image in images)
             {
-                return sessionImages;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(Config.JiwaAPIKey))
-        {
-            List<ProductGalleryImage>? apiKeyImages = await TryGetInventoryImages(path, null, Config.JiwaAPIKey);
-            if (apiKeyImages != null)
-            {
-                return apiKeyImages;
-            }
-        }
-
-        return new List<ProductGalleryImage>();
-    }
-
-    private static async Task<List<ProductGalleryImage>?> TryGetInventoryImages(string path, string? sessionId, string? apiKey)
-    {
-        try
-        {
-            using JsonApiClient client = new(Config.JiwaAPIURL);
-
-            if (!string.IsNullOrWhiteSpace(sessionId))
-            {
-                client.SetCookie("ss-id", sessionId, null);
-            }
-            else
-            {
-                client.BearerToken = apiKey;
-            }
-
-            List<Dictionary<string, object>> rows = await client.GetAsync<List<Dictionary<string, object>>>(path);
-            List<ProductGalleryImage> images = new();
-
-            foreach (Dictionary<string, object> row in rows)
-            {
-                string title = FirstNonEmpty(row,
-                    "Title",
-                    "Caption",
-                    "Description",
-                    "WebStore_Image_name",
-                    "AltText",
-                    "PhysicalFileName") ?? "Image";
-
-                string? physicalFileName = FirstNonEmpty(row, "PhysicalFileName");
-                string mime = GetMimeTypeFromFileName(physicalFileName);
-
-                string? base64 = FirstNonEmpty(row,
-                    "FileBinary",
-                    "Image",
-                    "Picture",
-                    "Base64",
-                    "ImageBase64",
-                    "Content",
-                    "Data");
-
-                string? source = null;
-                if (!string.IsNullOrWhiteSpace(base64))
+                if (image.FileBinary != null && image.FileBinary.Length > 0)
                 {
-                    string normalized = base64.Trim();
-                    if (normalized.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
-                    {
-                        source = normalized;
-                    }
-                    else if (!normalized.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !normalized.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-                    {
-                        source = $"data:{mime};base64,{normalized}";
-                    }
-                }
-
-                if (string.IsNullOrWhiteSpace(source))
-                {
-                    source = FirstNonEmpty(row,
-                        "WebStore_Image_src",
-                        "Url",
-                        "URL",
-                        "ImageUrl",
-                        "SourceUrl",
-                        "Src");
-                }
-
-                if (!string.IsNullOrWhiteSpace(source))
-                {
-                    source = await ResolveImageSourceAsync(source, mime);
-                    images.Add(new ProductGalleryImage { Source = source, Title = title });
-                }
-            }
-
-            return images;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private static async Task<string> ResolveImageSourceAsync(string source, string fallbackMime)
-    {
-        string normalized = source.Trim();
-
-        if (normalized.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
-        {
-            return normalized;
-        }
-
-        if (!normalized.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !normalized.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
-        {
-            return $"data:{fallbackMime};base64,{normalized}";
-        }
-
-        try
-        {
-            using HttpClient httpClient = new();
-            using HttpResponseMessage response = await httpClient.GetAsync(normalized);
-            if (!response.IsSuccessStatusCode)
-            {
-                return normalized;
-            }
-
-            byte[] bytes = await response.Content.ReadAsByteArrayAsync();
-            string mime = response.Content.Headers.ContentType?.MediaType ?? fallbackMime;
-            return $"data:{mime};base64,{Convert.ToBase64String(bytes)}";
-        }
-        catch
-        {
-            return normalized;
-        }
-    }
-
-    private static string? FirstNonEmpty(Dictionary<string, object> row, params string[] keys)
-    {
-        foreach (string key in keys)
-        {
-            if (!row.TryGetValue(key, out object? value) || value == null)
-            {
-                continue;
-            }
-
-            string? text = value switch
-            {
-                string s => s,
-                JsonElement je when je.ValueKind == JsonValueKind.String => je.GetString(),
-                JsonElement je => je.ToString(),
-                _ => value.ToString()
-            };
-
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                return text;
+                    string mime = GetMimeTypeFromFileName(image.PhysicalFileName);
+                    string base64 = Convert.ToBase64String(image.FileBinary);
+                    string source = $"data:{mime};base64,{base64}";
+                    galleryImages.Add(new ProductGalleryImage() { Source = source, Title = image.Title ?? "Image" });
+                }                
             }
         }
 
-        return null;
+        return galleryImages;
     }
 
     private static string GetMimeTypeFromFileName(string? fileName)
@@ -840,7 +688,7 @@
                 return;
             }
 
-            CustomerSpecificPricingResponse? pricing = await GetCustomerSpecificPrice(requestedInventoryId, debtorId);
+            JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryPriceGETResponse? pricing = await GetCustomerSpecificPrice(requestedInventoryId, debtorId);
 
             if (SelectedProduct?.InventoryID != requestedInventoryId)
             {
@@ -872,51 +720,17 @@
         }
     }
 
-    private async Task<CustomerSpecificPricingResponse?> GetCustomerSpecificPrice(string inventoryId, string debtorId)
+    private async Task<JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryPriceGETResponse?> GetCustomerSpecificPrice(string inventoryId, string debtorId)
     {
-        string date = DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        string logicalId = Config.IN_LogicalID;
-        string path = $"/Inventory/{Uri.EscapeDataString(inventoryId)}/Pricing/{Uri.EscapeDataString(debtorId)}/{Uri.EscapeDataString(logicalId)}/{Uri.EscapeDataString(date)}/1";
+        JiwaFinancials.Jiwa.JiwaServiceModel.InventoryPriceGETRequest priceRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.InventoryPriceGETRequest()
+        {            
+            InventoryID = inventoryId,
+            DebtorID = debtorId,
+            IN_LogicalID = Config.IN_LogicalID,
+            Date = DateTime.Today.Date,
+        };
 
-        string? sessionId = WebPortalUserSessionStateContainer.WebPortalUserSession?.Id;
-        if (!string.IsNullOrWhiteSpace(sessionId))
-        {
-            CustomerSpecificPricingResponse? sessionResponse = await TryGetCustomerSpecificPrice(path, sessionId, null);
-            if (sessionResponse != null)
-            {
-                return sessionResponse;
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(Config.JiwaAPIKey))
-        {
-            return await TryGetCustomerSpecificPrice(path, null, Config.JiwaAPIKey);
-        }
-
-        return null;
-    }
-
-    private static async Task<CustomerSpecificPricingResponse?> TryGetCustomerSpecificPrice(string path, string? sessionId, string? apiKey)
-    {
-        try
-        {
-            using JsonApiClient client = new(Config.JiwaAPIURL);
-
-            if (!string.IsNullOrWhiteSpace(sessionId))
-            {
-                client.SetCookie("ss-id", sessionId, null);
-            }
-            else
-            {
-                client.BearerToken = apiKey;
-            }
-
-            return await client.GetAsync<CustomerSpecificPricingResponse>(path);
-        }
-        catch
-        {
-            return null;
-        }
+        return await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.Inventory.InventoryPriceGETResponse>(priceRequest);
     }
 
     private async Task EnsureSelectedProductPicture(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR product)
@@ -961,106 +775,39 @@
 
     private async Task<byte[]?> LoadPictureFromInventoryEndpoint(string inventoryId)
     {
-        try
+        JiwaFinancials.Jiwa.JiwaServiceModel.InventoryPictureGETRequest pictureRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.InventoryPictureGETRequest()
         {
-            byte[]? queryPicture = await LoadPictureFromInventoryListQuery(inventoryId);
-            if (queryPicture != null)
-            {
-                return queryPicture;
-            }
-
-            string? sessionId = WebPortalUserSessionStateContainer.WebPortalUserSession?.Id;
-            byte[]? sessionPicture = null;
-            if (!string.IsNullOrWhiteSpace(sessionId))
-            {
-                sessionPicture = await TryLoadPictureFromInventoryEndpoint(inventoryId, sessionId, null);
-                if (sessionPicture != null)
-                {
-                    return sessionPicture;
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(Config.JiwaAPIKey))
-            {
-                return await TryLoadPictureFromInventoryEndpoint(inventoryId, null, Config.JiwaAPIKey);
-            }
-
-            return null;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private async Task<byte[]?> LoadPictureFromInventoryListQuery(string inventoryId)
-    {
-        JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_List_OR_ImmutableWarehouseQuery query = new()
-        {
-            IN_LogicalID = Config.IN_LogicalID,
-            InventoryID = inventoryId,
-            Take = 1,
-            Fields = "InventoryID,Picture"
+            InventoryID = inventoryId
         };
 
-        QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR>? response = null;
-        string? sessionId = WebPortalUserSessionStateContainer.WebPortalUserSession?.Id;
-
-        if (!string.IsNullOrWhiteSpace(sessionId))
-        {
-            response = await JiwaAPI.GetAsync(query, sessionId);
-        }
-
-        JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Inventory_Item_ListOR? product = response?.Results?.FirstOrDefault();
-        if ((product == null || !string.Equals(product.InventoryID, inventoryId, StringComparison.OrdinalIgnoreCase)) && !string.IsNullOrWhiteSpace(Config.JiwaAPIKey))
-        {
-            response = await JiwaAPI.GetAsync(query, jiwaAPIKey: Config.JiwaAPIKey);
-            product = response?.Results?.FirstOrDefault();
-        }
-
-        if (product == null || !string.Equals(product.InventoryID, inventoryId, StringComparison.OrdinalIgnoreCase))
-        {
-            return null;
-        }
-
-        return product.Picture != null && product.Picture.Length > 0 ? product.Picture : null;
-    }
-
-    private static async Task<byte[]?> TryLoadPictureFromInventoryEndpoint(string inventoryId, string? sessionId, string? apiKey)
-    {
-        using JsonApiClient client = new(Config.JiwaAPIURL);
-
-        if (!string.IsNullOrWhiteSpace(sessionId))
-        {
-            client.SetCookie("ss-id", sessionId, null);
-        }
-        else
-        {
-            client.BearerToken = apiKey;
-        }
-
-        InventoryImageResponse? response = await client.GetAsync<InventoryImageResponse>($"/Inventory/{Uri.EscapeDataString(inventoryId)}");
-        if (string.IsNullOrWhiteSpace(response?.Picture))
-        {
-            return null;
-        }
-
-        string picture = response.Picture.Trim();
-        const string dataUrlMarker = "base64,";
-        int markerIndex = picture.IndexOf(dataUrlMarker, StringComparison.OrdinalIgnoreCase);
-        if (markerIndex >= 0)
-        {
-            picture = picture[(markerIndex + dataUrlMarker.Length)..];
-        }
-
+        APIRequestInProgressCount++;
         try
         {
-            return Convert.FromBase64String(picture);
+            return await JiwaAPI.GetAsync<byte[]>(pictureRequest, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
         }
-        catch
+        catch (ServiceStack.WebServiceException webServiceException)
         {
-            return null;
+            if (webServiceException.StatusCode == 401)
+            {
+                // We are either not authenticated, or our token we have expired, go log on - but first clear any session info as it's no good no more.
+                WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
+                NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
+            }
+            else
+            {
+                statusMessage = webServiceException.ErrorMessage;
+            }
         }
+        catch (Exception ex)
+        {
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            APIRequestInProgressCount--;
+        }
+
+        return null;
     }
 
     private async Task ExportPriceListCsv()
@@ -1167,17 +914,6 @@
         return Config.FormattedDecimals(stockOnHand, product.QuantityDecimalPlaces, true);
     }
 
-    private sealed class InventoryImageResponse
-    {
-        public string? Picture { get; set; }
-    }
-
-    private sealed class CustomerSpecificPricingResponse
-    {
-        public decimal? Price { get; set; }
-        public bool? IncludesTax { get; set; }
-    }
-
     private sealed class ProductGalleryImage
     {
         public string Source { get; set; } = string.Empty;
@@ -1200,24 +936,6 @@
         }
     }
 
-    private void HandleAPIException(Exception ex)
-    {
-        if (ex is WebServiceException webServiceException)
-        {
-            if (webServiceException.StatusCode == 401)
-            {
-                WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
-                NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
-                return;
-            }
-
-            statusMessage = webServiceException.ErrorMessage;
-            return;
-        }
-
-        statusMessage = ex.Message;
-    }
-
     private void AppendSessionNotice(string message)
     {
         if (string.IsNullOrWhiteSpace(message))
@@ -1235,5 +953,61 @@
         {
             SessionNotice += " " + message;
         }
+    }
+
+    public async void APIException(Exception ex)
+    {
+        // first we need to work out what type of exception this was.  If it as a 401 (Not Authenticated), then we just redirect to to the login page
+        // Anything else, we set the errorMessage property so the component displays the error to the user.
+        if (ex is ServiceStack.WebServiceException)
+        {
+            ServiceStack.WebServiceException webServiceException = (ServiceStack.WebServiceException)ex;
+            if (webServiceException.StatusCode == 401)
+            {
+                // We are either not authenticated, or our token we have expired, go log on - but first clear any session info as it's no good no more.
+                WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
+                NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
+            }
+            else
+            {
+                statusMessage = webServiceException.ErrorMessage;
+            }
+        }
+        else
+        {
+            statusMessage = ex.Message;
+        }
+    }       
+
+    public async Task<TResponse> SendToAPI<TResponse>(IReturn<TResponse> requestDTO)
+    {
+        APIRequestInProgressCount++;
+        try
+        {
+            return await JiwaAPI.SendAsync(requestDTO, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
+        }
+        catch (ServiceStack.WebServiceException webServiceException)
+        {
+            if (webServiceException.StatusCode == 401)
+            {
+                // We are either not authenticated, or our token we have expired, go log on - but first clear any session info as it's no good no more.
+                WebPortalUserSessionStateContainer.SetWebPortalUserSession(null);
+                NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
+            }
+            else
+            {
+                statusMessage = webServiceException.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            APIRequestInProgressCount--;
+        }
+
+        return default(TResponse);
     }
 }
