@@ -24,10 +24,6 @@ namespace JiwaCustomerPortal
         public static string DebtorStatementReport { get; set; }
         public static string CustomerWebPortalPluginVersion { get; set; }
         public static string DocketNumHeader { get; set; }
-        public static string AppSettingsIN_LogicalID { get; set; }
-        public static string AppSettingsLogicalWarehouseDescription { get; set; }
-        public static string AppSettingsIN_PhysicalID { get; set; }
-        public static string AppSettingsPhysicalWarehouseDescription { get; set; }
         public static string IN_LogicalID { get; set; }
         public static string LogicalWarehouseDescription { get; set; }
         public static string IN_PhysicalID { get; set; }
@@ -132,8 +128,6 @@ namespace JiwaCustomerPortal
             IN_PhysicalID = response.IN_PhysicalID ?? string.Empty;
             PhysicalWarehouseDescription = response.PhysicalWarehouseDescription ?? string.Empty;
 
-            ApplyWarehouseFallbackFromAppSettings();
-
             if (string.IsNullOrWhiteSpace(LogicalWarehouseDescription))
             {
                 LogicalWarehouseDescription = "All Logical Warehouses";
@@ -168,29 +162,6 @@ namespace JiwaCustomerPortal
 
             _SalesQuoteCustomFields = await JiwaAPI.GetAsync(new SalesQuoteCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
             _SalesQuoteLineCustomFields = await JiwaAPI.GetAsync(new SalesQuoteLineCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
-        }
-
-        private static void ApplyWarehouseFallbackFromAppSettings()
-        {
-            if (string.IsNullOrWhiteSpace(IN_LogicalID))
-            {
-                IN_LogicalID = AppSettingsIN_LogicalID ?? string.Empty;
-            }
-
-            if (string.IsNullOrWhiteSpace(LogicalWarehouseDescription))
-            {
-                LogicalWarehouseDescription = AppSettingsLogicalWarehouseDescription ?? string.Empty;
-            }
-
-            if (string.IsNullOrWhiteSpace(IN_PhysicalID))
-            {
-                IN_PhysicalID = AppSettingsIN_PhysicalID ?? string.Empty;
-            }
-
-            if (string.IsNullOrWhiteSpace(PhysicalWarehouseDescription))
-            {
-                PhysicalWarehouseDescription = AppSettingsPhysicalWarehouseDescription ?? string.Empty;
-            }
         }
 
         public static string FormattedDecimals(decimal value, short decimalPlaces, bool useCommas = true)
