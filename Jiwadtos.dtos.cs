@@ -2249,6 +2249,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or
         : v_Jiwa_Inventory_Item_ListORQuery, IReturn<QueryResponse<v_Jiwa_Inventory_Item_ListOR>>
     {
         public virtual string Immutable_IN_LogicalID { get; set; }
+        public virtual bool? Immutable_WebEnabled { get; set; }
     }
 
     public partial class v_Jiwa_Inventory_Item_ListOR
@@ -2314,191 +2315,253 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or
     [ApiResponse(Description = "Read OK", StatusCode = 200)]
     [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
     [ApiResponse(Description = "Not authorised", StatusCode = 403)]
-    public partial class v_Jiwa_Inventory_Item_ListORQuery
-        : QueryDb<v_Jiwa_Inventory_Item_ListOR>, IReturn<QueryResponse<v_Jiwa_Inventory_Item_ListOR>>
+    public partial class v_Jiwa_Inventory_Item_ListORQuery : QueryDb<v_Jiwa_Inventory_Item_ListOR>
     {
-        public virtual string InventoryID { get; set; }
-        public virtual string InventoryIDStartsWith { get; set; }
-        public virtual string InventoryIDEndsWith { get; set; }
-        public virtual string InventoryIDContains { get; set; }
-        public virtual string InventoryIDLike { get; set; }
-        public virtual string[] InventoryIDBetween { get; set; }
-        public virtual string[] InventoryIDIn { get; set; }
-        public virtual string PartNo { get; set; }
-        public virtual string PartNoStartsWith { get; set; }
-        public virtual string PartNoEndsWith { get; set; }
-        public virtual string PartNoContains { get; set; }
-        public virtual string PartNoLike { get; set; }
-        public virtual string[] PartNoBetween { get; set; }
-        public virtual string[] PartNoIn { get; set; }
-        public virtual string Description { get; set; }
-        public virtual string DescriptionStartsWith { get; set; }
-        public virtual string DescriptionEndsWith { get; set; }
-        public virtual string DescriptionContains { get; set; }
-        public virtual string DescriptionLike { get; set; }
-        public virtual string[] DescriptionBetween { get; set; }
-        public virtual string[] DescriptionIn { get; set; }
-        public virtual byte[] Picture { get; set; }
-        public virtual string InventoryClassificationID { get; set; }
-        public virtual string InventoryClassificationIDStartsWith { get; set; }
-        public virtual string InventoryClassificationIDEndsWith { get; set; }
-        public virtual string InventoryClassificationIDContains { get; set; }
-        public virtual string InventoryClassificationIDLike { get; set; }
-        public virtual string[] InventoryClassificationIDBetween { get; set; }
-        public virtual string[] InventoryClassificationIDIn { get; set; }
-        public virtual string ClassificationDescription { get; set; }
-        public virtual string ClassificationDescriptionStartsWith { get; set; }
-        public virtual string ClassificationDescriptionEndsWith { get; set; }
-        public virtual string ClassificationDescriptionContains { get; set; }
-        public virtual string ClassificationDescriptionLike { get; set; }
-        public virtual string[] ClassificationDescriptionBetween { get; set; }
-        public virtual string[] ClassificationDescriptionIn { get; set; }
-        public virtual string Category1ID { get; set; }
-        public virtual string Category1IDStartsWith { get; set; }
-        public virtual string Category1IDEndsWith { get; set; }
-        public virtual string Category1IDContains { get; set; }
-        public virtual string Category1IDLike { get; set; }
-        public virtual string[] Category1IDBetween { get; set; }
-        public virtual string[] Category1IDIn { get; set; }
-        public virtual string Category1Description { get; set; }
-        public virtual string Category1DescriptionStartsWith { get; set; }
-        public virtual string Category1DescriptionEndsWith { get; set; }
-        public virtual string Category1DescriptionContains { get; set; }
-        public virtual string Category1DescriptionLike { get; set; }
-        public virtual string[] Category1DescriptionBetween { get; set; }
-        public virtual string[] Category1DescriptionIn { get; set; }
-        public virtual string Category2ID { get; set; }
-        public virtual string Category2IDStartsWith { get; set; }
-        public virtual string Category2IDEndsWith { get; set; }
-        public virtual string Category2IDContains { get; set; }
-        public virtual string Category2IDLike { get; set; }
-        public virtual string[] Category2IDBetween { get; set; }
-        public virtual string[] Category2IDIn { get; set; }
-        public virtual string Category2Description { get; set; }
-        public virtual string Category2DescriptionStartsWith { get; set; }
-        public virtual string Category2DescriptionEndsWith { get; set; }
-        public virtual string Category2DescriptionContains { get; set; }
-        public virtual string Category2DescriptionLike { get; set; }
-        public virtual string[] Category2DescriptionBetween { get; set; }
-        public virtual string[] Category2DescriptionIn { get; set; }
-        public virtual string Category3ID { get; set; }
-        public virtual string Category3IDStartsWith { get; set; }
-        public virtual string Category3IDEndsWith { get; set; }
-        public virtual string Category3IDContains { get; set; }
-        public virtual string Category3IDLike { get; set; }
-        public virtual string[] Category3IDBetween { get; set; }
-        public virtual string[] Category3IDIn { get; set; }
-        public virtual string Category3Description { get; set; }
-        public virtual string Category3DescriptionStartsWith { get; set; }
-        public virtual string Category3DescriptionEndsWith { get; set; }
-        public virtual string Category3DescriptionContains { get; set; }
-        public virtual string Category3DescriptionLike { get; set; }
-        public virtual string[] Category3DescriptionBetween { get; set; }
-        public virtual string[] Category3DescriptionIn { get; set; }
-        public virtual string Category4ID { get; set; }
-        public virtual string Category4IDStartsWith { get; set; }
-        public virtual string Category4IDEndsWith { get; set; }
-        public virtual string Category4IDContains { get; set; }
-        public virtual string Category4IDLike { get; set; }
-        public virtual string[] Category4IDBetween { get; set; }
-        public virtual string[] Category4IDIn { get; set; }
-        public virtual string Category4Description { get; set; }
-        public virtual string Category4DescriptionStartsWith { get; set; }
-        public virtual string Category4DescriptionEndsWith { get; set; }
-        public virtual string Category4DescriptionContains { get; set; }
-        public virtual string Category4DescriptionLike { get; set; }
-        public virtual string[] Category4DescriptionBetween { get; set; }
-        public virtual string[] Category4DescriptionIn { get; set; }
-        public virtual string Category5ID { get; set; }
-        public virtual string Category5IDStartsWith { get; set; }
-        public virtual string Category5IDEndsWith { get; set; }
-        public virtual string Category5IDContains { get; set; }
-        public virtual string Category5IDLike { get; set; }
-        public virtual string[] Category5IDBetween { get; set; }
-        public virtual string[] Category5IDIn { get; set; }
-        public virtual string Category5Description { get; set; }
-        public virtual string Category5DescriptionStartsWith { get; set; }
-        public virtual string Category5DescriptionEndsWith { get; set; }
-        public virtual string Category5DescriptionContains { get; set; }
-        public virtual string Category5DescriptionLike { get; set; }
-        public virtual string[] Category5DescriptionBetween { get; set; }
-        public virtual string[] Category5DescriptionIn { get; set; }
-        public virtual string IN_LogicalID { get; set; }
-        public virtual string IN_LogicalIDStartsWith { get; set; }
-        public virtual string IN_LogicalIDEndsWith { get; set; }
-        public virtual string IN_LogicalIDContains { get; set; }
-        public virtual string IN_LogicalIDLike { get; set; }
-        public virtual string[] IN_LogicalIDBetween { get; set; }
-        public virtual string[] IN_LogicalIDIn { get; set; }
-        public virtual string LogicalWarehouseDescription { get; set; }
-        public virtual string LogicalWarehouseDescriptionStartsWith { get; set; }
-        public virtual string LogicalWarehouseDescriptionEndsWith { get; set; }
-        public virtual string LogicalWarehouseDescriptionContains { get; set; }
-        public virtual string LogicalWarehouseDescriptionLike { get; set; }
-        public virtual string[] LogicalWarehouseDescriptionBetween { get; set; }
-        public virtual string[] LogicalWarehouseDescriptionIn { get; set; }
-        public virtual string IN_PhysicalID { get; set; }
-        public virtual string IN_PhysicalIDStartsWith { get; set; }
-        public virtual string IN_PhysicalIDEndsWith { get; set; }
-        public virtual string IN_PhysicalIDContains { get; set; }
-        public virtual string IN_PhysicalIDLike { get; set; }
-        public virtual string[] IN_PhysicalIDBetween { get; set; }
-        public virtual string[] IN_PhysicalIDIn { get; set; }
-        public virtual string PhysicalWarehouseDescription { get; set; }
-        public virtual string PhysicalWarehouseDescriptionStartsWith { get; set; }
-        public virtual string PhysicalWarehouseDescriptionEndsWith { get; set; }
-        public virtual string PhysicalWarehouseDescriptionContains { get; set; }
-        public virtual string PhysicalWarehouseDescriptionLike { get; set; }
-        public virtual string[] PhysicalWarehouseDescriptionBetween { get; set; }
-        public virtual string[] PhysicalWarehouseDescriptionIn { get; set; }
-        public virtual decimal? AvailableStock { get; set; }
-        public virtual decimal? AvailableStockGreaterThanOrEqualTo { get; set; }
-        public virtual decimal? AvailableStockGreaterThan { get; set; }
-        public virtual decimal? AvailableStockLessThan { get; set; }
-        public virtual decimal? AvailableStockLessThanOrEqualTo { get; set; }
-        public virtual decimal? AvailableStockNotEqualTo { get; set; }
-        public virtual decimal?[] AvailableStockBetween { get; set; }
-        public virtual decimal?[] AvailableStockIn { get; set; }
-        public virtual decimal? SellPrice { get; set; }
-        public virtual decimal? SellPriceGreaterThanOrEqualTo { get; set; }
-        public virtual decimal? SellPriceGreaterThan { get; set; }
-        public virtual decimal? SellPriceLessThan { get; set; }
-        public virtual decimal? SellPriceLessThanOrEqualTo { get; set; }
-        public virtual decimal? SellPriceNotEqualTo { get; set; }
-        public virtual decimal?[] SellPriceBetween { get; set; }
-        public virtual decimal?[] SellPriceIn { get; set; }
-        public virtual decimal? RRPPrice { get; set; }
-        public virtual decimal? RRPPriceGreaterThanOrEqualTo { get; set; }
-        public virtual decimal? RRPPriceGreaterThan { get; set; }
-        public virtual decimal? RRPPriceLessThan { get; set; }
-        public virtual decimal? RRPPriceLessThanOrEqualTo { get; set; }
-        public virtual decimal? RRPPriceNotEqualTo { get; set; }
-        public virtual decimal?[] RRPPriceBetween { get; set; }
-        public virtual decimal?[] RRPPriceIn { get; set; }
-        public virtual DateTimeOffset? LastSavedDateTime { get; set; }
-        public virtual DateTimeOffset? LastSavedDateTimeGreaterThanOrEqualTo { get; set; }
-        public virtual DateTimeOffset? LastSavedDateTimeGreaterThan { get; set; }
-        public virtual DateTimeOffset? LastSavedDateTimeLessThan { get; set; }
-        public virtual DateTimeOffset? LastSavedDateTimeLessThanOrEqualTo { get; set; }
-        public virtual DateTimeOffset? LastSavedDateTimeNotEqualTo { get; set; }
-        public virtual DateTimeOffset[] LastSavedDateTimeBetween { get; set; }
-        public virtual DateTimeOffset[] LastSavedDateTimeIn { get; set; }
-        public virtual decimal? InStock { get; set; }
-        public virtual decimal? InStockGreaterThanOrEqualTo { get; set; }
-        public virtual decimal? InStockGreaterThan { get; set; }
-        public virtual decimal? InStockLessThan { get; set; }
-        public virtual decimal? InStockLessThanOrEqualTo { get; set; }
-        public virtual decimal? InStockNotEqualTo { get; set; }
-        public virtual decimal?[] InStockBetween { get; set; }
-        public virtual decimal?[] InStockIn { get; set; }
-        public virtual short? QuantityDecimalPlaces { get; set; }
-        public virtual short? QuantityDecimalPlacesGreaterThanOrEqualTo { get; set; }
-        public virtual short? QuantityDecimalPlacesGreaterThan { get; set; }
-        public virtual short? QuantityDecimalPlacesLessThan { get; set; }
-        public virtual short? QuantityDecimalPlacesLessThanOrEqualTo { get; set; }
-        public virtual short? QuantityDecimalPlacesNotEqualTo { get; set; }
-        public virtual short?[] QuantityDecimalPlacesBetween { get; set; }
-        public virtual short?[] QuantityDecimalPlacesIn { get; set; }
+        public string InventoryID { get; set; }
+
+        public string InventoryIDStartsWith { get; set; }
+        public string InventoryIDEndsWith { get; set; }
+        public string InventoryIDContains { get; set; }
+        public string InventoryIDLike { get; set; }
+        public string[] InventoryIDBetween { get; set; }
+        public string[] InventoryIDIn { get; set; }
+
+        public string PartNo { get; set; }
+
+        public string PartNoStartsWith { get; set; }
+        public string PartNoEndsWith { get; set; }
+        public string PartNoContains { get; set; }
+        public string PartNoLike { get; set; }
+        public string[] PartNoBetween { get; set; }
+        public string[] PartNoIn { get; set; }
+
+        public string Description { get; set; }
+
+        public string DescriptionStartsWith { get; set; }
+        public string DescriptionEndsWith { get; set; }
+        public string DescriptionContains { get; set; }
+        public string DescriptionLike { get; set; }
+        public string[] DescriptionBetween { get; set; }
+        public string[] DescriptionIn { get; set; }
+
+        public byte[] Picture { get; set; }
+
+        public string InventoryClassificationID { get; set; }
+
+        public string InventoryClassificationIDStartsWith { get; set; }
+        public string InventoryClassificationIDEndsWith { get; set; }
+        public string InventoryClassificationIDContains { get; set; }
+        public string InventoryClassificationIDLike { get; set; }
+        public string[] InventoryClassificationIDBetween { get; set; }
+        public string[] InventoryClassificationIDIn { get; set; }
+
+        public string ClassificationDescription { get; set; }
+
+        public string ClassificationDescriptionStartsWith { get; set; }
+        public string ClassificationDescriptionEndsWith { get; set; }
+        public string ClassificationDescriptionContains { get; set; }
+        public string ClassificationDescriptionLike { get; set; }
+        public string[] ClassificationDescriptionBetween { get; set; }
+        public string[] ClassificationDescriptionIn { get; set; }
+
+        public string Category1ID { get; set; }
+
+        public string Category1IDStartsWith { get; set; }
+        public string Category1IDEndsWith { get; set; }
+        public string Category1IDContains { get; set; }
+        public string Category1IDLike { get; set; }
+        public string[] Category1IDBetween { get; set; }
+        public string[] Category1IDIn { get; set; }
+
+        public string Category1Description { get; set; }
+
+        public string Category1DescriptionStartsWith { get; set; }
+        public string Category1DescriptionEndsWith { get; set; }
+        public string Category1DescriptionContains { get; set; }
+        public string Category1DescriptionLike { get; set; }
+        public string[] Category1DescriptionBetween { get; set; }
+        public string[] Category1DescriptionIn { get; set; }
+
+        public string Category2ID { get; set; }
+
+        public string Category2IDStartsWith { get; set; }
+        public string Category2IDEndsWith { get; set; }
+        public string Category2IDContains { get; set; }
+        public string Category2IDLike { get; set; }
+        public string[] Category2IDBetween { get; set; }
+        public string[] Category2IDIn { get; set; }
+
+        public string Category2Description { get; set; }
+
+        public string Category2DescriptionStartsWith { get; set; }
+        public string Category2DescriptionEndsWith { get; set; }
+        public string Category2DescriptionContains { get; set; }
+        public string Category2DescriptionLike { get; set; }
+        public string[] Category2DescriptionBetween { get; set; }
+        public string[] Category2DescriptionIn { get; set; }
+
+        public string Category3ID { get; set; }
+
+        public string Category3IDStartsWith { get; set; }
+        public string Category3IDEndsWith { get; set; }
+        public string Category3IDContains { get; set; }
+        public string Category3IDLike { get; set; }
+        public string[] Category3IDBetween { get; set; }
+        public string[] Category3IDIn { get; set; }
+
+        public string Category3Description { get; set; }
+
+        public string Category3DescriptionStartsWith { get; set; }
+        public string Category3DescriptionEndsWith { get; set; }
+        public string Category3DescriptionContains { get; set; }
+        public string Category3DescriptionLike { get; set; }
+        public string[] Category3DescriptionBetween { get; set; }
+        public string[] Category3DescriptionIn { get; set; }
+
+        public string Category4ID { get; set; }
+
+        public string Category4IDStartsWith { get; set; }
+        public string Category4IDEndsWith { get; set; }
+        public string Category4IDContains { get; set; }
+        public string Category4IDLike { get; set; }
+        public string[] Category4IDBetween { get; set; }
+        public string[] Category4IDIn { get; set; }
+
+        public string Category4Description { get; set; }
+
+        public string Category4DescriptionStartsWith { get; set; }
+        public string Category4DescriptionEndsWith { get; set; }
+        public string Category4DescriptionContains { get; set; }
+        public string Category4DescriptionLike { get; set; }
+        public string[] Category4DescriptionBetween { get; set; }
+        public string[] Category4DescriptionIn { get; set; }
+
+        public string Category5ID { get; set; }
+
+        public string Category5IDStartsWith { get; set; }
+        public string Category5IDEndsWith { get; set; }
+        public string Category5IDContains { get; set; }
+        public string Category5IDLike { get; set; }
+        public string[] Category5IDBetween { get; set; }
+        public string[] Category5IDIn { get; set; }
+
+        public string Category5Description { get; set; }
+
+        public string Category5DescriptionStartsWith { get; set; }
+        public string Category5DescriptionEndsWith { get; set; }
+        public string Category5DescriptionContains { get; set; }
+        public string Category5DescriptionLike { get; set; }
+        public string[] Category5DescriptionBetween { get; set; }
+        public string[] Category5DescriptionIn { get; set; }
+
+        public string IN_LogicalID { get; set; }
+
+        public string IN_LogicalIDStartsWith { get; set; }
+        public string IN_LogicalIDEndsWith { get; set; }
+        public string IN_LogicalIDContains { get; set; }
+        public string IN_LogicalIDLike { get; set; }
+        public string[] IN_LogicalIDBetween { get; set; }
+        public string[] IN_LogicalIDIn { get; set; }
+
+        public string LogicalWarehouseDescription { get; set; }
+
+        public string LogicalWarehouseDescriptionStartsWith { get; set; }
+        public string LogicalWarehouseDescriptionEndsWith { get; set; }
+        public string LogicalWarehouseDescriptionContains { get; set; }
+        public string LogicalWarehouseDescriptionLike { get; set; }
+        public string[] LogicalWarehouseDescriptionBetween { get; set; }
+        public string[] LogicalWarehouseDescriptionIn { get; set; }
+
+        public string IN_PhysicalID { get; set; }
+
+        public string IN_PhysicalIDStartsWith { get; set; }
+        public string IN_PhysicalIDEndsWith { get; set; }
+        public string IN_PhysicalIDContains { get; set; }
+        public string IN_PhysicalIDLike { get; set; }
+        public string[] IN_PhysicalIDBetween { get; set; }
+        public string[] IN_PhysicalIDIn { get; set; }
+
+        public string PhysicalWarehouseDescription { get; set; }
+
+        public string PhysicalWarehouseDescriptionStartsWith { get; set; }
+        public string PhysicalWarehouseDescriptionEndsWith { get; set; }
+        public string PhysicalWarehouseDescriptionContains { get; set; }
+        public string PhysicalWarehouseDescriptionLike { get; set; }
+        public string[] PhysicalWarehouseDescriptionBetween { get; set; }
+        public string[] PhysicalWarehouseDescriptionIn { get; set; }
+
+        public decimal? AvailableStock { get; set; }
+
+        public decimal? AvailableStockGreaterThanOrEqualTo { get; set; }
+        public decimal? AvailableStockGreaterThan { get; set; }
+        public decimal? AvailableStockLessThan { get; set; }
+        public decimal? AvailableStockLessThanOrEqualTo { get; set; }
+        public decimal? AvailableStockNotEqualTo { get; set; }
+        public decimal?[] AvailableStockBetween { get; set; }
+        public decimal?[] AvailableStockIn { get; set; }
+
+        public decimal? SellPrice { get; set; }
+
+        public decimal? SellPriceGreaterThanOrEqualTo { get; set; }
+        public decimal? SellPriceGreaterThan { get; set; }
+        public decimal? SellPriceLessThan { get; set; }
+        public decimal? SellPriceLessThanOrEqualTo { get; set; }
+        public decimal? SellPriceNotEqualTo { get; set; }
+        public decimal?[] SellPriceBetween { get; set; }
+        public decimal?[] SellPriceIn { get; set; }
+
+        public decimal? RRPPrice { get; set; }
+
+        public decimal? RRPPriceGreaterThanOrEqualTo { get; set; }
+        public decimal? RRPPriceGreaterThan { get; set; }
+        public decimal? RRPPriceLessThan { get; set; }
+        public decimal? RRPPriceLessThanOrEqualTo { get; set; }
+        public decimal? RRPPriceNotEqualTo { get; set; }
+        public decimal?[] RRPPriceBetween { get; set; }
+        public decimal?[] RRPPriceIn { get; set; }
+
+        public DateTimeOffset? LastSavedDateTime { get; set; }
+
+        public DateTimeOffset? LastSavedDateTimeGreaterThanOrEqualTo { get; set; }
+        public DateTimeOffset? LastSavedDateTimeGreaterThan { get; set; }
+        public DateTimeOffset? LastSavedDateTimeLessThan { get; set; }
+        public DateTimeOffset? LastSavedDateTimeLessThanOrEqualTo { get; set; }
+        public DateTimeOffset? LastSavedDateTimeNotEqualTo { get; set; }
+        public DateTimeOffset[] LastSavedDateTimeBetween { get; set; }
+        public DateTimeOffset[] LastSavedDateTimeIn { get; set; }
+
+        public decimal? InStock { get; set; }
+
+        public decimal? InStockGreaterThanOrEqualTo { get; set; }
+        public decimal? InStockGreaterThan { get; set; }
+        public decimal? InStockLessThan { get; set; }
+        public decimal? InStockLessThanOrEqualTo { get; set; }
+        public decimal? InStockNotEqualTo { get; set; }
+        public decimal?[] InStockBetween { get; set; }
+        public decimal?[] InStockIn { get; set; }
+
+        public short? QuantityDecimalPlaces { get; set; }
+
+        public short? QuantityDecimalPlacesGreaterThanOrEqualTo { get; set; }
+        public short? QuantityDecimalPlacesGreaterThan { get; set; }
+        public short? QuantityDecimalPlacesLessThan { get; set; }
+        public short? QuantityDecimalPlacesLessThanOrEqualTo { get; set; }
+        public short? QuantityDecimalPlacesNotEqualTo { get; set; }
+        public short?[] QuantityDecimalPlacesBetween { get; set; }
+        public short?[] QuantityDecimalPlacesIn { get; set; }
+
+        public short? Status { get; set; }
+
+        public short? StatusGreaterThanOrEqualTo { get; set; }
+        public short? StatusGreaterThan { get; set; }
+        public short? StatusLessThan { get; set; }
+        public short? StatusLessThanOrEqualTo { get; set; }
+        public short? StatusNotEqualTo { get; set; }
+        public short[] StatusBetween { get; set; }
+        public short[] StatusIn { get; set; }
+
+        public bool? WebEnabled { get; set; }
+
     }
     #endregion
 
