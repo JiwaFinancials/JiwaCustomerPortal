@@ -127,7 +127,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             else if (InvoiceId != null)
             {
                 JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderGETRequest salesOrderGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderGETRequest() { InvoiceID = InvoiceId };
-                salesOrder = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>(salesOrderGETRequest);                
+                salesOrder = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>(salesOrderGETRequest);
             }
 
             if (salesOrder != null)

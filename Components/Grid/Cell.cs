@@ -1,4 +1,5 @@
 ﻿using JiwaCustomerPortal.Components.Grid.CellType;
+using Microsoft.AspNetCore.Components;
 
 namespace JiwaCustomerPortal.Components.Grid
 {
@@ -117,5 +118,7 @@ namespace JiwaCustomerPortal.Components.Grid
                 return $"{Column.Id}:{Row}";
             }
         }
+
+        public RenderFragment CustomRenderFragment { get; set; }
     }
 }
