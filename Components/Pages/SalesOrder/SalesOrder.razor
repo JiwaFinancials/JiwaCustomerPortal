@@ -382,10 +382,10 @@
 
             <div class="tab-content">
                 <div class=@String.Format("tab-pane{0}", CustomFieldsSelectedTabId == "OrderCustomFields-tab" ? " active" : null) id="OrderCustomFields" role="tabpanel" aria-labelledby="OrderCustomFields-tab">                                        
-                    <CustomFieldGrid @ref="@SalesOrderCustomFieldsGrid" Name="SalesOrderCustomFieldsGrid" PageHost="@this" CustomFields="@Config.SalesOrderCustomFields" CustomFieldValuesHost="@salesOrder" IsEditable="@IsEditable" CustomFieldChanged="@SalesOrderCustomFieldsGrid_CustomFieldChanged"></CustomFieldGrid>                    
+                    <CustomFieldGrid @ref="@SalesOrderCustomFieldsGrid" Name="SalesOrderCustomFieldsGrid" PageHost="@this" CustomFields="@((WebPortalUserSessionStateContainer.WebPortalUserSession?.AuthProvider == "credentials") ? Config.StaffLogin_SalesOrderCustomFields : Config.CustomerLogin_SalesOrderCustomFields)" CustomFieldValuesHost="@salesOrder" IsEditable="@IsEditable" CustomFieldChanged="@SalesOrderCustomFieldsGrid_CustomFieldChanged"></CustomFieldGrid>                    
                 </div>
                 <div class=@String.Format("tab-pane{0}", CustomFieldsSelectedTabId == "HistoryCustomFields-tab" ? " active" : null) id="HistoryCustomFields" role="tabpanel" aria-labelledby="HistoryCustomFields-tab">                                            
-                    <CustomFieldGrid @ref="@SalesOrderHistoryCustomFieldsGrid" Name="SalesOrderHistoryCustomFieldsGrid" PageHost="@this" CustomFields="@Config.SalesOrderHistoryCustomFields" CustomFieldValuesHost="@SelectedHistory" IsEditable="@IsEditable" CustomFieldChanged="@SalesOrderHistoryCustomFieldsGrid_CustomFieldChanged"></CustomFieldGrid>                    
+            <CustomFieldGrid @ref="@SalesOrderHistoryCustomFieldsGrid" Name="SalesOrderHistoryCustomFieldsGrid" PageHost="@this" CustomFields="@((WebPortalUserSessionStateContainer.WebPortalUserSession?.AuthProvider == "credentials") ? Config.StaffLogin_SalesOrderHistoryCustomFields : Config.CustomerLogin_SalesOrderHistoryCustomFields)" CustomFieldValuesHost="@SelectedHistory" IsEditable="@IsEditable" CustomFieldChanged="@SalesOrderHistoryCustomFieldsGrid_CustomFieldChanged"></CustomFieldGrid>
                 </div>            
             </div>
         </div>

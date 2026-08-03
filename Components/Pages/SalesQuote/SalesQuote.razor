@@ -370,7 +370,7 @@
         </div>        
 
         <div class=@String.Format("tab-pane{0}", SelectedTabId == "CustomFields-tab" ? " active" : null) id="CustomFields" role="tabpanel" aria-labelledby="CustomFields-tab">
-           <CustomFieldGrid @ref="@SalesQuoteCustomFieldsGrid" Name="SalesQuoteCustomFieldsGrid" PageHost="@this" CustomFields="@Config.SalesQuoteCustomFields" CustomFieldValuesHost="@salesQuote" IsEditable="@IsEditable" CustomFieldChanged="@SalesQuoteCustomFieldsGrid_CustomFieldChanged"></CustomFieldGrid>
+    <CustomFieldGrid @ref="@SalesQuoteCustomFieldsGrid" Name="SalesQuoteCustomFieldsGrid" PageHost="@this" CustomFields="@((WebPortalUserSessionStateContainer.WebPortalUserSession?.AuthProvider == "credentials") ? Config.StaffLogin_SalesQuoteCustomFields : Config.CustomerLogin_SalesQuoteCustomFields)" CustomFieldValuesHost="@salesQuote" IsEditable="@IsEditable" CustomFieldChanged="@SalesQuoteCustomFieldsGrid_CustomFieldChanged"></CustomFieldGrid>
         </div>
     </div>    
 }

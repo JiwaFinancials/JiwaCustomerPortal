@@ -187,8 +187,8 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 SalesOrderLinesGridCells.Columns.Add(new Column("Bin", new Components.Grid.CellType.ButtonCellType() { ButtonType = Components.Grid.CellType.ButtonCellType.ButtonTypes.Bin }, "") { Width = 10 });
             }
 
-            // Add sales order line custom field controller            
-            SalesOrderLineCustomFieldController = new Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesOrder.SalesOrder, JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine>(SalesOrderLinesGridCells, Config.SalesOrderLineCustomFields);
+            // Add sales order line custom field controller             
+            SalesOrderLineCustomFieldController = new Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesOrder.SalesOrder, JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine>(SalesOrderLinesGridCells, (WebPortalUserSessionStateContainer.WebPortalUserSession?.AuthProvider == "credentials") ? Config.StaffLogin_SalesOrderLineCustomFields : Config.CustomerLogin_SalesOrderLineCustomFields);
         
             return Task.CompletedTask;
         }

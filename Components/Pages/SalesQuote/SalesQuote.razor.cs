@@ -1,6 +1,7 @@
 using JiwaCustomerPortal.Components.AutoQueryGrid.Inventory;
 using JiwaCustomerPortal.Components.Grid;
 using JiwaCustomerPortal.Components.Grid.CustomField;
+using JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using ServiceStack;
@@ -181,7 +182,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
             }
 
             // Add sales quote line custom field controller            
-            SalesQuoteLineCustomFieldController = new Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesQuote.SalesQuote, JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine>(SalesQuoteLinesGridCells, Config.SalesQuoteLineCustomFields);
+            SalesQuoteLineCustomFieldController = new Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesQuote.SalesQuote, JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine>(SalesQuoteLinesGridCells, (WebPortalUserSessionStateContainer.WebPortalUserSession?.AuthProvider == "credentials") ? Config.StaffLogin_SalesQuoteLineCustomFields : Config.CustomerLogin_SalesQuoteLineCustomFields);
         
             return Task.CompletedTask;
         }

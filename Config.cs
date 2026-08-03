@@ -1,4 +1,5 @@
 ﻿using JiwaFinancials.Jiwa.JiwaServiceModel;
+using JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields;
 using ServiceStack.Html;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -63,6 +64,20 @@ namespace JiwaCustomerPortal
             }
         }
 
+        private static CustomFieldsToDisplay _CustomFieldsToDisplay;
+        public static CustomFieldsToDisplay CustomFieldsToDisplay
+        {
+            get
+            {
+                return _CustomFieldsToDisplay;
+            }
+            set
+            {
+                _CustomFieldsToDisplay = value;
+            }
+        }
+
+        #region "Sales Order"
         private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _SalesOrderCustomFields;
 
         public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> SalesOrderCustomFields
@@ -70,6 +85,26 @@ namespace JiwaCustomerPortal
             get
             {
                 return _SalesOrderCustomFields;
+            }
+        }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _StaffLogin_SalesOrderCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> StaffLogin_SalesOrderCustomFields
+        {
+            get
+            {
+                return _StaffLogin_SalesOrderCustomFields;
+            }
+        }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _CustomerLogin_SalesOrderCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> CustomerLogin_SalesOrderCustomFields
+        {
+            get
+            {
+                return _CustomerLogin_SalesOrderCustomFields;
             }
         }
 
@@ -83,6 +118,26 @@ namespace JiwaCustomerPortal
             }
         }
 
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _StaffLogin_SalesOrderHistoryCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> StaffLogin_SalesOrderHistoryCustomFields
+        {
+            get
+            {
+                return _StaffLogin_SalesOrderHistoryCustomFields;
+            }
+        }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _CustomerLogin_SalesOrderHistoryCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> CustomerLogin_SalesOrderHistoryCustomFields
+        {
+            get
+            {
+                return _CustomerLogin_SalesOrderHistoryCustomFields;
+            }
+        }
+
         private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _SalesOrderLineCustomFields;
 
         public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> SalesOrderLineCustomFields
@@ -93,6 +148,28 @@ namespace JiwaCustomerPortal
             }
         }
 
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _StaffLogin_SalesOrderLineCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> StaffLogin_SalesOrderLineCustomFields
+        {
+            get
+            {
+                return _StaffLogin_SalesOrderLineCustomFields;
+            }
+        }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _CustomerLogin_SalesOrderLineCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> CustomerLogin_SalesOrderLineCustomFields
+        {
+            get
+            {
+                return _CustomerLogin_SalesOrderLineCustomFields;
+            }
+        }
+        #endregion
+
+        #region "Sale Quote Custom Fields"
         private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _SalesQuoteCustomFields;
 
         public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> SalesQuoteCustomFields
@@ -100,6 +177,26 @@ namespace JiwaCustomerPortal
             get
             {
                 return _SalesQuoteCustomFields;
+            }
+        }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _StaffLogin_SalesQuoteCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> StaffLogin_SalesQuoteCustomFields
+        {
+            get
+            {
+                return _StaffLogin_SalesQuoteCustomFields;
+            }
+        }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _CustomerLogin_SalesQuoteCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> CustomerLogin_SalesQuoteCustomFields
+        {
+            get
+            {
+                return _CustomerLogin_SalesQuoteCustomFields;
             }
         }
 
@@ -112,6 +209,27 @@ namespace JiwaCustomerPortal
                 return _SalesQuoteLineCustomFields;
             }
         }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _StaffLogin_SalesQuoteLineCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> StaffLogin_SalesQuoteLineCustomFields
+        {
+            get
+            {
+                return _StaffLogin_SalesQuoteLineCustomFields;
+            }
+        }
+
+        private static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> _CustomerLogin_SalesQuoteLineCustomFields = new List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField>();
+
+        public static List<JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField> CustomerLogin_SalesQuoteLineCustomFields
+        {
+            get
+            {
+                return _CustomerLogin_SalesQuoteLineCustomFields;
+            }
+        }
+        #endregion
 
         public static async Task ReadSettingsFromAPI(CancellationToken cancellationToken = default)
         {
@@ -153,15 +271,79 @@ namespace JiwaCustomerPortal
                 {
                     _LocalCurrency = currency;
                 }
+            }            
+
+            // Read the custom field definitions            
+            _SalesOrderCustomFields = await JiwaAPI.GetAsync(new SalesOrderCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+            foreach (CustomField customField in Config.SalesOrderCustomFields)
+            {
+                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Order" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _StaffLogin_SalesOrderCustomFields.Add(customField);
+                }
+
+                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Order" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _CustomerLogin_SalesOrderCustomFields.Add(customField);
+                }
             }
 
-            // Read the custom field definitions
-            _SalesOrderCustomFields = await JiwaAPI.GetAsync(new SalesOrderCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
             _SalesOrderHistoryCustomFields = await JiwaAPI.GetAsync(new SalesOrderHistoryCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+            foreach (CustomField customField in Config.SalesOrderHistoryCustomFields)
+            {
+                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Order History" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _StaffLogin_SalesOrderHistoryCustomFields.Add(customField);
+                }
+
+                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Order History" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _CustomerLogin_SalesOrderHistoryCustomFields.Add(customField);
+                }
+            }
+
             _SalesOrderLineCustomFields = await JiwaAPI.GetAsync(new SalesOrderLineCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+            foreach (CustomField customField in Config.SalesOrderLineCustomFields)
+            {
+                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Order Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _StaffLogin_SalesQuoteLineCustomFields.Add(customField);
+                }
+
+                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Order Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _CustomerLogin_SalesOrderLineCustomFields.Add(customField);
+                }
+            }
 
             _SalesQuoteCustomFields = await JiwaAPI.GetAsync(new SalesQuoteCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+            foreach (CustomField customField in Config.SalesQuoteCustomFields)
+            {
+                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Quote" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _StaffLogin_SalesQuoteCustomFields.Add(customField);
+                }
+
+                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Quote" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _CustomerLogin_SalesQuoteCustomFields.Add(customField);
+                }
+            }
+
             _SalesQuoteLineCustomFields = await JiwaAPI.GetAsync(new SalesQuoteLineCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
+            
+            foreach (CustomField customField in Config.SalesQuoteLineCustomFields)
+            {                                
+                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Quote Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _StaffLogin_SalesQuoteLineCustomFields.Add(customField);
+                }
+                                
+                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Quote Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                {
+                    _CustomerLogin_SalesQuoteLineCustomFields.Add(customField);
+                }                
+            }
         }
 
         public static string FormattedDecimals(decimal value, short decimalPlaces, bool useCommas = true)
@@ -259,5 +441,18 @@ namespace JiwaCustomerPortal
         }
 
         public static string BootStrapVersion { get; set; }
+    }
+
+    public class CustomFieldsToDisplay
+    {
+        public List<AllowedCustomField> CustomerLogin { get; set; }
+        public List<AllowedCustomField>StaffLogin { get; set; }
+    }
+
+    public class AllowedCustomField
+    {
+        public string ModuleName { get; set; }
+        public string PluginName { get; set; }
+        public List<string> CustomFieldNames { get; set; }
     }
 }
