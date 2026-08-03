@@ -1,4 +1,4 @@
-﻿using JiwaCustomerPortal.Components.AutoQueryGrid.Inventory;
+using JiwaCustomerPortal.Components.AutoQueryGrid.Inventory;
 using JiwaCustomerPortal.Components.Grid;
 using JiwaCustomerPortal.Components.Grid.CustomField;
 using JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields;
@@ -160,7 +160,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         }
 
         #region "Sales Order Lines Grid"
-        public async Task InitialiseSalesOrderLinesGrid()
+        public Task InitialiseSalesOrderLinesGrid()
         {            
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
             currencyCellType.MinDecimalPlaces = Config.Currencies[salesOrder.CurrencyID].DecimalPlaces ?? 2;
@@ -189,6 +189,8 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
 
             // Add sales order line custom field controller            
             SalesOrderLineCustomFieldController = new Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesOrder.SalesOrder, JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine>(SalesOrderLinesGridCells, Config.SalesOrderLineCustomFields);
+        
+            return Task.CompletedTask;
         }
 
         public async Task DisplaySalesOrderLines()
@@ -201,7 +203,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             }
         }
 
-        public async Task DisplaySalesOrderLine(JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine salesOrderLine, int row = -1)
+        public Task DisplaySalesOrderLine(JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine salesOrderLine, int row = -1)
         {
             if (row == -1)
             {
@@ -262,7 +264,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                     SalesOrderLineCustomFieldController.DisplayCustomFieldValues(this, salesOrderLine, row, IsEditable);
                 }                
             }
-        }
+        
+    return Task.CompletedTask;
+}
 
         public async void SalesOrderLinesGrid_CellButtonClicked(Cell cell)
         {
@@ -340,7 +344,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         
         #region "Freight Grid"
 
-        public async Task InitialiseFreightGrid()
+        public Task InitialiseFreightGrid()
         {
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
             currencyCellType.MinDecimalPlaces = Config.Currencies[salesOrder.CurrencyID].DecimalPlaces ?? 2;
@@ -358,7 +362,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             FreightGridCells["FreightLabel", 0].Value = "Courier";
             FreightGridCells["FreightLabel", 1].Value = "Freight1";
             FreightGridCells["FreightLabel", 2].Value = "Freight2";
-        }
+        
+    return Task.CompletedTask;
+}
         public async Task FreightGrid_CellChanged((Cell cell, ChangeEventArgs e) args)
         {
             if (args.cell.Row == 0)
@@ -384,7 +390,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             }
         }
         
-        public async Task DisplayFreight()
+        public Task DisplayFreight()
         {                        
             FreightGridCells["ExTax", 0].Value = salesOrder.FXCartage1ExGst;
             FreightGridCells["Tax", 0].Value = salesOrder.FXCartage1Gst;
@@ -401,11 +407,13 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             FreightGridCells["ExTax", 0].IsEditable = IsEditable;
             FreightGridCells["ExTax", 1].IsEditable = IsEditable;
             FreightGridCells["ExTax", 2].IsEditable = IsEditable;
+        
+            return Task.CompletedTask;
         }
         #endregion
 
         #region "Totals Grid"
-        public async Task InitialiseTotalsGrid()
+        public Task InitialiseTotalsGrid()
         {            
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
             currencyCellType.MinDecimalPlaces = Config.Currencies[salesOrder.CurrencyID].DecimalPlaces ?? 2;
@@ -423,9 +431,11 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             TotalsGridCells["TotalLabel", 0].Value = "Ordered";
             TotalsGridCells["TotalLabel", 1].Value = "Previous";
             TotalsGridCells["TotalLabel", 2].Value = "This Del.";
+        
+            return Task.CompletedTask;
         }     
 
-        public async Task DisplayTotals()
+        public Task DisplayTotals()
         {                                    
             TotalsGridCells["ExTax", 0].Value = salesOrder.FXOrderedExGSTTotal;
             TotalsGridCells["Tax", 0].Value = salesOrder.FXOrderedGSTTotal;
@@ -438,7 +448,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             TotalsGridCells["ExTax", 2].Value = SelectedHistory.FXExGSTTotal;
             TotalsGridCells["Tax", 2].Value = SelectedHistory.FXGSTTotal;
             TotalsGridCells["IncTax", 2].Value = SelectedHistory.FXIncGSTTotal;
-        }
+        
+    return Task.CompletedTask;
+}
         #endregion
 
         #region "Custom Fields Grids"
@@ -453,20 +465,26 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         }
         #endregion
 
-        private async Task OnSelectTab(string tabId)
+        private Task OnSelectTab(string tabId)
         {
             SelectedTabId = tabId;
-        }
+        
+    return Task.CompletedTask;
+}
 
-        private async Task OnSelectCustomFieldsTab(string tabId)
+        private Task OnSelectCustomFieldsTab(string tabId)
         {
             CustomFieldsSelectedTabId = tabId;
-        }
+        
+    return Task.CompletedTask;
+}
 
-        private async Task SelectedHistoryChange(ChangeEventArgs e)
+        private Task SelectedHistoryChange(ChangeEventArgs e)
         {
             SelectedHistory = salesOrder.Histories.FirstOrDefault(x => x.InvoiceHistoryID == e.Value.ToString());
-        }
+        
+    return Task.CompletedTask;
+}
 
         public void NoAuthenticationToken()
         {
@@ -474,7 +492,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
         }
 
-        public async void APIException(Exception ex)
+        public void APIException(Exception ex)
         {
             // first we need to work out what type of exception this was.  If it as a 401 (Not Authenticated), then we just redirect to to the login page
             // Anything else, we set the errorMessage property so the component displays the error to the user.

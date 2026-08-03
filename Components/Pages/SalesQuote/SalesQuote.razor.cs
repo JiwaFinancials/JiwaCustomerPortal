@@ -1,4 +1,4 @@
-﻿using JiwaCustomerPortal.Components.AutoQueryGrid.Inventory;
+using JiwaCustomerPortal.Components.AutoQueryGrid.Inventory;
 using JiwaCustomerPortal.Components.Grid;
 using JiwaCustomerPortal.Components.Grid.CustomField;
 using Microsoft.AspNetCore.Components;
@@ -156,7 +156,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
         }
 
         #region "Sales Quote Lines Grid"
-        public async Task InitialiseSalesQuoteLinesGrid()
+        public Task InitialiseSalesQuoteLinesGrid()
         {
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
             currencyCellType.MinDecimalPlaces = Config.Currencies[salesQuote.CurrencyID].DecimalPlaces ?? 2;
@@ -182,6 +182,8 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
 
             // Add sales quote line custom field controller            
             SalesQuoteLineCustomFieldController = new Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesQuote.SalesQuote, JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine>(SalesQuoteLinesGridCells, Config.SalesQuoteLineCustomFields);
+        
+            return Task.CompletedTask;
         }
 
         public async Task DisplaySalesQuoteLines()
@@ -194,7 +196,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
             }
         }
 
-        public async Task DisplaySalesQuoteLine(JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine salesQuoteLine, int row = -1)
+        public Task DisplaySalesQuoteLine(JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteLine salesQuoteLine, int row = -1)
         {
             if (row == -1)
             {
@@ -246,7 +248,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
                     SalesQuoteLineCustomFieldController.DisplayCustomFieldValues(this, salesQuoteLine, row, IsEditable);
                 }
             }
-        }
+        
+    return Task.CompletedTask;
+}
 
         public async void SalesQuoteLinesGrid_CellButtonClicked(Cell cell)
         {
@@ -324,7 +328,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
 
         #region "Freight Grid"
 
-        public async Task InitialiseFreightGrid()
+        public Task InitialiseFreightGrid()
         {
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
             currencyCellType.MinDecimalPlaces = Config.Currencies[salesQuote.CurrencyID].DecimalPlaces ?? 2;
@@ -342,7 +346,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
             FreightGridCells["FreightLabel", 0].Value = "Courier";
             FreightGridCells["FreightLabel", 1].Value = "Freight1";
             FreightGridCells["FreightLabel", 2].Value = "Freight2";
-        }
+        
+    return Task.CompletedTask;
+}
         public async Task FreightGrid_CellChanged((Cell cell, ChangeEventArgs e) args)
         {
             if (args.cell.Row == 0)
@@ -368,7 +374,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
             }
         }
 
-        public async Task DisplayFreight()
+        public Task DisplayFreight()
         {
             FreightGridCells["ExTax", 0].Value = salesQuote.FXCartage1ExGst;
             FreightGridCells["Tax", 0].Value = salesQuote.FXCartage1Gst;
@@ -385,11 +391,13 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
             FreightGridCells["ExTax", 0].IsEditable = IsEditable;
             FreightGridCells["ExTax", 1].IsEditable = IsEditable;
             FreightGridCells["ExTax", 2].IsEditable = IsEditable;
-        }
+        
+    return Task.CompletedTask;
+}
         #endregion
 
         #region "Totals Grid"
-        public async Task InitialiseTotalsGrid()
+        public Task InitialiseTotalsGrid()
         {
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
             currencyCellType.MinDecimalPlaces = Config.Currencies[salesQuote.CurrencyID].DecimalPlaces ?? 2;
@@ -405,14 +413,18 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
             TotalsGridCells.RowCount = 1;
 
             TotalsGridCells["TotalLabel", 0].Value = "Total";
+        
+            return Task.CompletedTask;
         }
 
-        public async Task DisplayTotals()
+        public Task DisplayTotals()
         {            
             TotalsGridCells["ExTax", 0].Value = (SelectedHistory.Lines.Sum(x => x.FXLineTotal) - SelectedHistory.Lines.Sum(x => x.FXTaxToCharge)) + SelectedHistory.CartageCharge1.FXExTaxAmount + SelectedHistory.CartageCharge2.FXExTaxAmount + SelectedHistory.CartageCharge3.FXExTaxAmount;
             TotalsGridCells["Tax", 0].Value = SelectedHistory.Lines.Sum(x => x.FXTaxToCharge) + SelectedHistory.CartageCharge1.FXTaxAmount + SelectedHistory.CartageCharge2.FXTaxAmount + SelectedHistory.CartageCharge3.FXTaxAmount;
             TotalsGridCells["IncTax", 0].Value = SelectedHistory.FXHistoryTotal;
-        }
+        
+    return Task.CompletedTask;
+}
         #endregion
 
         #region "Custom Fields Grids"
@@ -422,15 +434,19 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
         }
         #endregion
 
-        private async Task OnSelectTab(string tabId)
+        private Task OnSelectTab(string tabId)
         {
             SelectedTabId = tabId;
-        }
+        
+    return Task.CompletedTask;
+}
 
-        private async Task SelectedHistoryChange(ChangeEventArgs e)
+        private Task SelectedHistoryChange(ChangeEventArgs e)
         {
             SelectedHistory = salesQuote.Histories.FirstOrDefault(x => x.QuoteHistoryID == e.Value.ToString());
-        }
+        
+    return Task.CompletedTask;
+}
 
         public void NoAuthenticationToken()
         {
@@ -438,7 +454,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
             NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
         }
 
-        public async void APIException(Exception ex)
+        public void APIException(Exception ex)
         {
             // first we need to work out what type of exception this was.  If it as a 401 (Not Authenticated), then we just redirect to to the login page
             // Anything else, we set the errorMessage property so the component displays the error to the user.

@@ -174,7 +174,7 @@ namespace JiwaCustomerPortal.Components.Pages
             await DisplayBalances();
         }
 
-        private async Task InitialiseContactsGrid()
+        private Task InitialiseContactsGrid()
         {
             ContactsGridCells = new Grid.CellArray();
             ContactsGridCells.Columns.Add(new Column("Name", new Components.Grid.CellType.TextCellType(), "Name") { Width = 40 });
@@ -188,7 +188,7 @@ namespace JiwaCustomerPortal.Components.Pages
                 ContactsGridCells.Columns.Add(new Column("Delete", new Components.Grid.CellType.ButtonCellType() { ButtonType = Components.Grid.CellType.ButtonCellType.ButtonTypes.Bin }, "Delete") { Width = 10 });
             }
 
-            return;
+            return Task.CompletedTask;
         }
 
         private async Task DisplayContacts()
@@ -206,7 +206,7 @@ namespace JiwaCustomerPortal.Components.Pages
             }                
         }
 
-        private async Task DisplayContact(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName contactName, int row)
+        private Task DisplayContact(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName contactName, int row)
         {
             ContactsGridCells["Name", row].Value = contactName.DisplayName();
             ContactsGridCells["Email", row].Value = contactName.EmailAddress;
@@ -234,7 +234,9 @@ namespace JiwaCustomerPortal.Components.Pages
             {
                 ContactsGridCells["Delete", row].IsEditable = IsAdminRole;
             }
-        }
+        
+    return Task.CompletedTask;
+}
 
         private async Task ContactsGrid_CellButtonClicked(Cell cell)
         {
@@ -254,7 +256,7 @@ namespace JiwaCustomerPortal.Components.Pages
             return;
         }
 
-        private async Task InitialiseDeliveryAddressesGrid()
+        private Task InitialiseDeliveryAddressesGrid()
         {
             DeliveryAddressesGridCells = new Grid.CellArray();
             DeliveryAddressesGridCells.Columns.Add(new Column("Address1", new Components.Grid.CellType.TextCellType(), "Address 1") { Width = 40 });
@@ -262,15 +264,17 @@ namespace JiwaCustomerPortal.Components.Pages
             DeliveryAddressesGridCells.Columns.Add(new Column("Address3", new Components.Grid.CellType.TextCellType(), "Suburb") { Width = 30 });
             DeliveryAddressesGridCells.Columns.Add(new Column("Address4", new Components.Grid.CellType.TextCellType(), "State") { Width = 20 });
             DeliveryAddressesGridCells.Columns.Add(new Column("Postcode", new Components.Grid.CellType.TextCellType(), "Postcode") { Width = 20 });
-            DeliveryAddressesGridCells.Columns.Add(new Column("Country", new Components.Grid.CellType.TextCellType(), "Country") { Width = 20 });                
+            DeliveryAddressesGridCells.Columns.Add(new Column("Country", new Components.Grid.CellType.TextCellType(), "Country") { Width = 20 });
+
+            return Task.CompletedTask;
         }
 
-        private async Task DisplayDeliveryAddresses()
+        private Task DisplayDeliveryAddresses()
         {
             if (Debtor?.DeliveryAddresses == null)
             {
                 DeliveryAddressesGridCells.RowCount = 0;
-                return;
+                return Task.CompletedTask;
             }
 
             DeliveryAddressesGridCells.RowCount = Debtor.DeliveryAddresses.Count;
@@ -284,25 +288,29 @@ namespace JiwaCustomerPortal.Components.Pages
                 DeliveryAddressesGridCells["Postcode", row].Value = deliveryAddress.Postcode;
                 DeliveryAddressesGridCells["Country", row].Value = deliveryAddress.Country;
             }
+
+            return Task.CompletedTask;
         }
 
-        private async Task InitialiseBalancesGrid()
+        private Task InitialiseBalancesGrid()
         {
-            BalancesGridCells = new Grid.CellArray();            
+            BalancesGridCells = new Grid.CellArray();
             BalancesGridCells.Columns.Add(new Column("Currency", new Components.Grid.CellType.TextCellType(), "Currency") { Width = 20 });
             BalancesGridCells.Columns.Add(new Column("Period1", new Components.Grid.CellType.DecimalCellType(), Period1Label) { Width = 15 });
             BalancesGridCells.Columns.Add(new Column("Period2", new Components.Grid.CellType.DecimalCellType(), Period2Label) { Width = 15 });
             BalancesGridCells.Columns.Add(new Column("Period3", new Components.Grid.CellType.DecimalCellType(), Period3Label) { Width = 15 });
             BalancesGridCells.Columns.Add(new Column("Period4", new Components.Grid.CellType.DecimalCellType(), Period4Label) { Width = 15 });
-            BalancesGridCells.Columns.Add(new Column("Total", new Components.Grid.CellType.DecimalCellType(), "Total") { Width = 15 });                
+            BalancesGridCells.Columns.Add(new Column("Total", new Components.Grid.CellType.DecimalCellType(), "Total") { Width = 15 });
+
+            return Task.CompletedTask;
         }
 
-        private async Task DisplayBalances()
+        private Task DisplayBalances()
         {
             if (Debtor?.Balances == null)
             {
                 BalancesGridCells.RowCount = 0;
-                return;
+                return Task.CompletedTask;
             }
 
             BalancesGridCells.RowCount = Debtor.Balances.Count;
@@ -310,6 +318,16 @@ namespace JiwaCustomerPortal.Components.Pages
             {
                 JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorBalance balance = Debtor.Balances[row];
                 BalancesGridCells["Currency", row].Value = balance.CurrencyShortName;
+
+                BalancesGridCells["Currency", row].CustomRenderFragment = async builder =>
+                {
+                    builder.OpenElement(0, "img");
+                    builder.AddAttribute(1, "src", $"data:image/png;base64,{Convert.ToBase64String(Config.Currencies[balance.CurrencyID].Picture)}");
+                    builder.AddAttribute(2, "width", "30");
+                    builder.AddAttribute(3, "height", "20");
+                    builder.CloseElement();
+                    builder.AddContent(4, $" {balance.CurrencyShortName}");
+                };
 
                 Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
                 currencyCellType.MinDecimalPlaces = balance.CurrencyDecimalPlaces ?? 0;
@@ -321,38 +339,43 @@ namespace JiwaCustomerPortal.Components.Pages
                 BalancesGridCells["Period4", row].CellType = currencyCellType;
                 BalancesGridCells["Total", row].CellType = currencyCellType;
 
-                BalancesGridCells["Period1", row].Value = balance.FXPeriod1;                
+                BalancesGridCells["Period1", row].Value = balance.FXPeriod1;
                 BalancesGridCells["Period2", row].Value = balance.FXPeriod2;
                 BalancesGridCells["Period3", row].Value = balance.FXPeriod3;
                 BalancesGridCells["Period4", row].Value = balance.FXPeriod4;
                 BalancesGridCells["Total", row].Value = balance.FXTotal;
-            }                
-        }        
+            }
+
+            return Task.CompletedTask;
+        }
         private async Task StatementsGrid_CellButtonClicked(Cell cell)
         {            
             await OpenUrlInNewTab($"StatementPDF/{cell.Column.Id}");
         }
 
-        private async Task InitialiseBackOrdersGrid()
+        private Task InitialiseBackOrdersGrid()
         {
+            Components.Grid.CellType.DateCellType dateCellType = new Components.Grid.CellType.DateCellType();
+            dateCellType.DateFormat = BrowserService.DateFormat;
+
             BackOrdersGridCells = new Grid.CellArray();
             BackOrdersGridCells.Columns.Add(new Column("PartNo", new Components.Grid.CellType.TextCellType(), "Part No.") { Width = 20 });
             BackOrdersGridCells.Columns.Add(new Column("Description", new Components.Grid.CellType.TextCellType(), "Description") { Width = 60 });
             BackOrdersGridCells.Columns.Add(new Column("InvoiceNo", new Components.Grid.CellType.TextCellType(), "Invoice No.") { Width = 20 });
             BackOrdersGridCells.Columns.Add(new Column("CustomerOrderNo", new Components.Grid.CellType.TextCellType(), "Order No.") { Width = 20 });
-            BackOrdersGridCells.Columns.Add(new Column("Date", new Components.Grid.CellType.TextCellType() { HorizontalAlignment = Components.Grid.CellType.ICellType.HAlignment.Right }, "Date") { Width = 20 });
-            BackOrdersGridCells.Columns.Add(new Column("Quantity", new Components.Grid.CellType.TextCellType() { HorizontalAlignment = Components.Grid.CellType.ICellType.HAlignment.Right }, "Quantity") { Width = 20 });
-            BackOrdersGridCells.Columns.Add(new Column("ExpectedDeliveryDate", new Components.Grid.CellType.TextCellType() { HorizontalAlignment = Components.Grid.CellType.ICellType.HAlignment.Right }, "ETA") { Width = 20 });
+            BackOrdersGridCells.Columns.Add(new Column("Date", dateCellType, "Date") { Width = 20 });
+            BackOrdersGridCells.Columns.Add(new Column("Quantity", new Components.Grid.CellType.DecimalCellType(), "Quantity") { Width = 20 });
+            BackOrdersGridCells.Columns.Add(new Column("ExpectedDeliveryDate", dateCellType, "ETA") { Width = 20 });
             BackOrdersGridCells.Columns.Add(new Column("Open", new Components.Grid.CellType.ButtonCellType() { ButtonType = Components.Grid.CellType.ButtonCellType.ButtonTypes.Lookup }, "") { Width = 10 });
-            return;
+            return Task.CompletedTask;
         }
 
-        private async Task DisplayBackOrders()
+        private Task DisplayBackOrders()
         {
             if (BackOrders == null)
             {
                 BackOrdersGridCells.RowCount = 0;
-                return;
+                return Task.CompletedTask;
             }
 
             BackOrdersGridCells.RowCount = BackOrders.Count;
@@ -363,13 +386,21 @@ namespace JiwaCustomerPortal.Components.Pages
                 BackOrdersGridCells["Description", row].Value = backorder.Description;
                 BackOrdersGridCells["InvoiceNo", row].Value = backorder.InvoiceNo;
                 BackOrdersGridCells["CustomerOrderNo", row].Value = backorder.CustomerOrderNo;
-                BackOrdersGridCells["Date", row].Value = backorder.Date.ToString(BrowserService.DateFormat);
-                BackOrdersGridCells["Quantity", row].Value = backorder.Quantity.ToString($"#,0.{new string('0', backorder.QuantityDecimalPlaces)}");
-                BackOrdersGridCells["ExpectedDeliveryDate", row].Value = backorder.ExpectedDeliveryDate.ToString(BrowserService.DateFormat);
+                BackOrdersGridCells["Date", row].Value = backorder.Date;
+
+                Components.Grid.CellType.DecimalCellType quantityCellType = new Components.Grid.CellType.DecimalCellType();
+                quantityCellType.MinValue = 0;
+                quantityCellType.MinDecimalPlaces = backorder.QuantityDecimalPlaces;
+                quantityCellType.MaxDecimalPlaces = backorder.QuantityDecimalPlaces;
+
+                BackOrdersGridCells["Quantity", row].CellType = quantityCellType;
+                BackOrdersGridCells["Quantity", row].Value = backorder.Quantity;
+
+                BackOrdersGridCells["ExpectedDeliveryDate", row].Value = backorder.ExpectedDeliveryDate;
                 BackOrdersGridCells["Open", row].IsEditable = true;
             }
 
-            return;
+            return Task.CompletedTask;
         }
 
         private async Task BackOrdersGrid_CellButtonClicked(Cell cell)
@@ -412,7 +443,7 @@ namespace JiwaCustomerPortal.Components.Pages
             NavigationManager.NavigateTo($"User/SignIn?returnUrl={NavigationManager.Uri}");
         }
         
-        public async void APIException(Exception ex)
+        public void APIException(Exception ex)
         {
             // first we need to work out what type of exception this was.  If it as a 401 (Not Authenticated), then we just redirect to to the login page
             // Anything else, we set the errorMessage property so the component displays the error to the user.
@@ -690,13 +721,15 @@ namespace JiwaCustomerPortal.Components.Pages
             return string.IsNullOrWhiteSpace(markup) ? null : (builder => builder.AddMarkupContent(0, markup));
         }
         
-        public async Task CreateContactName()
+        public Task CreateContactName()
         {
             ContactNameToCreate = new JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName();
             ContactNameToCreate.TagMemberships = new List<JiwaFinancials.Jiwa.JiwaServiceModel.Tags.Tag>();
+        
+            return Task.CompletedTask;
         }
         
-        public async Task EditContactName(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName ContactName)
+        public Task EditContactName(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName ContactName)
         {
             // setting ContactNameToEdit will trigger the edit contact dialog
             // we set ContactNameToEdit to a copy of the actual contact name, because whatever changes the edit dialog makes we might want to abandon if the user cancels the dialog        
@@ -708,12 +741,16 @@ namespace JiwaCustomerPortal.Components.Pages
             ContactNameToEdit.Mobile = ContactName.Mobile;
             ContactNameToEdit.EmailAddress = ContactName.EmailAddress;
             ContactNameToEdit.TagMemberships = ContactName.TagMemberships.ToList();
+        
+            return Task.CompletedTask;
         }
         
-        public async Task DeleteContactName(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName ContactName)
+        public Task DeleteContactName(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName ContactName)
         {
             // This will trigger the are you sure? dialog
             ContactNameToDelete = ContactName;
+        
+            return Task.CompletedTask;
         }      
         
         public async void CreateContactDialogClosed(JiwaFinancials.Jiwa.JiwaServiceModel.Debtors.DebtorContactName ContactName)

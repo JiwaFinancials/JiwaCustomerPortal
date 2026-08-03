@@ -55,7 +55,7 @@ namespace JiwaCustomerPortal.Components.Grid
                     case DateCellType:
                         if (value is DateTime)
                         {
-                            _value = DateTime.Parse((string)value);
+                            _value = value;
                         }
                         else if (value != null && !string.IsNullOrWhiteSpace((string)value))
                         {

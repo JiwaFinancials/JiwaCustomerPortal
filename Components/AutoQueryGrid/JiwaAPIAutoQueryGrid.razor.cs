@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Components;
 using ServiceStack;
 using System.IO;
@@ -532,10 +532,12 @@ namespace JiwaCustomerPortal.Components.AutoQueryGrid
         }
         #endregion
 
-        public async Task OnColumnHeaderClick(JiwaAutoQueryColumn<Model> column)
+        public Task OnColumnHeaderClick(JiwaAutoQueryColumn<Model> column)
         {
             ShowFilterDialogColumn = column;
-        }
+        
+    return Task.CompletedTask;
+}
 
         public async void FilterClosed(bool resultOK)
         {
@@ -571,7 +573,7 @@ namespace JiwaCustomerPortal.Components.AutoQueryGrid
             }
         }
 
-        public async void OnRowClick(Model item)
+        public void OnRowClick(Model item)
         {
             if (AddSelectButtonColumn)
             {
