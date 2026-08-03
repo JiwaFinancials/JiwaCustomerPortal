@@ -265,8 +265,8 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 }                
             }
         
-    return Task.CompletedTask;
-}
+            return Task.CompletedTask;
+        }
 
         public async void SalesOrderLinesGrid_CellButtonClicked(Cell cell)
         {
@@ -284,11 +284,8 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             {
                 if (salesOrderLine != null)
                 {
-                    // This may be a line custom field, call the controller and it will determine if it is a custom field and handle it accordingly
-                    // TODO: re-instate line custom fields - temporarily disabled whilst working out display issues
+                    // This may be a line custom field, call the controller and it will determine if it is a custom field and handle it accordingly                    
                     await SalesOrderLineCustomFieldController.HandleCellButtonClicked(this, salesOrderLine, cell);
-                    // TODO: See if we can get HandleCellButtonClicked to call StateHasChanged() instead
-                    //await InvokeAsync(StateHasChanged);
                 }
             }
         }
@@ -330,8 +327,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
 
                         break;
                     default:
-                        // This may be a line custom field, call the controller and it will determine if it is a custom field and handle it accordingly
-                        // TODO: re-instate line custom fields - temporarily disabled whilst working out display issues
+                        // This may be a line custom field, call the controller and it will determine if it is a custom field and handle it accordingly                        
                         await SalesOrderLineCustomFieldController.HandleCellChanged(salesOrderLine, args.cell, args.e, async (host, cell, customField, e) =>
                         {
                             await SetLineCustomFieldValue(host, customField, e);
@@ -363,8 +359,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             FreightGridCells["FreightLabel", 1].Value = "Freight1";
             FreightGridCells["FreightLabel", 2].Value = "Freight2";
         
-    return Task.CompletedTask;
-}
+            return Task.CompletedTask;
+        }
+
         public async Task FreightGrid_CellChanged((Cell cell, ChangeEventArgs e) args)
         {
             if (args.cell.Row == 0)
@@ -469,22 +466,22 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         {
             SelectedTabId = tabId;
         
-    return Task.CompletedTask;
-}
+            return Task.CompletedTask;
+        }
 
         private Task OnSelectCustomFieldsTab(string tabId)
         {
             CustomFieldsSelectedTabId = tabId;
         
-    return Task.CompletedTask;
-}
+            return Task.CompletedTask;
+        }
 
         private Task SelectedHistoryChange(ChangeEventArgs e)
         {
             SelectedHistory = salesOrder.Histories.FirstOrDefault(x => x.InvoiceHistoryID == e.Value.ToString());
         
-    return Task.CompletedTask;
-}
+            return Task.CompletedTask;
+        }
 
         public void NoAuthenticationToken()
         {
