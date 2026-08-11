@@ -277,12 +277,12 @@ namespace JiwaCustomerPortal
             _SalesOrderCustomFields = await JiwaAPI.GetAsync(new SalesOrderCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
             foreach (CustomField customField in Config.SalesOrderCustomFields)
             {
-                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Order" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay?.StaffLogin?.Where(x => x.ModuleName == "Sales Order" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _StaffLogin_SalesOrderCustomFields.Add(customField);
                 }
 
-                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Order" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay?.CustomerLogin?.Where(x => x.ModuleName == "Sales Order" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _CustomerLogin_SalesOrderCustomFields.Add(customField);
                 }
@@ -291,12 +291,12 @@ namespace JiwaCustomerPortal
             _SalesOrderHistoryCustomFields = await JiwaAPI.GetAsync(new SalesOrderHistoryCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
             foreach (CustomField customField in Config.SalesOrderHistoryCustomFields)
             {
-                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Order History" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay.StaffLogin?.Where(x => x.ModuleName == "Sales Order History" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _StaffLogin_SalesOrderHistoryCustomFields.Add(customField);
                 }
 
-                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Order History" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay.CustomerLogin?.Where(x => x.ModuleName == "Sales Order History" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _CustomerLogin_SalesOrderHistoryCustomFields.Add(customField);
                 }
@@ -305,12 +305,12 @@ namespace JiwaCustomerPortal
             _SalesOrderLineCustomFields = await JiwaAPI.GetAsync(new SalesOrderLineCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
             foreach (CustomField customField in Config.SalesOrderLineCustomFields)
             {
-                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Order Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay?.StaffLogin?.Where(x => x.ModuleName == "Sales Order Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _StaffLogin_SalesQuoteLineCustomFields.Add(customField);
                 }
 
-                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Order Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay.CustomerLogin?.Where(x => x.ModuleName == "Sales Order Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _CustomerLogin_SalesOrderLineCustomFields.Add(customField);
                 }
@@ -319,12 +319,12 @@ namespace JiwaCustomerPortal
             _SalesQuoteCustomFields = await JiwaAPI.GetAsync(new SalesQuoteCustomFieldsGETManyRequest(), jiwaAPIKey: JiwaAPIKey, cancellationToken: cancellationToken);
             foreach (CustomField customField in Config.SalesQuoteCustomFields)
             {
-                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Quote" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay?.StaffLogin?.Where(x => x.ModuleName == "Sales Quote" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _StaffLogin_SalesQuoteCustomFields.Add(customField);
                 }
 
-                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Quote" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay?.CustomerLogin?.Where(x => x.ModuleName == "Sales Quote" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _CustomerLogin_SalesQuoteCustomFields.Add(customField);
                 }
@@ -334,12 +334,12 @@ namespace JiwaCustomerPortal
             
             foreach (CustomField customField in Config.SalesQuoteLineCustomFields)
             {                                
-                if (Config.CustomFieldsToDisplay.StaffLogin.Where(x => x.ModuleName == "Sales Quote Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay?.StaffLogin?.Where(x => x.ModuleName == "Sales Quote Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _StaffLogin_SalesQuoteLineCustomFields.Add(customField);
                 }
                                 
-                if (Config.CustomFieldsToDisplay.CustomerLogin.Where(x => x.ModuleName == "Sales Quote Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
+                if (Config.CustomFieldsToDisplay?.CustomerLogin?.Where(x => x.ModuleName == "Sales Quote Line" && x.PluginName == customField.PluginName && x.CustomFieldNames.Contains(customField.SettingName)).FirstOrDefault() != null)
                 {
                     _CustomerLogin_SalesQuoteLineCustomFields.Add(customField);
                 }                
