@@ -170,16 +170,16 @@
     <div class="tab-content">        
          <div class=@String.Format("tab-pane{0}", SelectedTabId=="Items-tab" ? " active": null) id="Items" role="tabpanel" aria-labelledby="Items-tab">                    
             <Grid @ref="@SalesOrderLinesGrid" Name="SalesOrderLines" Cells="@SalesOrderLinesGridCells" CellButtonClicked="@SalesOrderLinesGrid_CellButtonClicked" CellChanged="@SalesOrderLinesGrid_CellChanged" DisplayMethod="@DisplaySalesOrderLines" />
-            <div class="row">
+            <div class="row align-items-end">
                 <div class="col-4">
                 <Grid @ref="@FreightGrid" Name="Freight" Cells="@FreightGridCells" CellChanged="@FreightGrid_CellChanged" DisplayMethod="@DisplayFreight" />
                 </div>
-                <div class="col-2">
+                <div class="col-4">
                 </div>
                 <div class="col-4">
                 <Grid @ref="@TotalsGrid" Name="Totals" Cells="@TotalsGridCells" DisplayMethod="@DisplayTotals" />
                 </div>
-            </div>                
+            </div>
 
             @if (IsEditable)
             {

@@ -21,6 +21,51 @@
 
 <StatusMessage Message="@statusMessage"/>
 
+@if (showDeclineDialog)
+{
+    <div class="relative">
+        <div class="modal fade show" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog" aria-labelledby="declineSalesQuoteTitle" aria-describedby="declineSalesQuoteDescription">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="declineSalesQuoteTitle">Decline Sales Quote</h4>
+                        <button type="button" class="btn-close" aria-label="Close" @onclick="CloseDeclineDialog"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="reasonForDecline" class="form-label">Reason for declining (optional)</label>
+                        <textarea id="reasonForDecline" class="form-control" rows="3" @bind="reasonForDecline" @bind:event="oninput"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseDeclineDialog">Cancel</button>
+                        <button type="button" class="btn btn-danger" disabled="@APIRequestInProgress" @onclick="(() => DeclineSalesQuote(reasonForDecline))">Decline</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (successDialogMessage != null)
+{
+    <div class="relative">
+        <div class="modal fade show" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Sales Quote</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>@successDialogMessage</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" @onclick="CloseSuccessDialog">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @if (CustomFieldLookupRenderFragment != null)
 {
     @CustomFieldLookupRenderFragment
@@ -38,22 +83,15 @@
             <label for="QuoteNo" class="form-label">Quote No.</label>
             <input type="text" class="form-control" id="QuoteNo" readonly placeholder="@salesQuote.QuoteNo">
         </div>
-        <div class="col-6">
+        <div class="col-5">
             <label for="Name" class="form-label">Name</label>
             <input type="text" class="form-control" id="Name" readonly placeholder="@salesQuote.DebtorName">
         </div>
-        <div class="col-1">
-            @if (salesQuote.Status == JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote.e_SalesQuoteStatuses.e_SalesQuoteEntered)
-            {
-                <div class="badge rounded-pill bg-success">Open</div>
-            }    
-            else
-            {
-                <div class="badge rounded-pill bg-danger">Closed</div>
-            }
+        <div class="col-2 text-end">
+            <div class="badge rounded-pill @SalesQuoteStatusBadgeColor">@SalesQuoteStatusBadgeText</div>
         </div>
         <div class="col-2 text-end">
-            <a href="/SalesQuotePDF/@SelectedHistory.QuoteHistoryID" target="_blank" rel="noopener noreferrer">                
+            <a href="/SalesQuotePDF/@SelectedHistory.QuoteHistoryID" target="_blank" rel="noopener noreferrer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-printer" viewBox="0 0 16 16">
                     <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1" />
                     <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1" />
@@ -165,36 +203,47 @@
         <div class=@String.Format("tab-pane{0}", SelectedTabId=="Items-tab" ? " active": null) id="Items" role="tabpanel" aria-labelledby="Items-tab">
              <div class=@String.Format("tab-pane{0}", SelectedTabId=="Items-tab" ? " active": null) id="Items" role="tabpanel" aria-labelledby="Items-tab">                    
             <Grid @ref="@SalesQuoteLinesGrid" Name="SalesQuoteLines" Cells="@SalesQuoteLinesGridCells" CellButtonClicked="@SalesQuoteLinesGrid_CellButtonClicked" CellChanged="@SalesQuoteLinesGrid_CellChanged" DisplayMethod="@DisplaySalesQuoteLines" />
-            <div class="row">
+            <div class="row align-items-end">
                 <div class="col-4">
                 <Grid @ref="@FreightGrid" Name="Freight" Cells="@FreightGridCells" CellChanged="@FreightGrid_CellChanged" DisplayMethod="@DisplayFreight" />
                 </div>
-                <div class="col-2">
+                <div class="col-4">
                 </div>
                 <div class="col-4">
                 <Grid @ref="@TotalsGrid" Name="Totals" Cells="@TotalsGridCells" DisplayMethod="@DisplayTotals" />
                 </div>
-            </div>                
+            </div>
 
-            @if (IsEditable)
+            @if (IsEditable || salesQuote.Status == JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote.e_SalesQuoteStatuses.e_SalesQuoteEntered)
             {
-                <button @onclick="(() => AddItemDialog.Open())" type="button" class="btn btn-success">
-                    Add Item
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="-6 -6 48 48">
-                        <circle cx="16" cy="16" r="14" style="stroke: white;stroke-width:2" fill="transparent" />
-                        <line x1="16" y1="6" x2="16" y2="26" style="stroke: white;stroke-width:2" />
-                        <line x1="6" y1="16" x2="26" y2="16" style="stroke: white;stroke-width:2" />
-                    </svg>
-                </button>
-                <button @onclick="(() => AddSalesQuoteCommentLine())" type="button" class="btn btn-success">
-                    Add Comment
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="-6 -6 48 48">
-                        <circle cx="16" cy="16" r="14" style="stroke: white;stroke-width:2" fill="transparent" />
-                        <line x1="16" y1="6" x2="16" y2="26" style="stroke: white;stroke-width:2" />
-                        <line x1="6" y1="16" x2="26" y2="16" style="stroke: white;stroke-width:2" />
-                    </svg>
-                </button>
-            }            
+                <div class="row mt-2 align-items-stretch">
+                    <div class="col-8">
+                        @if (IsEditable)
+                        {
+                            <button @onclick="(() => AddItemDialog.Open())" type="button" class="btn btn-success">
+                            Add Item
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="-6 -6 48 48">
+                                <circle cx="16" cy="16" r="14" style="stroke: white;stroke-width:2" fill="transparent" />
+                                <line x1="16" y1="6" x2="16" y2="26" style="stroke: white;stroke-width:2" />
+                                <line x1="6" y1="16" x2="26" y2="16" style="stroke: white;stroke-width:2" />
+                            </svg>
+                        </button>
+                        <button @onclick="(() => AddSalesQuoteCommentLine())" type="button" class="btn btn-success">
+                            Add Comment
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="-6 -6 48 48">
+                                <circle cx="16" cy="16" r="14" style="stroke: white;stroke-width:2" fill="transparent" />
+                                <line x1="16" y1="6" x2="16" y2="26" style="stroke: white;stroke-width:2" />
+                                <line x1="6" y1="16" x2="26" y2="16" style="stroke: white;stroke-width:2" />
+                            </svg>
+                        </button>
+                        }
+                    </div>
+                    <div class="col-4 d-flex align-items-stretch justify-content-end gap-2">
+                            <button @onclick="(() => AcceptSalesQuote())" type="button" class="btn btn-success">Accept</button>
+                            <button @onclick="OpenDeclineDialog" type="button" class="btn btn-danger" disabled="@APIRequestInProgress">Decline</button>
+                    </div>
+                </div>
+            }
         </div>
         </div>
 

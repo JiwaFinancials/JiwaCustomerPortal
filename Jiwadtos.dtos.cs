@@ -718,6 +718,29 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string QuoteID { get; set; }
     }
 
+    [Route("/SalesQuotes/{QuoteHistoryID}/Accept", "POST")]
+    [ApiResponse(Description = "Updated OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No Sales Quote with the QuoteID provided was found", StatusCode = 404)]
+    public partial class SalesQuoteACCEPTRequest
+        : IReturn<SalesQuote>
+    {
+        public virtual string? QuoteHistoryID { get; set; }
+    }
+
+    [Route("/SalesQuotes/{QuoteHistoryID}/Decline", "POST")]
+    [ApiResponse(Description = "Updated OK", StatusCode = 200)]
+    [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+    [ApiResponse(Description = "Not authorised", StatusCode = 403)]
+    [ApiResponse(Description = "No Sales Quote with the QuoteID provided was found", StatusCode = 404)]
+    public partial class SalesQuoteDECLINERequest
+        : IReturn<SalesQuote>
+    {
+        public virtual string? QuoteHistoryID { get; set; }
+        public virtual string? ReasonForDecline { get; set; }
+    }
+
     [Route("/SalesQuotes/{QuoteID}/Historys/{QuoteHistoryID}/Lines", "POST")]
     [ApiResponse(Description = "Created OK", StatusCode = 201)]
     [ApiResponse(Description = "Not authenticated", StatusCode = 401)]
@@ -1833,7 +1856,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes
         {
             OnGoing = 0,
             Won = 1,
-            Lost = 1,
+            Lost = 2,
         }
 
     }
@@ -2014,7 +2037,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes
         {
             OnGoing = 0,
             Won = 1,
-            Lost = 1,
+            Lost = 2,
         }
 
     }
@@ -4113,6 +4136,11 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual string CurrencyShortName { get; set; }
         public virtual string CurrencyName { get; set; }
         public virtual short? DecimalPlaces { get; set; }
+        public byte? OpportunityStatus { get; set; }
+        [Required]
+        public string? OpportunityStatusReason { get; set; }
+        [Required]
+        public bool VisibleInCustomerPortal { get; set; }
     }
 
     [Route("/Queries/SalesQuoteList", "GET")]
@@ -4568,6 +4596,25 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Tables
         public virtual short? DecimalPlacesNotEqualTo { get; set; }
         public virtual short?[] DecimalPlacesBetween { get; set; }
         public virtual short?[] DecimalPlacesIn { get; set; }
+        public byte? OpportunityStatus { get; set; }
+
+        public byte? OpportunityStatusGreaterThanOrEqualTo { get; set; }
+        public byte? OpportunityStatusGreaterThan { get; set; }
+        public byte? OpportunityStatusLessThan { get; set; }
+        public byte? OpportunityStatusLessThanOrEqualTo { get; set; }
+        public byte? OpportunityStatusNotEqualTo { get; set; }
+        public byte?[]? OpportunityStatusBetween { get; set; }
+        public byte?[]? OpportunityStatusIn { get; set; }
+
+        public string? OpportunityStatusReason { get; set; }
+
+        public string? OpportunityStatusReasonStartsWith { get; set; }
+        public string? OpportunityStatusReasonEndsWith { get; set; }
+        public string? OpportunityStatusReasonContains { get; set; }
+        public string? OpportunityStatusReasonLike { get; set; }
+        public string?[]? OpportunityStatusReasonBetween { get; set; }
+        public string?[]? OpportunityStatusReasonIn { get; set; }
+        public bool? VisibleInCustomerPortal { get; set; }
     }
     #endregion
 

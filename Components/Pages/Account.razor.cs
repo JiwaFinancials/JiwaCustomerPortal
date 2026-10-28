@@ -2,6 +2,7 @@ using JiwaCustomerPortal.Components.AutoQueryGrid;
 using JiwaCustomerPortal.Components.AutoQueryGrid.Inventory;
 using JiwaCustomerPortal.Components.Grid;
 using JiwaCustomerPortal.Components.Grid.CustomField;
+using JiwaCustomerPortal.Components.Pages.SalesQuote;
 using JiwaFinancials.Jiwa.JiwaServiceModel;
 using JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders;
 using Microsoft.AspNetCore.Components;
@@ -156,9 +157,10 @@ namespace JiwaCustomerPortal.Components.Pages
             SalesQuotesAutoQuery = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_SalesQuote_ListQuery()
                 {
                     OrderByDesc = "InvoiceNoDashHistoryNo",
-                FXInvoiceTotalIncTaxNotEqualTo = 0,
-                Fields = "InvoiceID,InvoiceNoDashHistoryNo,HistoryNo,InvoiceInitDate,Status,OrderNo,QOReference,CurrencyShortName,FXInvoiceTotalIncTax,CurrencyID",
-                    Take = 10
+                    FXInvoiceTotalIncTaxNotEqualTo = 0,
+                    VisibleInCustomerPortal = true,
+                    Fields = "InvoiceID,InvoiceNoDashHistoryNo,HistoryNo,InvoiceInitDate,Status,OpportunityStatus,OrderNo,QOReference,CurrencyShortName,FXInvoiceTotalIncTax,CurrencyID",
+                        Take = 10
                 };    
         }  
 
@@ -707,14 +709,10 @@ namespace JiwaCustomerPortal.Components.Pages
                     markup = $"<td><img src='data:image/png;base64,{Convert.ToBase64String(Config.Currencies[item.CurrencyID].Picture)}' width='30' height='20'> {System.Net.WebUtility.HtmlEncode(item.CurrencyShortName)}</td>";
                     break;
                 case "Status":
-                    if (item.Status == 0)
-                    {
-                        markup = "<td class='text-center'><span class='badge rounded-pill bg-success'>Open</span></td>";
-                    }
-                    else
-                    {
-                        markup = "<td class='text-center'><span class='badge rounded-pill bg-danger'>Closed</span></td>";
-                    }
+                    (string text, string color) = SalesQuoteBadgeHelper.GetBadge(
+                        item.Status == 0,
+                        (JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory.StatusTypes?)item.OpportunityStatus);
+                    markup = $"<td class='text-center'><span class='badge rounded-pill {color}'>{System.Net.WebUtility.HtmlEncode(text)}</span></td>";
                     break;
             }
 
