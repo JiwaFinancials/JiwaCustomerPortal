@@ -126,6 +126,9 @@ Grant the following REST API permissions to the Customer Web Portal User Group:
 | 35 | /SalesQuotes/Lines/CustomFields | GET |
 | 36 | /Sessions/Current | GET |
 | 37 | /SystemInfo | GET |
+| 38 | /DebtorCategory1Description | GET |
+| 39 | /SalesQuotes/{QuoteHistoryID}/Accept | POST |
+| 40 | /SalesQuotes/{QuoteHistoryID}/Decline | POST |
 
 If you are allowing staff members to login to the portal, the following permissions are also required for the Customer Web Portal User Group:
 | # | Route | Verb |
@@ -145,6 +148,7 @@ Also if you are allowing staff members to login to the portal, they will need to
 | 6 | /SalesQuotes | POST |
 | 7 | /SalesQuotes/{QuoteID} | PATCH |
 | 8 | /SalesQuotes/{QuoteID}/Historys/{QuoteHistoryID}/Lines/{QuoteLineID} | DELETE |
+| 9 | /Debtors/{DebtorID} | GET |
 
 <img width="1287" height="1021" alt="image" src="https://github.com/user-attachments/assets/656862e7-5a41-4b05-b5f3-b0a055cdf32a" />
 
