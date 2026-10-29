@@ -21,10 +21,133 @@ using System.Runtime.Serialization;
 using static JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder;
 using static JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote;
 
+#region "Rosedale Licence DTOs"
+#region "Licencing"
+namespace JiwaFinancials.Jiwa.JiwaServiceModel.Licencing
+{
+    public partial class Licence
+    {
+        public virtual string LicenceID { get; set; }
+        public virtual string ResourceID { get; set; }
+        public virtual string ResourceName { get; set; }
+        public virtual DateTime CommenceDate { get; set; }
+        public virtual DateTime ExpiryDate { get; set; }
+        public virtual string LicenceType { get; set; }
+        public virtual bool NonInteractive { get; set; }
+        public virtual string Username { get; set; }
+        public virtual int CALs { get; set; }
+        public virtual string Version { get; set; }
+        public virtual DateTime IssueDate { get; set; }
+        public virtual string CompanyName { get; set; }
+        public virtual string Note { get; set; }
+        public virtual string Scope { get; set; }
+        public virtual string Signature { get; set; }
+        public virtual DateTimeOffset? LastSavedDateTime { get; set; }
+    }
+}
+#endregion
+public class CustomerName
+{
+    public string DebtorID { get; set; }
+    public string Name { get; set; }
+    public int CALs { get; set; }
+    public bool IsMaintained { get; set; }
+    public DateTime LicenceExpiration { get; set; }
+
+    // We add this to the DTO for convenience when displaying the licences page.  This gets lazy loaded.
+    public List<RegistrationLicences> RegistrationLicences { get; set; }
+    public bool LicencesHaveBeenRead { get; set; }
+    public bool isExpanded { get; set; }
+}
+
+public class RegistrationLicences
+{
+    public string RecID { get; set; }
+    public string RegistrationName { get; set; }
+    public string ResourceName { get; set; }
+    public DateTime IssueDate { get; set; }
+    public DateTime CommenceDate { get; set; }
+    public DateTime ExpiryDate { get; set; }
+    public int LicenceType { get; set; }
+    public int CALs { get; set; }
+    public string UserName { get; set; }
+    public string Version { get; set; }
+    public bool NonInteractive { get; set; }
+}
+
+[Route("/LicensedCustomerNames", "GET")]
+[ApiResponse(Description = "OK", StatusCode = 200)]
+[ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+[ApiResponse(Description = "Not authorised", StatusCode = 403)]
+[ApiResponse(Description = "No results found", StatusCode = 404)]
+public class LicensedCustomerNamesGETRequest : IReturn<List<CustomerName>>
+{
+}
+
+[Route("/CustomerLicences/{DebtorID}", "GET")]
+[ApiResponse(Description = "OK", StatusCode = 200)]
+[ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+[ApiResponse(Description = "Not authorised", StatusCode = 403)]
+[ApiResponse(Description = "No results found", StatusCode = 404)]
+public class CustomerLicencesGETRequest : IReturn<List<RegistrationLicences>>
+{
+    public string DebtorID { get; set; }
+}
+
+[Route("/Licence/{LicenceID}", "GET")]
+[ApiResponse(Description = "OK", StatusCode = 200)]
+[ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+[ApiResponse(Description = "Not authorised", StatusCode = 403)]
+[ApiResponse(Description = "No Licence with the provided LicenceID was found", StatusCode = 404)]
+public class LicenceGETRequest : IReturn<ServiceStack.Web.IHttpResult>
+{
+    public string LicenceID { get; set; }
+    public bool AsAttachment { get; set; }
+}
+
+[ApiResponse(Description = "OK", StatusCode = 200)]
+[ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+[ApiResponse(Description = "Not authorised", StatusCode = 403)]
+public class LicenceRenewGETRequest : IReturn<List<JiwaFinancials.Jiwa.JiwaServiceModel.Licencing.Licence>>
+{
+    public string CompanyName { get; set; }
+    public string? Version { get; set; }
+}
+
+public class WebDownloadLink
+{
+    public string GroupDescription { get; set; }
+    public int GroupDisplayOrder { get; set; }
+    public string DisplayText { get; set; }
+    public int DisplayOrder { get; set; }
+    public string Size { get; set; }
+    public string URL { get; set; }
+    public string Comment { get; set; }
+    public DateTime PublishDate { get; set; }
+    public bool GroupExpanded { get; set; } // Added property only used for rendering downloads page
+}
+
+[Route("/Downloads", "GET")]
+[ApiResponse(Description = "OK", StatusCode = 200)]
+[ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+[ApiResponse(Description = "Not authorised", StatusCode = 403)]
+[ApiResponse(Description = "No downloads found", StatusCode = 404)]
+public class WebDownloadLinksGETRequest : IReturn<List<WebDownloadLink>>
+{
+}
+
+[Route("/DebtorCategory1Description", "GET")]
+[ApiResponse(Description = "OK", StatusCode = 200)]
+[ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+[ApiResponse(Description = "Not authorised", StatusCode = 403)]
+public class DebtorCategory1DescriptionGETRequest : IReturn<string>
+{
+}
+#endregion
 
 #region "DTOs purpose made for this app"
 namespace JiwaFinancials.Jiwa.JiwaServiceModel
-{    
+{
     public class WebPortalUserSession
     {
         // this is just the standard JiwaAuthUserSessionResponse class with some fields removed and some extra fields - like the Web Portal role IsAdminRole
@@ -38,7 +161,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string DebtorID { get; set; }
         public virtual string DebtorName { get; set; }
         public virtual bool IsAdminRole { get; set; }
-
+        public virtual string DebtorCategory1Description { get; set; }
         public virtual string AuthProvider { get; set; }
         public virtual string JiwaStaffID { get; set; }
         public virtual string JiwaStaffUsername { get; set; }
@@ -46,7 +169,61 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
         public virtual string JiwaStaffFirstname { get; set; }
         public virtual string JiwaStaffSurname { get; set; }
         public virtual string JiwaStaffEmailAddress { get; set; }
-    }    
+    }
+}
+#endregion
+
+#region "Events"
+[Route("/CustomerWebPortal/Events/Eligible", "GET")]
+[ApiResponse(Description = "OK", StatusCode = 200)]
+[ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+[ApiResponse(Description = "Not authorised", StatusCode = 403)]
+public class CustomerWebPortalEligibleEventsGETRequest : IReturn<List<EligibleEvent>>
+{
+}
+
+[Route("/CustomerWebPortal/Events/{EventID}/Sessions/{SessionID}/Register", "POST")]
+[ApiResponse(Description = "Registered OK", StatusCode = 200)]
+[ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+[ApiResponse(Description = "Not authorised", StatusCode = 403)]
+[ApiResponse(Description = "Event or Session ID provided not found", StatusCode = 404)]
+[ApiResponse(Description = "Debtor contact already registered or session is full", StatusCode = 409)]
+public class CustomerWebPortalRegisterSessionPOSTRequest : IReturnVoid
+{
+    public string EventID { get; set; }
+    public string SessionID { get; set; }
+}
+
+[Route("/CustomerWebPortal/Events/{EventID}/Sessions/{SessionID}/Deregister", "DELETE")]
+[ApiResponse(Description = "Deregistered OK", StatusCode = 204)]
+[ApiResponse(Description = "Not authenticated", StatusCode = 401)]
+[ApiResponse(Description = "Not authorised", StatusCode = 403)]
+[ApiResponse(Description = "Event or Session ID provided not found", StatusCode = 404)]
+[ApiResponse(Description = "Debtor contact is not registered for session, and so cannot Deregister", StatusCode = 409)]
+public class CustomerWebPortalDeregisterSessionDELETERequest : IReturnVoid
+{
+    public string EventID { get; set; }
+    public string SessionID { get; set; }
+}
+
+public class EligibleEvent
+{
+    public Guid EventID { get; set; }
+    public string EventNo { get; set; }
+    public string Title { get; set; }
+    public string Summary { get; set; }
+    public int? MaxAttendees { get; set; }
+    public int SessionDurationInMinutes { get; set; }
+    public List<EventSession> EventSessions { get; set; } = new List<EventSession>();
+    public bool isExpanded { get; set; } // indicates if the session details are expanded in the UI
+}
+
+public class EventSession
+{
+    public Guid SessionID { get; set; }
+    public DateTimeOffset SessionStartDateTime { get; set; }
+    public int NumberRegisteredAttendees { get; set; }
+    public bool IsRegistered { get; set; }
 }
 #endregion
 
@@ -67,7 +244,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel
 
     public partial class DebtorContactNameCustomerWebPortalRoleGETResponse
     {
-        public virtual List<string>? Roles { get; set; }        
+        public virtual List<string>? Roles { get; set; }
     }
 
     [Route("/CustomerWebPortal/Settings", "GET")]
@@ -1057,7 +1234,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Debtors
         public virtual string ExternalAppRecID { get; set; }
         public virtual DateTimeOffset? LastSavedDateTime { get; set; }
         //public virtual bool? LogonCodeChangedByUser { get; set; }
-        public virtual string CustomerWebPortalPassword { get; set; }     
+        public virtual string CustomerWebPortalPassword { get; set; }
         public virtual List<Tags.Tag> TagMemberships { get; set; }
         //public virtual List<CustomFieldValue> CustomFieldValues { get; set; }
     }
@@ -1294,7 +1471,7 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders
         //public virtual BankAccount BankAccount { get; set; } // Don't need this, so we don't include it
         public virtual DateTimeOffset? LastSavedDateTime { get; set; }
     }
-    
+
     // ICustomFieldValuesHost interface added to the class declaration for our purposes here in the web portal - this is not populated or used by the Jiwa REST API
     public partial class SalesOrder : ICustomFieldValuesHost
     {
@@ -5434,3 +5611,4 @@ namespace JiwaFinancials.Jiwa.JiwaServiceModel.Startup.Diagnostics
 }
 
 #endregion
+

@@ -142,6 +142,7 @@ namespace JiwaCustomerPortal.Components.Pages
             DebtorsTransactionsAutoQuery = new JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_Debtor_Transactions_ListQuery()
                 {
                     OrderByDesc = "TranDate",
+                    AmountNotEqualTo = 0,
                     Fields = "InvRemitNo,TranDate,Description,DueDate,CurrencyShortName,Ref,Remark,Note,SourceID,DecimalPlaces,CurrencyID,DebitCredit,DebitAmountIncTax,CreditAmountIncTax,GSTAmount,AllocatedAmount,OutstandingAmount",
                     Take = 10
                 };        
@@ -709,6 +710,7 @@ namespace JiwaCustomerPortal.Components.Pages
                     markup = $"<td><img src='data:image/png;base64,{Convert.ToBase64String(Config.Currencies[item.CurrencyID].Picture)}' width='30' height='20'> {System.Net.WebUtility.HtmlEncode(item.CurrencyShortName)}</td>";
                     break;
                 case "Status":
+
                     (string text, string color) = SalesQuoteBadgeHelper.GetBadge(
                         item.Status == 0,
                         (JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory.StatusTypes?)item.OpportunityStatus);

@@ -1,5 +1,7 @@
 using JiwaCustomerPortal.Components;
 using ServiceStack;
+using JiwaCustomerPortal.Options;
+using Microsoft.AspNetCore.Components;
 using System.Net;
 
 namespace JiwaCustomerPortal
@@ -23,17 +25,24 @@ namespace JiwaCustomerPortal
             // HttpClient Factory Registration
             //builder.Services.AddJsonApiClient(Config.JiwaAPIURL); TODO: Find a way for our static JiwaAPI class to use DI to get the JsonApiClient instead of creating it's own instances. The recommended way of using any HttpClient is by using a factory
 
+            builder.Services.Configure<UploadPortalOptions>(configuration.GetSection(UploadPortalOptions.SectionName));
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri(sp.GetRequiredService<NavigationManager>().BaseUri)
+            });
+            builder.Services.AddScoped<JiwaCustomerPortal.Services.UploadPortalService>();
+
             // We want to read some config settings and we should wait until thats' finished before proceediing
             // if it fails, it will throw an exception and we'll not be able to start - which is what we want because
             // we can't do anything without the API, and if the call to the API to get some config values fails then we cannot go on.
             try
             {
                 Task readConfigTask = Task.Run(async () =>
-                    {
-                        await Config.ReadSettingsFromAPI();
-                    });
+                {
+                    await Config.ReadSettingsFromAPI();
+                });
                 readConfigTask.Wait();
-            }            
+            }
             catch (Exception ex)
             {
                 // wrap the exception with something more obvious to the operator what the problem is.
@@ -41,8 +50,15 @@ namespace JiwaCustomerPortal
             }
 
             // Add services to the container.
+            // Large browser uploads can take several minutes; the default JS interop timeout is too short for direct Azure uploads.
             builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents();
+                .AddInteractiveServerComponents(options =>
+                {
+                    options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(90);
+                });
+
+            // only used for the /downloadlicences route
+            builder.Services.AddControllers();
 
             // ColourModeServices is used to store the colour mode and it's a singleton so it can be referenced everywhere
             builder.Services.AddSingleton<IColourModeServices, ColourModeServices>();
@@ -66,6 +82,9 @@ namespace JiwaCustomerPortal
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
+
+            // only used for the /downloadlicences route
+            app.MapControllers();
 
             app.Run();
         }

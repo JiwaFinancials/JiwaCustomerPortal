@@ -22,6 +22,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
+    <PackageReference Include="Azure.Identity" />
+    <PackageReference Include="Azure.Storage.Blobs" />
     <PackageReference Include="ServiceStack" />
     <PackageReference Include="ServiceStack.Client" />
   </ItemGroup>
@@ -58,5 +60,8 @@
   </ItemGroup>
   <ItemGroup>
     <UpToDateCheckInput Remove="Components\SignedInUserInfo.razor" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
 </Project>

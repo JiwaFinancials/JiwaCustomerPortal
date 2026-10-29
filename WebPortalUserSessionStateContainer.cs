@@ -19,13 +19,13 @@ namespace JiwaCustomerPortal
     public class WebPortalUserSessionStateContainer
     {
         public event Action? OnChange;
-        
+
         public ProtectedLocalStorage? ProtectedLocalStore { get; private set; }
 
         private WebPortalUserSession? _WebPortalUserSession;
-        public WebPortalUserSession? WebPortalUserSession 
+        public WebPortalUserSession? WebPortalUserSession
         {
-            get 
+            get
             {
                 if (_WebPortalUserSession == null && ProtectedLocalStore != null)
                 {
@@ -34,10 +34,10 @@ namespace JiwaCustomerPortal
                 }
                 return _WebPortalUserSession;
             }
-            private set 
+            private set
             {
                 _WebPortalUserSession = value;
-            } 
+            }
         }
 
         private async Task GetWebPortalUserSessionFromStorage()
@@ -68,13 +68,15 @@ namespace JiwaCustomerPortal
                         {
                             // no web portal role has been assigned to this debtor contact name; they are not allowed to sign in.
                             throw new Exception("User does not have permission to sign in using the Customer Web Portal. Add the tag 'Customer Web Portal - User' or 'Customer Web Portal - Admin' to the debtor contact name");
-                        }                        
+                        }
                     }
 
                     webPortalUserSession = jiwaAuthUserSession.ConvertTo<JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession>();
                     if (webPortalUserSession.AuthProvider != "credentials")
                     {
                         webPortalUserSession.IsAdminRole = debtorContactNameCustomerWebPortalRoleGETResponse.Roles.Contains("Admin");
+                        //Get debtor category 1 for this contact
+                        webPortalUserSession.DebtorCategory1Description = await JiwaAPI.GetAsync(new DebtorCategory1DescriptionGETRequest(), jiwaAPISessionId: jiwaAuthUserSession.Id);
 
                         // null these because not relevant for non-credential based auth, and we don't want to accidentally persist staff details in the browser's local storage when they are not relevant to the authentication method used.
                         webPortalUserSession.JiwaStaffID = null;
@@ -94,7 +96,7 @@ namespace JiwaCustomerPortal
                         webPortalUserSession.DebtorID = null;
                         webPortalUserSession.DebtorName = null;
                     }
-                    
+
                     await ProtectedLocalStore.SetAsync("JiwaCustomerWebPortalAuthUserSession", webPortalUserSession);
                     SetWebPortalUserSession(webPortalUserSession);
                 }
@@ -105,7 +107,7 @@ namespace JiwaCustomerPortal
                     await ProtectedLocalStore.DeleteAsync("JiwaCustomerWebPortalAuthUserSession");
                     SetWebPortalUserSession(null);
                 }
-            }            
+            }
         }
 
         public void SetWebPortalUserSession(WebPortalUserSession? value)

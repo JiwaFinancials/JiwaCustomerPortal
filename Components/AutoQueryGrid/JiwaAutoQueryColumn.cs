@@ -28,7 +28,7 @@
         {
             this.Id = Id;
             IsHidden = true;
-        }        
+        }
 
         public int DisplayOrder
         {
