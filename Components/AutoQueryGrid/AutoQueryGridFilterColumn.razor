@@ -4,7 +4,7 @@
 @typeparam Model
 
 <div class="relative">
-    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);"
+    <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" 
          aria-modal="true" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -31,11 +31,11 @@
                         </div>
 
                         <div></div>
-
+                
                         <div class="card">
                             <div class="card-body">
                                 <h5>Filters</h5>
-
+                            
                                 @foreach (JiwaAutoQueryColumnFilter columnFilter in Column.Filters)
                                 {
                                     <span class="badge rounded-pill bg-primary">
@@ -46,9 +46,9 @@
                                             </svg>
                                             @columnFilter.FilterOperator.DisplayValue @columnFilter.FilterValue
                                         </button>
-                                    </span>
+                                    </span>                                
                                 }
-
+                            
                                 <div class="card">
                                     <div class="card-body">
                                         <h6>Add Filter</h6>
@@ -92,8 +92,8 @@
     [Parameter]
     public EventCallback<bool> OnClose { get; set; }
 
-    public string Title
-    {
+    public string Title 
+    { 
         get
         {
             return $"Sort and Filter Options for Column {Column.Caption}";
@@ -113,13 +113,13 @@
     {
         if (Column.SortOrder == sortOrder)
         {
-            // if the column was already in the order selected, then we remove the sort altogether
+            // if the column was already in the order selected, then we remove the sort altogether   
             Column.SortOrder = null;
         }
         else
         {
             Column.SortOrder = sortOrder;
-        }
+        }        
     }
 
     private Task ModalCancel()
@@ -150,7 +150,7 @@
     }
 
     public void FilterOperatorChanged(ChangeEventArgs e)
-    {
+    {        
         NewFilter.FilterOperator = Column.FilterOperators.FirstOrDefault(x => x.QueryModelProperty == e.Value.ToString());
     }
 

@@ -1,6 +1,7 @@
 using JiwaCustomerPortal.Components.AutoQueryGrid;
 using JiwaCustomerPortal.Components.AutoQueryGrid.Debtor;
 using JiwaCustomerPortal.Components.Grid;
+using JiwaCustomerPortal.Components.Pages.SalesQuote;
 using JiwaFinancials.Jiwa.JiwaServiceModel;
 using JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders;
 using Microsoft.AspNetCore.Components;
@@ -132,7 +133,8 @@ namespace JiwaCustomerPortal.Components.Pages
                 {            
                     OrderByDesc = "InvoiceNoDashHistoryNo",
                     FXInvoiceTotalIncTaxNotEqualTo = 0,
-                    Fields = "InvoiceID,InvoiceNoDashHistoryNo,HistoryNo,InvoiceInitDate,Status,OrderNo,QOReference,CurrencyShortName,FXInvoiceTotalIncTax,CurrencyID",
+                    VisibleInCustomerPortal = true,
+                    Fields = "InvoiceID,InvoiceNoDashHistoryNo,HistoryNo,InvoiceInitDate,Status,OpportunityStatus,OrderNo,QOReference,CurrencyShortName,FXInvoiceTotalIncTax,CurrencyID",
                     Take = 10
                 };
             }
@@ -767,9 +769,10 @@ namespace JiwaCustomerPortal.Components.Pages
                 case "CurrencyShortName":
                     return CurrencyCell(item.CurrencyID, item.CurrencyShortName);
                 case "Status":
-                    return item.Status == 0
-                        ? BadgeCell("Open", "badge rounded-pill bg-success", "text-center")
-                        : BadgeCell("Closed", "badge rounded-pill bg-danger", "text-center");
+                    (string text, string color) = SalesQuoteBadgeHelper.GetBadge(
+                        item.Status == 0,
+                        (JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory.StatusTypes?)item.OpportunityStatus);
+                    return BadgeCell(text, $"badge rounded-pill {color}", "text-center");
             }
 
             return null;

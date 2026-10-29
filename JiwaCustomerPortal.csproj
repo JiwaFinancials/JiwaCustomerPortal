@@ -9,8 +9,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>1.0.0.1</FileVersion>
+    <AssemblyVersion>8.0.63.0</AssemblyVersion>
+    <FileVersion>8.0.63.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="wwwroot\bootstrap\**" />
@@ -19,6 +19,7 @@
     <None Remove="wwwroot\bootstrap\**" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
     <PackageReference Include="Azure.Identity" />
@@ -35,10 +36,19 @@
     <_ContentIncludedByDefault Remove="Components\User\PasswordReset.razor" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="Components\Pages\SalesQuote\SalesQuote.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Components\Pages\SalesOrder\SalesOrder.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
     <Content Update="Components\Pages\Diagnostics.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Update="Components\Pages\StatementPDF.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Components\Pages\SalesQuote\SalesQuotePDF.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Update="Components\User\ChangePasswordConfirmation.razor">

@@ -23,8 +23,8 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         // APIRequestInProgress cannot be simply set to true and restored to original state, due to race conditions arising from asynchronous
         // calls - so we use a counter instead, and increment or decrement that - and we look at the APIRequestInProgressCount to determine if a request is currently in progress or not.    
         private int _APIRequestInProgressCount = 0;
-        public int APIRequestInProgressCount
-        {
+        public int APIRequestInProgressCount 
+        { 
             get
             {
                 return _APIRequestInProgressCount;
@@ -32,13 +32,13 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             set
             {
                 int previousValue = _APIRequestInProgressCount;
-                _APIRequestInProgressCount = value;
+                _APIRequestInProgressCount = value;                
 
                 if ((previousValue > 0 && value == 0) || (previousValue == 0 && value > 0))
                 {
                     // only trigger a render if we're changing from 0 to >0 or >0 to 0 - otherwise we don't need to trigger a render to show the APIRequestInProgress indicator
                     InvokeAsync(StateHasChanged);
-                }
+                }                
             }
         }
         public bool APIRequestInProgress => APIRequestInProgressCount > 0;
@@ -47,30 +47,30 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         private string SelectedTabId { get; set; } = "Items-tab";
         private string CustomFieldsSelectedTabId { get; set; } = "OrderCustomFields-tab";
         private JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderHistory _SelectedHistory;
-        private JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderHistory SelectedHistory
-        {
-            get
+        private JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderHistory SelectedHistory 
+        { 
+            get 
             {
                 return _SelectedHistory;
-            }
+            } 
             set
             {
                 _SelectedHistory = value;
                 // whenever the selected history changes, we need to re-display everything - this occurs on read of sales order, not just selection of snapshot by the user
                 InvokeAsync(DisplaySalesOrder);
-            }
+            } 
         }
-        private JiwaInventoryAutoQueryModalSelectionDialog AddItemDialog { get; set; }
+        private JiwaInventoryAutoQueryModalSelectionDialog AddItemDialog { get; set; }        
         private RenderFragment? _CustomFieldLookupRenderFragment;
-        public RenderFragment? CustomFieldLookupRenderFragment
-        {
+        public RenderFragment? CustomFieldLookupRenderFragment 
+        { 
             get
             {
                 return _CustomFieldLookupRenderFragment;
             }
             set
             {
-                _CustomFieldLookupRenderFragment = value;
+                _CustomFieldLookupRenderFragment = value;                
                 InvokeAsync(StateHasChanged);
             }
         }
@@ -85,7 +85,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         private Grid.CellArray SalesOrderCustomFieldsGridCells { get; set; }
         private CustomFieldGrid SalesOrderHistoryCustomFieldsGrid { get; set; }
         private Grid.CellArray SalesOrderHistoryCustomFieldsGridCells { get; set; }
-        private Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesOrder.SalesOrder, JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine> SalesOrderLineCustomFieldController { get; set; }
+        private Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesOrder.SalesOrder, JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine> SalesOrderLineCustomFieldController { get; set; }        
         public bool IsEditable
         {
             get
@@ -122,7 +122,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             {
                 // create a new Order, and then proceed to show that Order
                 JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPOSTRequest salesOrderPOSTRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderPOSTRequest() { DebtorID = CreateForDebtorID };
-                salesOrder = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>(salesOrderPOSTRequest);
+                salesOrder = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>(salesOrderPOSTRequest);                
             }
             else if (InvoiceId != null)
             {
@@ -136,7 +136,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 await InitialiseFreightGrid();
                 await InitialiseTotalsGrid();
 
-                short snapno = 1;
+                short snapno = 1;                           
 
                 if (QueryHelpers.ParseQuery(NavigationManager.ToAbsoluteUri(NavigationManager.Uri).Query).TryGetValue("SnapshotNo", out var snapshotNoParam))
                 {
@@ -149,7 +149,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 }
 
                 SelectedHistory = salesOrder.Histories[snapno - 1];
-            }
+            }            
         }
 
         public async Task DisplaySalesOrder()
@@ -161,7 +161,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
 
         #region "Sales Order Lines Grid"
         public Task InitialiseSalesOrderLinesGrid()
-        {
+        {            
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
             currencyCellType.MinDecimalPlaces = Config.Currencies[salesOrder.CurrencyID].DecimalPlaces ?? 2;
             currencyCellType.MaxDecimalPlaces = Config.Currencies[salesOrder.CurrencyID].DecimalPlaces ?? 2;
@@ -189,12 +189,12 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
 
             // Add sales order line custom field controller             
             SalesOrderLineCustomFieldController = new Components.Grid.CustomField.LineCustomFieldController<JiwaCustomerPortal.Components.Pages.SalesOrder.SalesOrder, JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine>(SalesOrderLinesGridCells, (WebPortalUserSessionStateContainer.WebPortalUserSession?.AuthProvider == "credentials") ? Config.StaffLogin_SalesOrderLineCustomFields : Config.CustomerLogin_SalesOrderLineCustomFields);
-
+        
             return Task.CompletedTask;
         }
 
         public async Task DisplaySalesOrderLines()
-        {
+        {                        
             SalesOrderLinesGridCells.RowCount = 0;
             foreach (JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine salesOrderLine in SelectedHistory.Lines)
             {
@@ -263,11 +263,11 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                     {
                         SalesOrderLinesGridCells["Bin", row].IsEditable = IsEditable;
                     }
-
+                    
                     SalesOrderLineCustomFieldController.DisplayCustomFieldValues(this, salesOrderLine, row, IsEditable);
-                }
+                }                
             }
-
+        
             return Task.CompletedTask;
         }
 
@@ -277,10 +277,10 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine? salesOrderLine = SelectedHistory.Lines.FirstOrDefault(x => x.InvoiceLineID == invoiceLineID);
 
             if (cell.Column.Id == "Bin")
-            {
+            {                
                 if (salesOrderLine != null)
                 {
-                    await DeleteSalesOrderLine(salesOrderLine);
+                    await DeleteSalesOrderLine(salesOrderLine);                    
                 }
             }
             else
@@ -340,7 +340,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             }
         }
         #endregion
-
+        
         #region "Freight Grid"
 
         public Task InitialiseFreightGrid()
@@ -361,7 +361,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             FreightGridCells["FreightLabel", 0].Value = "Courier";
             FreightGridCells["FreightLabel", 1].Value = "Freight1";
             FreightGridCells["FreightLabel", 2].Value = "Freight2";
-
+        
             return Task.CompletedTask;
         }
 
@@ -374,7 +374,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                     dtoSalesOrder.Cartage1ExGst = decimal.Parse(args.e.Value.ToString());
                 });
             }
-            else if (args.cell.Row == 1)
+            else if(args.cell.Row == 1)
             {
                 await SalesOrderChanged(args.e, (dtoSalesOrder) =>
                 {
@@ -389,9 +389,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 });
             }
         }
-
+        
         public Task DisplayFreight()
-        {
+        {                        
             FreightGridCells["ExTax", 0].Value = salesOrder.FXCartage1ExGst;
             FreightGridCells["Tax", 0].Value = salesOrder.FXCartage1Gst;
             FreightGridCells["IncTax", 0].Value = salesOrder.FXCartage1ExGst + salesOrder.FXCartage1Gst;
@@ -407,14 +407,14 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             FreightGridCells["ExTax", 0].IsEditable = IsEditable;
             FreightGridCells["ExTax", 1].IsEditable = IsEditable;
             FreightGridCells["ExTax", 2].IsEditable = IsEditable;
-
+        
             return Task.CompletedTask;
         }
         #endregion
 
         #region "Totals Grid"
         public Task InitialiseTotalsGrid()
-        {
+        {            
             Components.Grid.CellType.DecimalCellType currencyCellType = new Components.Grid.CellType.DecimalCellType();
             currencyCellType.MinDecimalPlaces = Config.Currencies[salesOrder.CurrencyID].DecimalPlaces ?? 2;
             currencyCellType.MaxDecimalPlaces = Config.Currencies[salesOrder.CurrencyID].DecimalPlaces ?? 2;
@@ -431,12 +431,12 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             TotalsGridCells["TotalLabel", 0].Value = "Ordered";
             TotalsGridCells["TotalLabel", 1].Value = "Previous";
             TotalsGridCells["TotalLabel", 2].Value = "This Del.";
-
+        
             return Task.CompletedTask;
-        }
+        }     
 
         public Task DisplayTotals()
-        {
+        {                                    
             TotalsGridCells["ExTax", 0].Value = salesOrder.FXOrderedExGSTTotal;
             TotalsGridCells["Tax", 0].Value = salesOrder.FXOrderedGSTTotal;
             TotalsGridCells["IncTax", 0].Value = salesOrder.FXOrderedExGSTTotal + salesOrder.FXOrderedGSTTotal;
@@ -448,15 +448,15 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             TotalsGridCells["ExTax", 2].Value = SelectedHistory.FXExGSTTotal;
             TotalsGridCells["Tax", 2].Value = SelectedHistory.FXGSTTotal;
             TotalsGridCells["IncTax", 2].Value = SelectedHistory.FXIncGSTTotal;
-
-            return Task.CompletedTask;
-        }
+        
+    return Task.CompletedTask;
+}
         #endregion
 
         #region "Custom Fields Grids"
         public async Task SalesOrderCustomFieldsGrid_CustomFieldChanged((JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, Cell cell, ChangeEventArgs e) args)
         {
-            await SetSalesOrderCustomFieldValue(args.customField, args.e);
+            await SetSalesOrderCustomFieldValue(args.customField, args.e);            
         }
 
         public async Task SalesOrderHistoryCustomFieldsGrid_CustomFieldChanged((JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField customField, Cell cell, ChangeEventArgs e) args)
@@ -468,21 +468,21 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         private Task OnSelectTab(string tabId)
         {
             SelectedTabId = tabId;
-
+        
             return Task.CompletedTask;
         }
 
         private Task OnSelectCustomFieldsTab(string tabId)
         {
             CustomFieldsSelectedTabId = tabId;
-
+        
             return Task.CompletedTask;
         }
 
         private Task SelectedHistoryChange(ChangeEventArgs e)
         {
             SelectedHistory = salesOrder.Histories.FirstOrDefault(x => x.InvoiceHistoryID == e.Value.ToString());
-
+        
             return Task.CompletedTask;
         }
 
@@ -528,7 +528,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             if (response != null)
             {
                 salesOrder = response;
-                SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
+                SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];                
             }
         }
 
@@ -558,18 +558,18 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
         }
 
         private async Task DeleteSalesOrderLine(JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrderLine salesOrderLine)
-        {
+        {            
             JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderLineDELETERequest salesOrderLineDELETERequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderLineDELETERequest();
             salesOrderLineDELETERequest.InvoiceID = salesOrder.InvoiceID;
             salesOrderLineDELETERequest.InvoiceHistoryID = SelectedHistory.InvoiceHistoryID;
             salesOrderLineDELETERequest.InvoiceLineID = salesOrderLine.InvoiceLineID;
             await DeleteFromAPI(salesOrderLineDELETERequest);
-
+            
             // re-read the Order
             int? currentSnap = SelectedHistory.HistoryNo;
             JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderGETRequest salesOrderGETRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrderGETRequest() { InvoiceID = salesOrder.InvoiceID };
             salesOrder = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesOrders.SalesOrder>(salesOrderGETRequest);
-
+            
             if (salesOrder != null)
             {
                 SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
@@ -667,7 +667,7 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             {
                 salesOrder = response;
                 SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
-            }
+            }            
         }
 
         public async Task SetSalesOrderHistoryCustomFieldValue(JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField, ChangeEventArgs e)
@@ -728,12 +728,12 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 salesOrder = response;
                 SelectedHistory = salesOrder.Histories[currentSnap.Value - 1];
             }
-        }
+        }        
         #endregion
 
         private async Task DeleteFromAPI(IReturnVoid requestDTO)
         {
-            APIRequestInProgressCount++;
+            APIRequestInProgressCount++;            
             try
             {
                 await JiwaAPI.DeleteAsync<ServiceStack.IReturnVoid>(requestDTO, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
@@ -757,13 +757,13 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
             }
             finally
             {
-                APIRequestInProgressCount--;
+                APIRequestInProgressCount--;                
             }
         }
 
         public async Task<TResponse> SendToAPI<TResponse>(IReturn<TResponse> requestDTO)
-        {
-            APIRequestInProgressCount++;
+        {            
+            APIRequestInProgressCount++;             
             try
             {
                 return await JiwaAPI.SendAsync(requestDTO, WebPortalUserSessionStateContainer.WebPortalUserSession.Id, null);
@@ -786,8 +786,8 @@ namespace JiwaCustomerPortal.Components.Pages.SalesOrder
                 statusMessage = ex.Message;
             }
             finally
-            {
-                APIRequestInProgressCount--;
+            {              
+                APIRequestInProgressCount--;                
             }
 
             return default(TResponse);

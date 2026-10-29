@@ -1,6 +1,7 @@
 using JiwaCustomerPortal.Components.AutoQueryGrid.Inventory;
 using JiwaCustomerPortal.Components.Grid;
 using JiwaCustomerPortal.Components.Grid.CustomField;
+using JiwaFinancials.Jiwa.JiwaServiceModel;
 using JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
@@ -42,6 +43,9 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
         }
         public bool APIRequestInProgress => APIRequestInProgressCount > 0;
         private string? statusMessage;
+        private string? successDialogMessage;
+        private bool showDeclineDialog;
+        private string? reasonForDecline;
         private JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote salesQuote { get; set; }
         private string SelectedTabId { get; set; } = "Items-tab";
         private JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory _SelectedHistory;
@@ -90,6 +94,18 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
                 return salesQuote.Status == JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote.e_SalesQuoteStatuses.e_SalesQuoteEntered && WebPortalUserSessionStateContainer.WebPortalUserSession?.AuthProvider == "credentials";
             }
         }
+
+        private (string Text, string Color) SalesQuoteStatusBadge
+        {
+            get
+            {
+                bool isOpen = salesQuote.Status == JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote.e_SalesQuoteStatuses.e_SalesQuoteEntered;
+                return SalesQuoteBadgeHelper.GetBadge(isOpen, SelectedHistory?.OpportunityStatus);
+            }
+        }
+
+        private string SalesQuoteStatusBadgeText => SalesQuoteStatusBadge.Text;
+        private string SalesQuoteStatusBadgeColor => SalesQuoteStatusBadge.Color;
 
         protected override async Task OnInitializedAsync()
         {
@@ -592,6 +608,74 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
             }
         }
 
+        private async Task AcceptSalesQuote()
+        {
+            JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteACCEPTRequest salesQuoteACCEPTRequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteACCEPTRequest();
+            salesQuoteACCEPTRequest.QuoteHistoryID = SelectedHistory.QuoteHistoryID;
+
+            int? currentSnap = SelectedHistory.HistoryNo;
+
+            JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuoteACCEPTRequest);
+            if (response != null)
+            {
+                salesQuote = response;
+                SelectedHistory = salesQuote.Histories[currentSnap.Value - 1];
+                string? quoteNo = await GetInvoiceNoDashHistoryNo();
+                successDialogMessage = $"Sales Quote {quoteNo ?? response.QuoteNo} Sucessfully Accepted.";
+            }
+        }
+
+        private void OpenDeclineDialog()
+        {
+            reasonForDecline = null;
+            showDeclineDialog = true;
+        }
+
+        private void CloseDeclineDialog()
+        {
+            showDeclineDialog = false;
+            reasonForDecline = null;
+        }
+
+        private async Task DeclineSalesQuote(string? reason)
+        {
+            CloseDeclineDialog();
+
+            JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteDECLINERequest salesQuoteDECLINERequest = new JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuoteDECLINERequest();
+            salesQuoteDECLINERequest.QuoteHistoryID = SelectedHistory.QuoteHistoryID;
+            salesQuoteDECLINERequest.ReasonForDecline = string.IsNullOrWhiteSpace(reason) ? null : reason;
+
+            int? currentSnap = SelectedHistory.HistoryNo;
+
+            JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote response = await SendToAPI<JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuote>(salesQuoteDECLINERequest);
+            if (response != null)
+            {
+                salesQuote = response;
+                SelectedHistory = salesQuote.Histories[currentSnap.Value - 1];
+                string? quoteNo = await GetInvoiceNoDashHistoryNo();
+                successDialogMessage = $"Sales Quote {quoteNo ?? response.QuoteNo} Successfully Declined.";
+            }
+        }
+
+        private async Task<string?> GetInvoiceNoDashHistoryNo()
+        {
+            JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_SalesQuote_ListQuery query = new()
+            {
+                InvoiceID = salesQuote.QuoteID,
+                HistoryNo = (short?)SelectedHistory.HistoryNo,
+                Fields = "InvoiceNoDashHistoryNo",
+                Take = 1
+            };
+
+            ServiceStack.QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_SalesQuote_List> response =
+                await SendToAPI<ServiceStack.QueryResponse<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.v_Jiwa_SalesQuote_List>>(query);
+            return response?.Results?.FirstOrDefault()?.InvoiceNoDashHistoryNo;
+        }
+        private void CloseSuccessDialog()
+        {
+            successDialogMessage = null;
+        }
+
         #region "Custom Fields"
         public async Task SetCustomFieldValue(ICustomFieldValuesHost CustomFieldValuesHost, JiwaFinancials.Jiwa.JiwaServiceModel.CustomFields.CustomField CustomField, ChangeEventArgs e)
         {
@@ -723,6 +807,38 @@ namespace JiwaCustomerPortal.Components.Pages.SalesQuote
             }
 
             return default(TResponse);
+        }
+    }
+
+    internal static class SalesQuoteBadgeHelper
+    {
+        private static readonly IReadOnlyDictionary<string, string> BadgeColors = new Dictionary<string, string>
+        {
+            ["Awaiting Approval"] = "bg-warning bg-opacity-75",
+            ["Accepted"] = "bg-success",
+            ["Declined"] = "bg-danger",
+            ["Closed"] = "bg-secondary",
+            ["Accepted & Closed"] = "bg-success",
+            ["Declined & Closed"] = "bg-danger"
+        };
+
+        public static (string Text, string Color) GetBadge(bool isOpen, JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory.StatusTypes? opportunityStatus)
+        {
+            string text = isOpen
+                ? opportunityStatus switch
+                {
+                    JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory.StatusTypes.Won => "Accepted",
+                    JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory.StatusTypes.Lost => "Declined",
+                    _ => "Awaiting Approval"
+                }
+                : opportunityStatus switch
+                {
+                    JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory.StatusTypes.Won => "Accepted & Closed",
+                    JiwaFinancials.Jiwa.JiwaServiceModel.SalesQuotes.SalesQuoteHistory.StatusTypes.Lost => "Declined & Closed",
+                    _ => "Closed"
+                };
+
+            return (text, BadgeColors[text]);
         }
     }
 }
