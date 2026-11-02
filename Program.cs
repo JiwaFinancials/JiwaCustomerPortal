@@ -22,6 +22,12 @@ namespace JiwaCustomerPortal
             Config.AllowStaffLogin = configuration.GetValue<bool>("AllowStaffLogin");
             Config.CustomFieldsToDisplay = configuration.GetSection("CustomFieldsToDisplay").Get<JiwaCustomerPortal.CustomFieldsToDisplay>();
 
+            builder.Services.AddSingleton(new Services.StaffLoginWhitelist(configuration));
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<Services.StaffLoginAccess>();
+            builder.Services.AddScoped<Microsoft.AspNetCore.Components.Server.Circuits.CircuitHandler>(sp =>
+                sp.GetRequiredService<Services.StaffLoginAccess>());
+
             // HttpClient Factory Registration
             //builder.Services.AddJsonApiClient(Config.JiwaAPIURL); TODO: Find a way for our static JiwaAPI class to use DI to get the JsonApiClient instead of creating it's own instances. The recommended way of using any HttpClient is by using a factory
 

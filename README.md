@@ -51,6 +51,24 @@ https://portal.demo.jiwa.com.au/ is a demo which consumes https://api.jiwa.com.a
 
 # Deployment
 
+## Staff login IP whitelist
+Staff login requires both `AllowStaffLogin: true` and a matching entry in `StaffLoginAllowedCidrs` in `appsettings.json`. Missing or empty whitelists block all staff logins, including remembered staff sessions. Customer login is unaffected.
+
+```json
+"StaffLoginAllowedCidrs": [
+  "192.168.10.0/24",
+  "203.0.113.42/32",
+  "2001:db8:1234::/48",
+  "::1/128"
+]
+```
+
+Replace these examples with your trusted networks. Use `/32` for a single IPv4 address or `/128` for a single IPv6 address. Invalid entries prevent startup with a configuration error. Restart the portal after changing the whitelist.
+
+Only matching visitors see the staff login toggle (when customer login is also enabled), or the staff login form when customer login is disabled. Authentication and session restoration enforce the same restriction on the server. IPv4-mapped IPv6 connection addresses are matched against IPv4 ranges, and circuit reconnects refresh the client IP.
+
+This configuration is for visitors connecting directly to Kestrel: it uses the connection's remote IP and does not trust client-supplied forwarding headers. Do not place the portal behind a reverse proxy without configuring trusted-proxy forwarding first; otherwise the proxy address would be checked instead of the visitor's address. The whitelist restricts portal access, not direct access to the Jiwa REST API.
+
 ## Jiwa REST API 
 The Jiwa 8 REST API must be configured and running.
 
@@ -347,6 +365,7 @@ AllowedHosts and Kestrel.Endpoints.MyHttpEndpoint.Url must match the CNAME DNS r
   "JiwaAPIKey": "Your Jiwa API Key",
   "AllowCustomerLogin": true,
   "AllowStaffLogin": true,
+  "StaffLoginAllowedCidrs": [],
   "Logging": {
     "LogLevel": {
       "Default": "Information",
@@ -464,6 +483,7 @@ AllowedHosts and Kestrel.Endpoints.MyHttpEndpoint.Url must match the CNAME DNS r
   "JiwaAPIKey": "Your Jiwa API Key",
   "AllowCustomerLogin": true,
   "AllowStaffLogin": true,
+  "StaffLoginAllowedCidrs": [],
   "Logging": {
     "LogLevel": {
       "Default": "Information",

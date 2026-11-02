@@ -18,6 +18,15 @@ namespace JiwaCustomerPortal
 
     public class WebPortalUserSessionStateContainer
     {
+        private readonly Services.StaffLoginAccess staffLoginAccess;
+        private readonly ILogger<WebPortalUserSessionStateContainer> logger;
+
+        public WebPortalUserSessionStateContainer(Services.StaffLoginAccess staffLoginAccess, ILogger<WebPortalUserSessionStateContainer> logger)
+        {
+            this.staffLoginAccess = staffLoginAccess;
+            this.logger = logger;
+        }
+
         public event Action? OnChange;
 
         public ProtectedLocalStorage? ProtectedLocalStore { get; private set; }
@@ -32,18 +41,39 @@ namespace JiwaCustomerPortal
                     // retrieve from local storage
                     GetWebPortalUserSessionFromStorage();
                 }
+                if (!IsSessionAllowed(_WebPortalUserSession))
+                {
+                    _WebPortalUserSession = null;
+                }
                 return _WebPortalUserSession;
             }
             private set
             {
-                _WebPortalUserSession = value;
+                _WebPortalUserSession = IsSessionAllowed(value) ? value : null;
             }
         }
 
         private async Task GetWebPortalUserSessionFromStorage()
         {
             ProtectedBrowserStorageResult<JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession> storedWebPortalUserSession = await ProtectedLocalStore.GetAsync<JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession>("JiwaCustomerWebPortalAuthUserSession");
-            _WebPortalUserSession = storedWebPortalUserSession.Value;
+            if (!IsSessionAllowed(storedWebPortalUserSession.Value))
+            {
+                await ProtectedLocalStore.DeleteAsync("JiwaCustomerWebPortalAuthUserSession");
+                return;
+            }
+
+            WebPortalUserSession = storedWebPortalUserSession.Value;
+        }
+
+        private bool IsSessionAllowed(WebPortalUserSession? session)
+        {
+            if (session?.AuthProvider == "credentials" && !staffLoginAccess.IsAllowed)
+            {
+                logger.LogWarning("Staff session denied for remote IP {RemoteIpAddress}.", staffLoginAccess.RemoteIpAddress);
+                return false;
+            }
+
+            return true;
         }
 
         public async Task SetProtectedLocalStore(ProtectedLocalStorage value)
@@ -53,6 +83,13 @@ namespace JiwaCustomerPortal
             if (storedWebPortalUserSession.Success && storedWebPortalUserSession.Value != null)
             {
                 JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession webPortalUserSession = storedWebPortalUserSession.Value;
+
+                if (!IsSessionAllowed(webPortalUserSession))
+                {
+                    await ProtectedLocalStore.DeleteAsync("JiwaCustomerWebPortalAuthUserSession");
+                    SetWebPortalUserSession(null);
+                    return;
+                }
 
                 // re-authenticate with the stored session id - in case something has changed since it was last used, or if it has expired. 
                 try
@@ -72,6 +109,13 @@ namespace JiwaCustomerPortal
                     }
 
                     webPortalUserSession = jiwaAuthUserSession.ConvertTo<JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession>();
+                    if (!IsSessionAllowed(webPortalUserSession))
+                    {
+                        await ProtectedLocalStore.DeleteAsync("JiwaCustomerWebPortalAuthUserSession");
+                        SetWebPortalUserSession(null);
+                        return;
+                    }
+
                     if (webPortalUserSession.AuthProvider != "credentials")
                     {
                         webPortalUserSession.IsAdminRole = debtorContactNameCustomerWebPortalRoleGETResponse.Roles.Contains("Admin");

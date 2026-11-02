@@ -10,6 +10,7 @@
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedLocalStorage ProtectedLocalStore
 @inject WebPortalUserSessionStateContainer WebPortalUserSessionStateContainer
+@inject JiwaCustomerPortal.Services.StaffLoginAccess StaffLoginAccess
 
 <PageTitle>Sign in</PageTitle>
 
@@ -22,16 +23,16 @@
         }
         <section>            
             
-            @if(!Config.AllowCustomerLogin && !Config.AllowStaffLogin)
+            @if (!Config.AllowCustomerLogin && !StaffLoginAccess.IsAllowed)
             {
-                errorMessage = "Neither staff login or customer login has been enabled in the configuration. Please contact your administrator.";
+                <StatusMessage Message="No sign-in methods are available from your IP address. Please contact your administrator." />
             }
 
             <StatusMessage Message="@errorMessage" />
 
-            @if (Config.AllowCustomerLogin || Config.AllowStaffLogin)
+            @if (Config.AllowCustomerLogin || StaffLoginAccess.IsAllowed)
             {
-                @if (Config.AllowStaffLogin && Config.AllowCustomerLogin)
+                @if (StaffLoginAccess.IsAllowed && Config.AllowCustomerLogin)
                 {
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="signInAsStaffMember" @bind="SignInAsStaffMember">
@@ -44,7 +45,7 @@
                     {
                         SignInAsStaffMember = false;
                     }
-                    else if (Config.AllowStaffLogin)
+                    else if (StaffLoginAccess.IsAllowed)
                     {
                         SignInAsStaffMember = true;
                     }
@@ -202,6 +203,13 @@
     {
         errorMessage = null;
 
+        if (SignInAsStaffMember && !StaffLoginAccess.IsAllowed)
+        {
+            Logger.LogWarning("Staff login denied for remote IP {RemoteIpAddress}.", StaffLoginAccess.RemoteIpAddress);
+            errorMessage = JiwaCustomerPortal.Services.StaffLoginWhitelist.DenialMessage;
+            return;
+        }
+
         if (!SignInAsStaffMember)
         {
             if (hasMultipleUserIdentitiesWithEmailAddress && selectedContact == null)
@@ -300,6 +308,13 @@
         {
             JiwaFinancials.Jiwa.JiwaServiceModel.JiwaAuthUserSessionResponse jiwaAuthUserSession = await JiwaAPI.GetAsync(new JiwaFinancials.Jiwa.JiwaServiceModel.AuthCurrentSessionGETRequest(), jiwaAPISessionId: authResponse.SessionId);
             JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession webPortalUserSession = jiwaAuthUserSession.ConvertTo<JiwaFinancials.Jiwa.JiwaServiceModel.WebPortalUserSession>();
+
+            if (webPortalUserSession.AuthProvider == "credentials" && !StaffLoginAccess.IsAllowed)
+            {
+                Logger.LogWarning("Staff login denied for remote IP {RemoteIpAddress}.", StaffLoginAccess.RemoteIpAddress);
+                errorMessage = JiwaCustomerPortal.Services.StaffLoginWhitelist.DenialMessage;
+                return;
+            }
 
             if (!SignInAsStaffMember)
             {

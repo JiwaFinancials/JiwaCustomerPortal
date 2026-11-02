@@ -13,9 +13,13 @@
     <FileVersion>8.0.63.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Data\**" />
     <Compile Remove="wwwroot\bootstrap\**" />
+    <Content Remove="Data\**" />
     <Content Remove="wwwroot\bootstrap\**" />
+    <EmbeddedResource Remove="Data\**" />
     <EmbeddedResource Remove="wwwroot\bootstrap\**" />
+    <None Remove="Data\**" />
     <None Remove="wwwroot\bootstrap\**" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +66,6 @@
     <UpToDateCheckInput Remove="Components\SignedInUserInfo.razor" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Data\" />
+    <Folder Include="obj\" />
   </ItemGroup>
 </Project>
