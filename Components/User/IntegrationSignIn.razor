@@ -41,12 +41,11 @@
                 <p>Selected: @selectedDebtor.AccountNo - @selectedDebtor.Name</p>
             }
             <button type="button" class="btn btn-primary" disabled="@(busy || selectedDebtor == null)" @onclick="ConfirmDebtor">Continue</button>
-            <button type="button" class="btn btn-link" disabled="@busy" @onclick="Cancel">Cancel</button>
+            <button type="button" class="btn btn-link" disabled="@busy" @onclick="BackToSignIn">Back to sign in</button>
         }
         else if (!Config.AllowCustomerLogin && !StaffAllowed)
         {
             <p>No sign-in methods are available from your IP address. Please contact your administrator.</p>
-            <button type="button" class="btn btn-secondary" disabled="@busy" @onclick="CustomerLoginDisabled">Continue</button>
         }
         else
         {
@@ -95,11 +94,7 @@
                     {
                         <p>Selected: @selectedContact.Name - @selectedContact.FirstName @selectedContact.Surname</p>
                     }
-                    @if (contactLookupFailed)
-                    {
-                        <button type="button" class="btn btn-secondary" disabled="@busy" @onclick="ReturnLookupError">Return error</button>
-                    }
-                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="ChangeEmail">Use a different email address</button>
+                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="ChangeEmail">Use a different email address or try again</button>
                 }
                 <EditForm Model="input" OnValidSubmit="SignIn" FormName="integration-signin">
                     <DataAnnotationsValidator />
@@ -117,7 +112,6 @@
                     <button type="submit" disabled="@busy" class="w-100 btn btn-lg btn-primary">Sign in</button>
                 </EditForm>
             }
-            <button type="button" class="btn btn-link mt-2" disabled="@busy" @onclick="Cancel">Cancel</button>
         }
     </div>
 </div>
@@ -134,7 +128,6 @@
     private string? message;
     private bool busy;
     private bool multipleMatches;
-    private bool contactLookupFailed;
     private v_Jiwa_DB_ContactNameMultiple? selectedContact;
     private v_Jiwa_DB_ContactNameMultipleQuery? contactQuery;
     private IntegrationAuthenticationResult? pendingResult;
@@ -144,7 +137,7 @@
         if (busy) return;
         if (!Config.AllowCustomerLogin)
         {
-            await CustomerLoginDisabled();
+            message = "Customer sign-in is disabled.";
             return;
         }
         if (multipleMatches && selectedContact == null)
@@ -197,12 +190,12 @@
         catch (WebServiceException ex)
         {
             Logger.LogWarning(ex, "Customer integration authentication failed.");
-            result = new(false, string.IsNullOrWhiteSpace(ex.ErrorMessage) ? "Authentication failed." : ex.ErrorMessage, null, null);
+            message = string.IsNullOrWhiteSpace(ex.ErrorMessage) ? "Authentication failed." : ex.ErrorMessage;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Customer integration authentication failed.");
-            result = new(false, ex is InvalidOperationException ? ex.Message : "Authentication failed. Please contact your administrator.", null, null);
+            message = ex is InvalidOperationException ? ex.Message : "Authentication failed. Please contact your administrator.";
         }
         finally
         {
@@ -229,41 +222,44 @@
     private void GridError(Exception ex)
     {
         Logger.LogError(ex, "Could not retrieve customer identities for integration authentication.");
-        contactLookupFailed = true;
-        message = "Could not retrieve customer identities. Return the error or use a different email address.";
+        message = "Could not retrieve customer identities. Please try again or use a different email address.";
     }
 
     private void ChangeEmail()
     {
         multipleMatches = false;
-        contactLookupFailed = false;
         selectedContact = null;
         contactQuery = null;
         input.Password = string.Empty;
         message = null;
     }
 
-    private Task ReturnLookupError() => Complete(new(false, "Could not retrieve customer identities.", null, null));
-    private async Task Cancel()
+    private async Task BackToSignIn()
     {
         if (busy) return;
         busy = true;
         await RevokeStaffSession();
+        selectedDebtor = null;
+        message = null;
         busy = false;
-        await Complete(new(false, "Authentication cancelled.", null, null));
     }
-    private Task CustomerLoginDisabled() => Complete(new(false, "No sign-in methods are available.", null, null));
+
     private Task RetryCompletion() => Complete(pendingResult!);
 
     private async Task Complete(IntegrationAuthenticationResult result)
     {
         if (busy) return;
+        if (!result.Success) throw new InvalidOperationException("Only successful authentication results can be delivered.");
         busy = true;
-        if (staffSessionId != null && result.Success && !StaffAllowed)
+        if (staffSessionId != null && !StaffAllowed)
         {
             Logger.LogWarning("Integration staff result denied for remote IP {RemoteIpAddress}.", StaffLoginAccess.RemoteIpAddress);
             await RevokeStaffSession();
-            result = new(false, StaffLoginWhitelist.DenialMessage, null, null);
+            selectedDebtor = null;
+            pendingResult = null;
+            message = StaffLoginWhitelist.DenialMessage;
+            busy = false;
+            return;
         }
         pendingResult = result;
         try
@@ -289,12 +285,12 @@
         if (!StaffAllowed)
         {
             Logger.LogWarning("Integration staff login denied for remote IP {RemoteIpAddress}.", StaffLoginAccess.RemoteIpAddress);
-            await Complete(new(false, StaffLoginWhitelist.DenialMessage, null, null));
+            message = StaffLoginWhitelist.DenialMessage;
             return;
         }
         busy = true;
         message = null;
-        IntegrationAuthenticationResult? failure = null;
+        bool failed = false;
         try
         {
             var response = await JiwaAPI.GetAsync(new Authenticate
@@ -314,21 +310,22 @@
         catch (WebServiceException ex)
         {
             Logger.LogWarning(ex, "Staff integration authentication failed.");
-            failure = new(false, string.IsNullOrWhiteSpace(ex.ErrorMessage) ? "Authentication failed." : ex.ErrorMessage, null, null);
+            failed = true;
+            message = string.IsNullOrWhiteSpace(ex.ErrorMessage) ? "Authentication failed." : ex.ErrorMessage;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Staff integration authentication failed.");
-            failure = new(false, ex is InvalidOperationException ? ex.Message : "Authentication failed. Please contact your administrator.", null, null);
+            failed = true;
+            message = ex is InvalidOperationException ? ex.Message : "Authentication failed. Please contact your administrator.";
         }
         finally
         {
             staffInput.Password = string.Empty;
             input.Password = string.Empty;
-            if (failure != null) await RevokeStaffSession();
+            if (failed) await RevokeStaffSession();
             busy = false;
         }
-        if (failure != null) await Complete(failure);
     }
 
     private void SelectDebtor(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListOR? debtor)
@@ -340,14 +337,15 @@
     {
         Logger.LogError(ex, "Could not retrieve debtors for integration authentication.");
         selectedDebtor = null;
-        message = "Could not retrieve debtors. Please cancel and try again.";
+        message = "Could not retrieve debtors. Please go back to sign in and try again.";
     }
 
     private async Task ConfirmDebtor()
     {
         if (busy || selectedDebtor == null || staffSessionId == null) return;
         busy = true;
-        IntegrationAuthenticationResult result;
+        message = null;
+        IntegrationAuthenticationResult? result = null;
         try
         {
             if (!StaffAllowed) throw new UnauthorizedAccessException(StaffLoginWhitelist.DenialMessage);
@@ -363,10 +361,11 @@
         {
             Logger.LogError(ex, "Could not complete staff integration debtor selection.");
             await RevokeStaffSession();
-            result = new(false, ex is UnauthorizedAccessException or InvalidOperationException ? ex.Message : "Could not select the debtor. Please check API permissions and try again.", null, null);
+            selectedDebtor = null;
+            message = ex is UnauthorizedAccessException or InvalidOperationException ? ex.Message : "Could not select the debtor. Please check API permissions and try again.";
         }
         busy = false;
-        await Complete(result);
+        if (result != null) await Complete(result);
     }
 
     private async Task RevokeStaffSession()
