@@ -74,6 +74,7 @@ namespace JiwaCustomerPortal
             builder.Services.AddScoped<BrowserService>();
 
             builder.Services.AddScoped<WebPortalUserSessionStateContainer>();
+            builder.Services.AddSingleton<Services.IntegrationAuthenticationResultProtector>();
 
             var app = builder.Build();
 
@@ -82,6 +83,17 @@ namespace JiwaCustomerPortal
             {
                 app.UseExceptionHandler("/Error");
             }
+
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path.StartsWithSegments("/integration/auth"))
+                {
+                    context.Response.Headers.CacheControl = "no-store";
+                    context.Response.Headers.Pragma = "no-cache";
+                    context.Response.Headers["Referrer-Policy"] = "no-referrer";
+                }
+                await next();
+            });
 
             app.UseStaticFiles();
             app.UseAntiforgery();

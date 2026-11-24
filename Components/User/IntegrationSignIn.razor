@@ -1,0 +1,407 @@
+@page "/integration/auth"
+@layout JiwaCustomerPortal.Components.Layout.IntegrationLayout
+@attribute [type: RenderModeInteractiveServer]
+@using System.ComponentModel.DataAnnotations
+@using JiwaCustomerPortal.Components.AutoQueryGrid
+@using JiwaCustomerPortal.Services
+@using JiwaFinancials.Jiwa.JiwaServiceModel
+@using JiwaFinancials.Jiwa.JiwaServiceModel.Tables
+@using ServiceStack
+@inject ILogger<IntegrationSignIn> Logger
+@inject IntegrationAuthenticationResultProtector ResultProtector
+@inject IJSRuntime JS
+@inject StaffLoginAccess StaffLoginAccess
+@implements IAsyncDisposable
+
+<PageTitle>Sign in</PageTitle>
+<h1>Sign in</h1>
+<div class="row">
+    <div class="col-md-6">
+        @if (busy)
+        {
+            <Throbber />
+        }
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="alert alert-danger" role="alert">@message</div>
+        }
+        @if (pendingResult != null)
+        {
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="RetryCompletion">Retry returning the result</button>
+        }
+        else if (staffSessionId != null)
+        {
+            <h2>Select a debtor</h2>
+            <JiwaCustomerPortal.Components.AutoQueryGrid.Debtor.JiwaDebtorsAutoQuerySelection
+                StaffSessionId="@staffSessionId"
+                ItemSelectedCallbackMethod="@SelectDebtor"
+                APIExceptionCallbackMethod="@DebtorLookupError" />
+            @if (selectedDebtor != null)
+            {
+                <p>Selected: @selectedDebtor.AccountNo - @selectedDebtor.Name</p>
+            }
+            <button type="button" class="btn btn-primary" disabled="@(busy || selectedDebtor == null)" @onclick="ConfirmDebtor">Continue</button>
+            <button type="button" class="btn btn-link" disabled="@busy" @onclick="Cancel">Cancel</button>
+        }
+        else if (!Config.AllowCustomerLogin && !StaffAllowed)
+        {
+            <p>No sign-in methods are available from your IP address. Please contact your administrator.</p>
+            <button type="button" class="btn btn-secondary" disabled="@busy" @onclick="CustomerLoginDisabled">Continue</button>
+        }
+        else
+        {
+            @if (Config.AllowCustomerLogin && StaffAllowed)
+            {
+                <div class="form-check form-switch">
+                    <input id="integration-staff" class="form-check-input" type="checkbox" @bind="signInAsStaff" disabled="@busy" />
+                    <label for="integration-staff" class="form-check-label">Sign in as staff member</label>
+                </div>
+            }
+            @if (UseStaffLogin)
+            {
+                <EditForm Model="staffInput" OnValidSubmit="SignInStaff" FormName="integration-staff-signin">
+                    <DataAnnotationsValidator />
+                    <hr />
+                    <h2>Staff Sign in</h2>
+                    <ValidationSummary class="text-danger" role="alert" />
+                    <div class="form-floating mb-3">
+                        <InputText id="integration-username" @bind-Value="staffInput.Username" class="form-control" autocomplete="username" placeholder="username" />
+                        <label for="integration-username">Username</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <InputText id="integration-staff-password" type="password" @bind-Value="staffInput.Password" class="form-control" autocomplete="current-password" placeholder="password" />
+                        <label for="integration-staff-password">Password</label>
+                    </div>
+                    <button type="submit" disabled="@busy" class="w-100 btn btn-lg btn-primary">Sign in</button>
+                </EditForm>
+            }
+            else
+            {
+                @if (multipleMatches)
+                {
+                    <p>Multiple users are registered with this email address. Select the customer identity to sign in as.</p>
+                    <JiwaAPIAutoQueryGrid Model="v_Jiwa_DB_ContactNameMultiple"
+                                          QueryType="v_Jiwa_DB_ContactNameMultipleQuery"
+                                          AutoQuery="@contactQuery"
+                                          ShowPageNavigationHeader="false"
+                                          UseFilters="false"
+                                          HiddenColumns="@(new List<string> { "RecID" })"
+                                          CaptionMaps="@(new Dictionary<string, string> { ["Name"] = "Company", ["FirstName"] = "First Name" })"
+                                          AddSelectButtonColumn="true"
+                                          ItemSelectedCallbackMethod="@SelectContact"
+                                          AuthType="AuthTypes.JiwaAPIKey"
+                                          APIExceptionCallbackMethod="@GridError" />
+                    @if (selectedContact != null)
+                    {
+                        <p>Selected: @selectedContact.Name - @selectedContact.FirstName @selectedContact.Surname</p>
+                    }
+                    @if (contactLookupFailed)
+                    {
+                        <button type="button" class="btn btn-secondary" disabled="@busy" @onclick="ReturnLookupError">Return error</button>
+                    }
+                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="ChangeEmail">Use a different email address</button>
+                }
+                <EditForm Model="input" OnValidSubmit="SignIn" FormName="integration-signin">
+                    <DataAnnotationsValidator />
+                    <hr />
+                    <h2>Customer Sign in</h2>
+                    <ValidationSummary class="text-danger" role="alert" />
+                    <div class="form-floating mb-3">
+                        <InputText id="integration-email" @bind-Value="input.Email" disabled="@multipleMatches" class="form-control" autocomplete="username" placeholder="name@example.com" />
+                        <label for="integration-email">Email</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <InputText id="integration-password" type="password" @bind-Value="input.Password" class="form-control" autocomplete="current-password" placeholder="password" />
+                        <label for="integration-password">Password</label>
+                    </div>
+                    <button type="submit" disabled="@busy" class="w-100 btn btn-lg btn-primary">Sign in</button>
+                </EditForm>
+            }
+            <button type="button" class="btn btn-link mt-2" disabled="@busy" @onclick="Cancel">Cancel</button>
+        }
+    </div>
+</div>
+
+@code {
+    private readonly InputModel input = new();
+    private readonly StaffInputModel staffInput = new();
+    private bool signInAsStaff;
+    private bool StaffAllowed => Config.AllowStaffLogin && StaffLoginAccess.IsAllowed;
+    private bool UseStaffLogin => signInAsStaff || !Config.AllowCustomerLogin;
+    private string? staffSessionId;
+    private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListOR? selectedDebtor;
+    private bool sessionHandedOff;
+    private string? message;
+    private bool busy;
+    private bool multipleMatches;
+    private bool contactLookupFailed;
+    private v_Jiwa_DB_ContactNameMultiple? selectedContact;
+    private v_Jiwa_DB_ContactNameMultipleQuery? contactQuery;
+    private IntegrationAuthenticationResult? pendingResult;
+
+    private async Task SignIn()
+    {
+        if (busy) return;
+        if (!Config.AllowCustomerLogin)
+        {
+            await CustomerLoginDisabled();
+            return;
+        }
+        if (multipleMatches && selectedContact == null)
+        {
+            message = "Select which user identity you are authenticating with.";
+            return;
+        }
+
+        busy = true;
+        message = null;
+        string? sessionId = null;
+        IntegrationAuthenticationResult? result = null;
+        try
+        {
+            var request = new Authenticate
+            {
+                UserName = multipleMatches ? selectedContact!.RecID : input.Email,
+                Password = input.Password,
+                provider = multipleMatches ? "debtorcontactnameidcredentials" : "debtorcontactnameemailaddresscredentials",
+                RememberMe = false
+            };
+            var response = await JiwaAPI.GetAsync(request);
+            sessionId = response?.SessionId;
+            if (string.IsNullOrWhiteSpace(sessionId))
+                throw new InvalidOperationException("Authentication did not return a session ID.");
+
+            var session = await JiwaAPI.GetAsync(new AuthCurrentSessionGETRequest(), jiwaAPISessionId: sessionId);
+            if ((session.AuthProvider != "debtorcontactnameemailaddresscredentials" && session.AuthProvider != "debtorcontactnameidcredentials") ||
+                string.IsNullOrWhiteSpace(session.DebtorID) || string.IsNullOrWhiteSpace(session.DebtorContactNameID) ||
+                (multipleMatches && session.DebtorContactNameID != selectedContact!.RecID))
+                throw new InvalidOperationException("Authentication did not return the selected customer identity.");
+
+            var roles = await JiwaAPI.GetAsync(new DebtorContactNameCustomerWebPortalRoleGETRequest(), jiwaAPISessionId: sessionId);
+            if (roles.Roles == null || (!roles.Roles.Contains("User") && !roles.Roles.Contains("Admin")))
+                throw new InvalidOperationException("User does not have permission to sign in using the Customer Web Portal.");
+
+            result = new(true, null, sessionId, new(session.DebtorID, session.DebtorName, session.DebtorContactNameID));
+        }
+        catch (WebServiceException ex) when (ex.ErrorCode == "BadLoginMultipleMatchesException" && !multipleMatches)
+        {
+            contactQuery = new v_Jiwa_DB_ContactNameMultipleQuery
+            {
+                EmailAddress = input.Email,
+                OrderBy = "Name",
+                Fields = "RecID,Name,FirstName,Surname",
+                Take = 10
+            };
+            multipleMatches = true;
+        }
+        catch (WebServiceException ex)
+        {
+            Logger.LogWarning(ex, "Customer integration authentication failed.");
+            result = new(false, string.IsNullOrWhiteSpace(ex.ErrorMessage) ? "Authentication failed." : ex.ErrorMessage, null, null);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Customer integration authentication failed.");
+            result = new(false, ex is InvalidOperationException ? ex.Message : "Authentication failed. Please contact your administrator.", null, null);
+        }
+        finally
+        {
+            input.Password = string.Empty;
+            if (sessionId != null && result?.Success != true)
+            {
+                try
+                {
+                    await JiwaAPI.GetAsync(new LogoutGetRequest(), jiwaAPISessionId: sessionId);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning(ex, "Could not revoke a rejected integration authentication session.");
+                }
+            }
+            busy = false;
+        }
+
+        if (result != null) await Complete(result);
+    }
+
+    private void SelectContact(v_Jiwa_DB_ContactNameMultiple contact) => selectedContact = contact;
+
+    private void GridError(Exception ex)
+    {
+        Logger.LogError(ex, "Could not retrieve customer identities for integration authentication.");
+        contactLookupFailed = true;
+        message = "Could not retrieve customer identities. Return the error or use a different email address.";
+    }
+
+    private void ChangeEmail()
+    {
+        multipleMatches = false;
+        contactLookupFailed = false;
+        selectedContact = null;
+        contactQuery = null;
+        input.Password = string.Empty;
+        message = null;
+    }
+
+    private Task ReturnLookupError() => Complete(new(false, "Could not retrieve customer identities.", null, null));
+    private async Task Cancel()
+    {
+        if (busy) return;
+        busy = true;
+        await RevokeStaffSession();
+        busy = false;
+        await Complete(new(false, "Authentication cancelled.", null, null));
+    }
+    private Task CustomerLoginDisabled() => Complete(new(false, "No sign-in methods are available.", null, null));
+    private Task RetryCompletion() => Complete(pendingResult!);
+
+    private async Task Complete(IntegrationAuthenticationResult result)
+    {
+        if (busy) return;
+        busy = true;
+        if (staffSessionId != null && result.Success && !StaffAllowed)
+        {
+            Logger.LogWarning("Integration staff result denied for remote IP {RemoteIpAddress}.", StaffLoginAccess.RemoteIpAddress);
+            await RevokeStaffSession();
+            result = new(false, StaffLoginWhitelist.DenialMessage, null, null);
+        }
+        pendingResult = result;
+        try
+        {
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/integrationAuthentication.js");
+            var token = ResultProtector.Protect(result);
+            // Navigation may dispose the circuit before the JS acknowledgement arrives.
+            sessionHandedOff = result.Success;
+            await module.InvokeVoidAsync("complete", token);
+        }
+        catch (JSException ex)
+        {
+            sessionHandedOff = false;
+            Logger.LogError(ex, "Could not deliver integration authentication result.");
+            message = "Could not deliver the authentication result. Please try again.";
+            busy = false;
+        }
+    }
+
+    private async Task SignInStaff()
+    {
+        if (busy) return;
+        if (!StaffAllowed)
+        {
+            Logger.LogWarning("Integration staff login denied for remote IP {RemoteIpAddress}.", StaffLoginAccess.RemoteIpAddress);
+            await Complete(new(false, StaffLoginWhitelist.DenialMessage, null, null));
+            return;
+        }
+        busy = true;
+        message = null;
+        IntegrationAuthenticationResult? failure = null;
+        try
+        {
+            var response = await JiwaAPI.GetAsync(new Authenticate
+            {
+                UserName = staffInput.Username,
+                Password = staffInput.Password,
+                provider = "credentials",
+                RememberMe = false
+            });
+            staffSessionId = response?.SessionId;
+            if (string.IsNullOrWhiteSpace(staffSessionId))
+                throw new InvalidOperationException("Authentication did not return a session ID.");
+            var session = await JiwaAPI.GetAsync(new AuthCurrentSessionGETRequest(), jiwaAPISessionId: staffSessionId);
+            if (!StaffAllowed || session.AuthProvider != "credentials" || string.IsNullOrWhiteSpace(session.JiwaStaffID))
+                throw new InvalidOperationException("Authentication did not return an allowed staff identity.");
+        }
+        catch (WebServiceException ex)
+        {
+            Logger.LogWarning(ex, "Staff integration authentication failed.");
+            failure = new(false, string.IsNullOrWhiteSpace(ex.ErrorMessage) ? "Authentication failed." : ex.ErrorMessage, null, null);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Staff integration authentication failed.");
+            failure = new(false, ex is InvalidOperationException ? ex.Message : "Authentication failed. Please contact your administrator.", null, null);
+        }
+        finally
+        {
+            staffInput.Password = string.Empty;
+            input.Password = string.Empty;
+            if (failure != null) await RevokeStaffSession();
+            busy = false;
+        }
+        if (failure != null) await Complete(failure);
+    }
+
+    private void SelectDebtor(JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListOR? debtor)
+    {
+        if (!busy) selectedDebtor = debtor;
+    }
+
+    private void DebtorLookupError(Exception ex)
+    {
+        Logger.LogError(ex, "Could not retrieve debtors for integration authentication.");
+        selectedDebtor = null;
+        message = "Could not retrieve debtors. Please cancel and try again.";
+    }
+
+    private async Task ConfirmDebtor()
+    {
+        if (busy || selectedDebtor == null || staffSessionId == null) return;
+        busy = true;
+        IntegrationAuthenticationResult result;
+        try
+        {
+            if (!StaffAllowed) throw new UnauthorizedAccessException(StaffLoginWhitelist.DenialMessage);
+            var session = await JiwaAPI.GetAsync(new AuthCurrentSessionGETRequest(), jiwaAPISessionId: staffSessionId);
+            if (session.AuthProvider != "credentials" || string.IsNullOrWhiteSpace(session.JiwaStaffID))
+                throw new InvalidOperationException("The staff session is no longer valid.");
+            var debtor = await JiwaAPI.GetAsync(new DebtorGETRequest { DebtorID = selectedDebtor.DebtorID }, jiwaAPISessionId: staffSessionId);
+            if (debtor.DebtorID != selectedDebtor.DebtorID)
+                throw new InvalidOperationException("The selected debtor is no longer available.");
+            result = new(true, null, staffSessionId, new(debtor.DebtorID, debtor.Name, null));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Could not complete staff integration debtor selection.");
+            await RevokeStaffSession();
+            result = new(false, ex is UnauthorizedAccessException or InvalidOperationException ? ex.Message : "Could not select the debtor. Please check API permissions and try again.", null, null);
+        }
+        busy = false;
+        await Complete(result);
+    }
+
+    private async Task RevokeStaffSession()
+    {
+        string? sessionId = staffSessionId;
+        staffSessionId = null;
+        if (string.IsNullOrWhiteSpace(sessionId)) return;
+        try
+        {
+            await JiwaAPI.GetAsync(new LogoutGetRequest(), jiwaAPISessionId: sessionId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Could not revoke an unfinished staff integration session.");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!sessionHandedOff) await RevokeStaffSession();
+    }
+
+    private sealed class StaffInputModel
+    {
+        [Required]
+        public string Username { get; set; } = "";
+        [Required, DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+    }
+
+    private sealed class InputModel
+    {
+        [Required, EmailAddress]
+        public string Email { get; set; } = "";
+        [Required, DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+    }
+}

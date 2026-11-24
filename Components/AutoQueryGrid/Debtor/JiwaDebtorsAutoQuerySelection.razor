@@ -25,6 +25,7 @@
                       InitialSelectedItemMethod="@InitialSelectedItemMethod"
                       NoAuthenticationTokenCallbackMethod="@NoAuthenticationToken"
                       AuthType="AuthTypes.JiwaAPISessionId"
+                      StaffSessionId="@StaffSessionId"
                       APIExceptionCallbackMethod="@APIException">
 </JiwaAPIAutoQueryGrid>
 
@@ -37,6 +38,8 @@
     public EventCallback<Exception> APIExceptionCallbackMethod { get; set; }
     [Parameter]
     public bool CompactNavigationButtons { get; set; }
+    [Parameter]
+    public string? StaffSessionId { get; set; }
 
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListORQuery v_Jiwa_Debtor_ListORQuery { get; set; }
     private JiwaAPIAutoQueryGrid<JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListOR, JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListORQuery> CustomerListGrid { get; set; }

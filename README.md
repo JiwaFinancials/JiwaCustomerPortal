@@ -36,6 +36,30 @@ If authenticated as a debtor contact, only those debtor contacts with the debtor
 
 For Jiwa staff members, API route permissions will control what functions they are able to perform.
 
+## Application integration sign-in
+
+Open `https://<portal-host>/integration/auth` in a JavaScript-enabled browser or embedded browser control. Customer sign-in requires `AllowCustomerLogin` and the same customer portal role and API permissions as the normal customer sign-in. If the email matches multiple contacts, the user selects an identity and re-enters the password.
+
+Staff sign-in requires `AllowStaffLogin: true` and a matching `StaffLoginAllowedCidrs` entry, just like normal portal staff login. When both methods are allowed, a staff toggle is shown; when only staff login is allowed, the staff form is shown directly. After authenticating with Jiwa staff credentials, staff can search and select any debtor before continuing. Their Jiwa user needs GET permissions for `/Queries/OR/DebtorList`, `/Debtors/{DebtorID}`, `/Sessions/Current` and `/auth/logout`. No customer portal contact tag is required for staff login. Cancelling or abandoning an unfinished staff flow attempts to revoke the temporary session.
+
+On completion the browser navigates via POST to `/integration/auth/result`, which returns an `application/json` document. An embedded browser host should detect that navigation and read the completed response body (rather than extracting the session from the URL). For example:
+
+```json
+{"success":true,"errorMessage":null,"sessionId":"<Jiwa session ID>","debtor":{"id":"<debtor ID>","name":"<debtor name>","contactNameId":"<contact name ID>"}}
+```
+
+For staff login, `debtor.contactNameId` is null. The returned session is a staff session, not a customer impersonation session: selecting a debtor does not limit the staff user's API permissions or modify the Jiwa session. The integrating application must supply the selected debtor ID on debtor-specific API requests.
+
+A failed login or cancellation returns `success: false`, an `errorMessage`, and null `sessionId` and `debtor`. Input validation and contact selection errors remain on the sign-in page so the user can correct them. Closing the browser without completing sign-in produces no response and should be treated as cancellation by the host. A malformed or expired completion token produces an HTTP 400 JSON failure. The completion POST is an internal browser step, not an API for submitting credentials. Do not retry or replay it; its protected payload expires after two minutes.
+
+The returned session ID is a bearer credential for the configured Jiwa REST API: protect it, do not log it or put it in a URL, and use it as the `ss-id` cookie for API requests. Log out via the Jiwa API `/auth/logout` when finished. Use HTTPS for both the portal and API. The flow does not sign the browser into the portal, and does not provide an OAuth redirect or cross-origin `postMessage` callback. A web application must arrange a trusted browser-host integration capable of reading the same-origin result; embedding it in an unrelated origin does not grant access to the response.
+
+### Testing with Postman
+
+Import `Scripts\JiwaCustomerPortal-IntegrationAuth.postman_collection.json` and set the collection variable `portalBaseUrl` to the portal origin. The first three requests check the HTML entry point and the missing/invalid-token responses. Run the optional captured-token request separately; it requires `completionToken` and will fail in a collection run without one.
+
+Postman cannot perform the interactive Blazor sign-in or debtor selection. Test those in a JavaScript-enabled browser. To test the completion endpoint in Postman, pause the browser before the completion form is submitted (for example, with a breakpoint at `form.submit()` in `integrationAuthentication.js`), copy the form's hidden `token` value into Postman's local `completionToken` variable, and send the optional request to the same portal within two minutes. Do not resume the browser's form submission or otherwise replay the token. Clear the variable afterward and avoid sharing or retaining Postman history containing the token or returned session ID.
+
 ![image](https://github.com/user-attachments/assets/b9d36636-3e14-48a7-8b6b-0b6b35e5f8a8)
 
 ![image](https://github.com/user-attachments/assets/5656bc11-6689-44fe-9303-c1c9d3c5bc43)

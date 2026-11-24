@@ -20,6 +20,10 @@ namespace JiwaCustomerPortal.Components.AutoQueryGrid
         [Parameter]
         public AuthTypes AuthType { get; set; } = AuthTypes.JiwaAPISessionId;
         [Parameter]
+        public string? StaffSessionId { get; set; }
+        [Inject]
+        private Services.StaffLoginAccess StaffLoginAccess { get; set; } = default!;
+        [Parameter]
         public IQuery AutoQuery { get; set; }
         [Parameter]
         public bool UseFilters { get; set; } = true;
@@ -233,10 +237,28 @@ namespace JiwaCustomerPortal.Components.AutoQueryGrid
             }
 
             string? jiwaAPIKey = null;
+            string? sessionId = null;
 
             if (AuthType == AuthTypes.JiwaAPISessionId)
             {
-                if (WebPortalUserSessionStateContainer.WebPortalUserSession == null)
+                if (!string.IsNullOrWhiteSpace(StaffSessionId))
+                {
+                    if (!Config.AllowStaffLogin || !StaffLoginAccess.IsAllowed)
+                    {
+                        var exception = new UnauthorizedAccessException(Services.StaffLoginWhitelist.DenialMessage);
+                        if (APIExceptionCallbackMethod.HasDelegate)
+                            await APIExceptionCallbackMethod.InvokeAsync(exception);
+                        else
+                            throw exception;
+                        return;
+                    }
+                    sessionId = StaffSessionId;
+                }
+                else
+                {
+                    sessionId = WebPortalUserSessionStateContainer.WebPortalUserSession?.Id;
+                }
+                if (string.IsNullOrWhiteSpace(sessionId))
                 {
                     // not authenticated - no token found in session storage
                     if (NoAuthenticationTokenCallbackMethod.HasDelegate)
@@ -360,9 +382,9 @@ namespace JiwaCustomerPortal.Components.AutoQueryGrid
                 }
                 else
                 {
-                    Response = await JiwaAPI.GetAsync<QueryResponse<Model>>(AutoQuery, jiwaAPISessionId: WebPortalUserSessionStateContainer?.WebPortalUserSession?.Id, cancellationToken: cancellationToken);
+                    Response = await JiwaAPI.GetAsync<QueryResponse<Model>>(AutoQuery, jiwaAPISessionId: sessionId, cancellationToken: cancellationToken);
                 }
-            }            
+            }
             catch(OperationCanceledException)
             {
                 //swallow
