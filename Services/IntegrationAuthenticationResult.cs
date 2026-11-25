@@ -6,7 +6,8 @@ namespace JiwaCustomerPortal.Services;
 
 public sealed record IntegrationDebtor(string Id, string Name, string? ContactNameId);
 
-public sealed record IntegrationAuthenticationResult(bool Success, string? ErrorMessage, string? SessionId, IntegrationDebtor? Debtor);
+public sealed record IntegrationAuthenticationResult(bool Success, string? ErrorMessage, string? SessionId, IntegrationDebtor? Debtor,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? IntegrationTicket = null);
 
 public sealed class IntegrationAuthenticationResultProtector
 {

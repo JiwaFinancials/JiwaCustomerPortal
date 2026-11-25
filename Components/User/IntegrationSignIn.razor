@@ -2,6 +2,7 @@
 @layout JiwaCustomerPortal.Components.Layout.IntegrationLayout
 @attribute [type: RenderModeInteractiveServer]
 @using System.ComponentModel.DataAnnotations
+@using System.Text.Json
 @using JiwaCustomerPortal.Components.AutoQueryGrid
 @using JiwaCustomerPortal.Services
 @using JiwaFinancials.Jiwa.JiwaServiceModel
@@ -9,6 +10,7 @@
 @using ServiceStack
 @inject ILogger<IntegrationSignIn> Logger
 @inject IntegrationAuthenticationResultProtector ResultProtector
+@inject IntegrationTickets IntegrationTickets
 @inject IJSRuntime JS
 @inject StaffLoginAccess StaffLoginAccess
 @implements IAsyncDisposable
@@ -117,11 +119,17 @@
 </div>
 
 @code {
+    [SupplyParameterFromQuery(Name = "purpose")]
+    public string? Purpose { get; set; }
+    [SupplyParameterFromQuery(Name = "context")]
+    public string? TicketContextJson { get; set; }
+
+    private bool IntegrationTicketRequested => Purpose == "integration-ticket";
     private readonly InputModel input = new();
     private readonly StaffInputModel staffInput = new();
     private bool signInAsStaff;
-    private bool StaffAllowed => Config.AllowStaffLogin && StaffLoginAccess.IsAllowed;
-    private bool UseStaffLogin => signInAsStaff || !Config.AllowCustomerLogin;
+    private bool StaffAllowed => !IntegrationTicketRequested && Config.AllowStaffLogin && StaffLoginAccess.IsAllowed;
+    private bool UseStaffLogin => !IntegrationTicketRequested && (signInAsStaff || !Config.AllowCustomerLogin);
     private string? staffSessionId;
     private JiwaFinancials.Jiwa.JiwaServiceModel.Tables.Or.v_Jiwa_Debtor_ListOR? selectedDebtor;
     private bool sessionHandedOff;
@@ -150,8 +158,16 @@
         message = null;
         string? sessionId = null;
         IntegrationAuthenticationResult? result = null;
+        JsonElement ticketContext = default;
         try
         {
+            if (!string.IsNullOrEmpty(Purpose) && !IntegrationTicketRequested)
+                throw new InvalidOperationException("Unsupported integration sign-in purpose.");
+            if (IntegrationTicketRequested)
+            {
+                IntegrationTickets.ValidateConfiguration();
+                ticketContext = IntegrationTickets.ParseContext(TicketContextJson);
+            }
             var request = new Authenticate
             {
                 UserName = multipleMatches ? selectedContact!.RecID : input.Email,
@@ -174,7 +190,11 @@
             if (roles.Roles == null || (!roles.Roles.Contains("User") && !roles.Roles.Contains("Admin")))
                 throw new InvalidOperationException("User does not have permission to sign in using the Customer Web Portal.");
 
-            result = new(true, null, sessionId, new(session.DebtorID, session.DebtorName, session.DebtorContactNameID));
+            var authenticatedResult = new IntegrationAuthenticationResult(true, null, sessionId,
+                new(session.DebtorID, session.DebtorName, session.DebtorContactNameID));
+            result = IntegrationTicketRequested
+                ? authenticatedResult with { IntegrationTicket = IntegrationTickets.Issue(authenticatedResult, ticketContext) }
+                : authenticatedResult;
         }
         catch (WebServiceException ex) when (ex.ErrorCode == "BadLoginMultipleMatchesException" && !multipleMatches)
         {

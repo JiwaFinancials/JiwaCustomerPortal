@@ -75,6 +75,8 @@ namespace JiwaCustomerPortal
 
             builder.Services.AddScoped<WebPortalUserSessionStateContainer>();
             builder.Services.AddSingleton<Services.IntegrationAuthenticationResultProtector>();
+            builder.Services.AddSingleton(TimeProvider.System);
+            builder.Services.AddSingleton<Services.IntegrationTickets>();
 
             var app = builder.Build();
 
@@ -86,7 +88,8 @@ namespace JiwaCustomerPortal
 
             app.Use(async (context, next) =>
             {
-                if (context.Request.Path.StartsWithSegments("/integration/auth"))
+                if (context.Request.Path.StartsWithSegments("/integration/auth") ||
+                    context.Request.Path.StartsWithSegments("/integration/ticket"))
                 {
                     context.Response.Headers.CacheControl = "no-store";
                     context.Response.Headers.Pragma = "no-cache";
